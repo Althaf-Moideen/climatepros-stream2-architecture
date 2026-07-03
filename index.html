@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClimatePros — Technical Architecture (Final Application)</title>
+<style>
+        :root {
+            --primary: #1a56db;
+            --primary-light: #e8effc;
+            --primary-dark: #0f3a8e;
+            --accent: #059669;
+            --accent-light: #d1fae5;
+            --warning: #d97706;
+            --warning-light: #fef3c7;
+            --danger: #dc2626;
+            --danger-light: #fee2e2;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #f1f5f9;
+            --stage-upload: #6366f1;
+            --stage-analyze: #8b5cf6;
+            --stage-estimate: #f97316;
+            --stage-quote: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .sidebar-brand {
+            padding: 0 24px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .sidebar-brand h2 {
+            font-size: 18px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .sidebar-brand span {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-section {
+            padding: 8px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+        }
+        .nav-link {
+            display: block;
+            padding: 8px 24px 8px 32px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .nav-link:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        .nav-link.sub { padding-left: 48px; font-size: 13px; color: var(--text-muted); }
+
+        /* Main Content */
+        .main {
+            margin-left: 280px;
+            padding: 40px 60px 100px;
+            max-width: 1200px;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 48px;
+            border-radius: 16px;
+            margin-bottom: 48px;
+        }
+        .hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+        .hero .subtitle { font-size: 18px; opacity: 0.9; margin-bottom: 20px; }
+        .hero-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+            opacity: 0.8;
+            flex-wrap: wrap;
+        }
+        .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+        /* Sections */
+        section { margin-bottom: 56px; }
+        h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+        h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 28px 0 14px;
+        }
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 20px 0 10px;
+            color: var(--text);
+        }
+        p { margin-bottom: 14px; color: var(--text); }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .card-header .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .card-header h4 { margin: 0; font-size: 17px; }
+        .card-header p { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+        /* Tech Stack Grid */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .tech-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.15s;
+        }
+        .tech-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .tech-card .tech-icon { font-size: 32px; margin-bottom: 10px; }
+        .tech-card .tech-name { font-weight: 700; font-size: 15px; }
+        .tech-card .tech-ver { font-size: 12px; color: var(--text-muted); }
+        .tech-card .tech-role { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+        /* Pipeline Diagram */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 28px 0;
+            overflow-x: auto;
+        }
+        .stage-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 140px;
+            text-align: center;
+        }
+        .stage-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .stage-label { font-weight: 600; font-size: 13px; }
+        .stage-type {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .type-sync { background: var(--accent-light); color: var(--accent); }
+        .type-async { background: var(--warning-light); color: var(--warning); }
+        .stage-arrow {
+            font-size: 24px;
+            color: var(--text-muted);
+            margin: 0 4px;
+            margin-bottom: 30px;
+        }
+
+        /* State Machine */
+        .state-machine {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            overflow-x: auto;
+        }
+        .state-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .state-row:last-child { border-bottom: none; }
+        .state-from {
+            min-width: 220px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+        }
+        .state-arrow-sm { min-width: 40px; color: var(--text-muted); text-align: center; }
+        .state-to { font-family: 'Consolas', 'Monaco', monospace; }
+        .state-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 2px 4px;
+            font-weight: 600;
+        }
+        .state-running { background: var(--warning-light); color: var(--warning); }
+        .state-done { background: var(--accent-light); color: var(--accent); }
+        .state-failed { background: var(--danger-light); color: var(--danger); }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        thead { background: var(--primary); color: #fff; }
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        tr:nth-child(even) { background: #fafbfc; }
+        tr:hover { background: var(--primary-light); }
+
+        /* Code */
+        code {
+            background: var(--code-bg);
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            color: var(--primary-dark);
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        pre code { background: none; padding: 0; color: inherit; }
+        .kw { color: #c084fc; }
+        .fn { color: #67e8f9; }
+        .str { color: #86efac; }
+        .cmt { color: #64748b; font-style: italic; }
+        .num { color: #fbbf24; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-get { background: #dbeafe; color: #1d4ed8; }
+        .badge-post { background: #d1fae5; color: #059669; }
+        .badge-patch { background: #fef3c7; color: #d97706; }
+        .badge-ws { background: #ede9fe; color: #7c3aed; }
+        .badge-202 { background: #fce7f3; color: #db2777; }
+        .badge-200 { background: #d1fae5; color: #059669; }
+
+        /* Infra Diagram */
+        .infra-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .infra-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .infra-card .infra-icon { font-size: 36px; margin-bottom: 8px; }
+        .infra-card .infra-name { font-weight: 700; font-size: 16px; }
+        .infra-card .infra-tech { font-size: 13px; color: var(--text-muted); }
+        .infra-card .infra-port {
+            margin-top: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* ER Diagram */
+        .er-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .er-table {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .er-table-name {
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .er-cols { padding: 8px 0; }
+        .er-col {
+            padding: 4px 16px;
+            font-size: 13px;
+            font-family: 'Consolas', monospace;
+            display: flex;
+            justify-content: space-between;
+        }
+        .er-col:nth-child(even) { background: #fafbfc; }
+        .er-col .col-name { font-weight: 600; }
+        .er-col .col-type { color: var(--text-muted); font-size: 12px; }
+        .er-col .pk { color: var(--warning); }
+        .er-col .fk { color: var(--primary); }
+
+        /* Data Flow */
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        .flow-num {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .flow-content h4 { margin: 0 0 6px; }
+        .flow-content p { margin: 0; font-size: 14px; color: var(--text-muted); }
+
+        /* Relationship lines */
+        .rel-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        .rel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px dotted var(--border);
+        }
+        .rel-item:last-child { border-bottom: none; }
+        .rel-from, .rel-to {
+            font-family: monospace;
+            font-weight: 600;
+            background: var(--code-bg);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .rel-type { font-size: 12px; color: var(--text-muted); }
+
+        /* Sequence diagram text-based */
+        .sequence {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 24px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 16px 0;
+        }
+
+        /* Directory tree */
+        .tree {
+            background: var(--code-bg);
+            padding: 20px 24px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            margin: 16px 0;
+        }
+        .tree .dir { color: var(--primary); font-weight: 700; }
+        .tree .file { color: var(--text); }
+        .tree .desc { color: var(--text-muted); font-style: italic; }
+
+        /* Callout */
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+        .callout strong { color: var(--primary-dark); }
+
+        /* Layered Architecture Diagram */
+        .arch { margin: 24px 0; display: flex; flex-direction: column; gap: 4px; }
+        .arch-layer {
+            border-radius: 14px;
+            padding: 14px 22px 18px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .arch-title {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .arch-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+        .arch-box {
+            background: #fff;
+            border: 1.5px solid #c3b8ef;
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            min-width: 120px;
+        }
+        .arch-box small { display: block; font-weight: 400; color: var(--text-muted); font-size: 11px; margin-top: 3px; }
+        .arch-box.dashed { border-style: dashed; color: var(--text-muted); background: #fbfaff; }
+        .arch-arrow { text-align: center; color: #94a3b8; font-size: 18px; line-height: 1; margin: 2px 0; }
+        .arch-split { display: flex; gap: 16px; }
+        .arch-split > .arch-layer { flex: 1; }
+        .layer-user       { background: #e5f0fb; }
+        .layer-present    { background: #fdf2e3; }
+        .layer-api        { background: #e9edfc; }
+        .layer-logic      { background: #eef1f4; }
+        .layer-worker     { background: #f2ecfd; }
+        .layer-integration{ background: #e7f6ee; }
+        .layer-data       { background: #fceaf0; }
+        @media (max-width: 720px) { .arch-split { flex-direction: column; } }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 24px; }
+        }
+        @media print {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+        }
+        .hero p { color: #fff; }
+    </style></head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <h2>ClimatePros</h2>
+    <span>Technical Architecture — Final App</span>
+  </div>
+  <div class="nav-section">High-Level Design</div>
+  <a href="#overview" class="nav-link">System Overview</a>
+  <a href="#goals" class="nav-link">Goals &amp; Success Criteria</a>
+  <a href="#features" class="nav-link">Core Features</a>
+  <a href="#architecture" class="nav-link">Architecture Diagram</a>
+  <a href="#workflow" class="nav-link">Application Workflow</a>
+  <a href="#stack" class="nav-link">Technology Stack</a>
+  <div class="nav-section">Engineering</div>
+  <a href="#services" class="nav-link">Core Services</a>
+  <a href="#data" class="nav-link">Data Model &amp; Schema</a>
+  <a href="#api" class="nav-link">API Contracts</a>
+  <div class="nav-section">Applied-AI &amp; Delivery</div>
+  <a href="#ai" class="nav-link">AI Engineering &amp; Governance</a>
+  <a href="#security" class="nav-link">Security &amp; Access</a>
+  <a href="#infra" class="nav-link">Infrastructure (Azure)</a>
+  <a href="#cicd" class="nav-link">CI/CD &amp; Release</a>
+  <a href="#observability" class="nav-link">Observability &amp; SLOs</a>
+  <a href="#cost" class="nav-link">Cost Projection</a>
+</nav>
+<div class="main">
+<div class="hero">
+  <h1>ClimatePros — Technical Architecture</h1>
+  <div class="subtitle">Final Application · AI-assisted refrigeration &amp; HVAC bid estimation on Microsoft Azure</div>
+  <div class="hero-meta">
+    <span>☁️ Microsoft Azure</span><span>|</span>
+    <span>🤖 Two-model AI takeoff (Gemini + Claude)</span><span>|</span>
+    <span>❄️🔥 Refrigeration + HVAC</span><span>|</span>
+    <span>v1.0</span>
+  </div>
+</div>
+
+<section id="overview">
+  <h2>1. System Overview</h2>
+  <p>ClimatePros is an AI-assisted estimating platform for commercial <strong>refrigeration and HVAC</strong> bids. Estimators upload engineering drawing packages; the platform extracts a structured takeoff with a two-model AI pass, prices it deterministically, routes it through a review-and-approval workflow, and delivers the <strong>FieldJetX Excel</strong> (the only file sent to FieldJetX) plus an in-app <strong>summary PDF</strong>. It runs on <strong>Microsoft Azure</strong>.</p>
+  <div class="card"><div class="card-header"><div class="icon" style="background:var(--primary-light);color:var(--primary)">🧮</div><div><h4>Design Principle: LLMs do quantities, code does dollars</h4><p>Models only extract scope &amp; quantities; every price is computed by pure, auditable code.</p></div></div>
+  <p>Gemini extracts, Claude verifies the money fields, a deterministic reconciler merges them, and a deterministic engine prices the result — so every estimate is reproducible and traceable, and no model ever emits a price.</p></div>
+  <h3>Key Capabilities</h3>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF · DOC · CAD · images</div><div class="tech-role">Normalised to per-page text + images</div></div>
+    <div class="tech-card"><div class="tech-icon">🤖</div><div class="tech-name">Two-model AI Takeoff</div><div class="tech-ver">Gemini + Claude</div><div class="tech-role">Extract → verify → reconcile</div></div>
+    <div class="tech-card"><div class="tech-icon">💵</div><div class="tech-name">Deterministic Estimate</div><div class="tech-ver">rate card + rate sheets</div><div class="tech-role">Honest + draft totals, re-runnable</div></div>
+    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review &amp; Approval</div><div class="tech-ver">estimator → manager</div><div class="tech-role">Sign-off before finalisation</div></div>
+    <div class="tech-card"><div class="tech-icon">📤</div><div class="tech-name">FieldJetX + Summary PDF</div><div class="tech-ver">Excel push · in-app PDF</div><div class="tech-role">Excel only to FieldJetX</div></div>
+    <div class="tech-card"><div class="tech-icon">👥</div><div class="tech-name">Client Management</div><div class="tech-ver">multi-tenant</div><div class="tech-role">History, search, analytics</div></div>
+  </div>
+</section>
+
+<section id="goals">
+  <h2>2. Goals &amp; Success Criteria</h2>
+  <div class="table-wrapper"><table><thead><tr><th>Dimension</th><th>Target</th><th>Measured by</th></tr></thead><tbody>
+    <tr><td>Circuit/equipment extraction recall</td><td>≥ 95% vs. golden set</td><td>Reconciled items vs. verified expected</td></tr>
+    <tr><td>Pipe/duct size match (sized items)</td><td>≥ 90%</td><td>Size match on the golden set</td></tr>
+    <tr><td>Status classification (N/E/R/X)</td><td>≥ 95%</td><td>Per-item status vs. expected</td></tr>
+    <tr><td>Analyze latency</td><td>P95 &lt; 5 min</td><td>Job-duration histogram (App Insights)</td></tr>
+    <tr><td>Estimator time per bid</td><td>60–75% reduction</td><td>Baseline study vs. platform timing</td></tr>
+    <tr><td>Availability</td><td>99.9% monthly (API)</td><td>Azure Monitor uptime</td></tr>
+    <tr><td>Auditability</td><td>100% of priced items traceable</td><td>item → prompt_version + raw outputs + approver</td></tr>
+  </tbody></table></div>
+  <h3>Non-Goals</h3>
+  <div class="callout">Trades outside mechanical refrigeration/HVAC · full ERP/accounting integration (only the FieldJetX hand-off) · autonomous bid submission (human approval always required).</div>
+</section>
+
+<section id="features">
+  <h2>3. Core Features</h2>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-icon">❄️🔥</div><div class="tech-name">Multi-domain</div><div class="tech-ver">Refrigeration + HVAC</div><div class="tech-role">RFP &amp; RFQ estimation</div></div>
+    <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF/DOC/CAD/images</div><div class="tech-role">Per-page text + rendered images</div></div>
+    <div class="tech-card"><div class="tech-icon">🤖</div><div class="tech-name">Two-model Takeoff</div><div class="tech-ver">extract + verify + reconcile</div><div class="tech-role">Project facts · items · condensers · RFIs</div></div>
+    <div class="tech-card"><div class="tech-icon">💵</div><div class="tech-name">Estimate</div><div class="tech-ver">rate card + equipment rate sheets</div><div class="tech-role">Honest + draft totals</div></div>
+    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review &amp; Approval</div><div class="tech-ver">state machine</div><div class="tech-role">Estimator → reviewer/manager sign-off</div></div>
+    <div class="tech-card"><div class="tech-icon">📤</div><div class="tech-name">Deliverables</div><div class="tech-ver">Excel → FieldJetX</div><div class="tech-role">+ in-app summary PDF (not sent)</div></div>
+    <div class="tech-card"><div class="tech-icon">👥</div><div class="tech-name">Client Management</div><div class="tech-ver">multi-tenant</div><div class="tech-role">History · search · reuse · audit</div></div>
+    <div class="tech-card"><div class="tech-icon">🔐</div><div class="tech-name">Security</div><div class="tech-ver">Entra SSO + MFA + RBAC</div><div class="tech-role">Estimator/reviewer/manager/admin</div></div>
+  </div>
+</section>
+
+<section id="architecture">
+  <h2>4. Architecture Diagram</h2>
+  <p>A modular monolith deployed as an <strong>API service</strong> and a <strong>worker service</strong> on Azure Container Apps, coordinated through Azure Service Bus. Requests enter through Front Door + WAF; heavy analyze jobs autoscale on queue depth (KEDA).</p>
+  <div class="arch">
+  <div class="arch-layer layer-user">
+    <div class="arch-title">User Layer &mdash; roles</div>
+    <div class="arch-row"><div class="arch-box ">👤 Estimator</div> <div class="arch-box ">🔎 Reviewer</div> <div class="arch-box ">🧑‍💼 Manager</div> <div class="arch-box ">⚙️ Admin</div></div>
+  </div>
+  <div class="arch-arrow">&#8595;</div>
+  <div class="arch-layer layer-present">
+    <div class="arch-title">Presentation &mdash; Angular SPA</div>
+    <div class="arch-row"><div class="arch-box ">📈 Dashboard</div> <div class="arch-box ">🧾 Bid Stepper</div> <div class="arch-box ">✅ Review/Approval</div> <div class="arch-box ">👥 Clients</div> <div class="arch-box ">💲 Pricing Admin</div></div>
+  </div>
+  <div class="arch-arrow">&#8597; &nbsp;<span style="font-size:12px">HTTPS · Entra ID SSO (OIDC) + MFA</span></div>
+  <div class="arch-layer layer-api">
+    <div class="arch-title">Edge &amp; API</div>
+    <div class="arch-row"><div class="arch-box ">🚪 Front Door<small>+ WAF</small></div> <div class="arch-box ">🛡️ App Gateway<small>TLS · routing · rate-limit</small></div> <div class="arch-box ">🔐 Entra ID<small>SSO + MFA</small></div></div>
+    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">⚡ API Service — FastAPI / Uvicorn<small>REST + WebSocket · RBAC</small></div></div>
+  </div>
+  <div class="arch-arrow">&#8595;</div>
+  <div class="arch-layer layer-logic">
+    <div class="arch-title">Domain Services (Azure Container Apps)</div>
+    <div class="arch-row"><div class="arch-box ">📥 Intake<small>multi-format</small></div> <div class="arch-box ">🤖 Analyze<small>two-model</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic</small></div> <div class="arch-box ">💵 Estimate<small>rate card + rate sheets</small></div></div>
+    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing</div> <div class="arch-box ">✅ Review/Approval</div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients</div></div>
+  </div>
+  <div class="arch-arrow">&#8595;</div>
+  <div class="arch-layer layer-worker">
+    <div class="arch-title">Async Processing</div>
+    <div class="arch-row"><div class="arch-box ">🚌 Service Bus<small>async jobs</small></div> <div class="arch-box ">📈 KEDA autoscale + Celery workers</div></div>
+  </div>
+  <div class="arch-arrow">&#8595;</div>
+  <div class="arch-split">
+    <div class="arch-layer layer-integration">
+      <div class="arch-title">Integration (managed · DPA · zero-retention)</div>
+      <div class="arch-row"><div class="arch-box ">🧠 Gemini / Vertex<small>primary extractor</small></div> <div class="arch-box ">🔎 Claude / Anthropic<small>verifier</small></div> <div class="arch-box dashed">📤 FieldJetX API<small>Excel push</small></div></div>
+    </div>
+    <div class="arch-layer layer-data">
+      <div class="arch-title">Data (Azure)</div>
+      <div class="arch-row"><div class="arch-box ">🐘 PostgreSQL<small>HA + PITR</small></div> <div class="arch-box ">📦 Blob Storage<small>drawings/quotes</small></div> <div class="arch-box ">🔥 Cache for Redis</div></div>
+    </div>
+  </div>
+  <div class="arch-arrow">&#8595;</div>
+  <div class="arch-layer layer-logic">
+    <div class="arch-title">Platform &amp; Foundation</div>
+    <div class="arch-row"><div class="arch-box ">🔑 Key Vault</div> <div class="arch-box ">📊 Monitor + App Insights</div> <div class="arch-box ">🗃️ Container Registry</div> <div class="arch-box ">🕸️ VNet + Private Endpoints</div></div>
+  </div>
+</div>
+  <h3>Request Flow</h3>
+  <ol style="padding-left:24px">
+    <li>User signs in via <strong>Entra ID</strong> (OIDC + MFA); the SPA calls the API with a Bearer token.</li>
+    <li>Traffic passes <strong>Front Door + WAF → App Gateway</strong> (TLS, filtering, rate-limiting) to the API.</li>
+    <li>The <strong>API</strong> validates the token + RBAC, then serves sync actions or enqueues an analyze job on <strong>Service Bus</strong>.</li>
+    <li><strong>Workers</strong> (autoscaled by KEDA) run Gemini → Claude → reconcile, writing results to <strong>PostgreSQL</strong>.</li>
+    <li>On approval, <strong>Export</strong> pushes the Excel to <strong>FieldJetX</strong> and renders the in-app summary PDF.</li>
+  </ol>
+</section>
+
+<section id="workflow">
+  <h2>5. Application Workflow (Data Flow)</h2>
+  <div class="flow-step" style="border-left-color:var(--stage-upload)"><div class="flow-num" style="background:var(--stage-upload)">1</div><div class="flow-content"><h4>Upload &amp; Normalise</h4><p>Multi-format package (PDF · DOC · CAD · images) → per-page text + 200-DPI images in Blob + PostgreSQL.</p></div></div>
+  <div class="flow-step" style="border-left-color:var(--stage-analyze)"><div class="flow-num" style="background:var(--stage-analyze)">2</div><div class="flow-content"><h4>Analyze (async worker)</h4><p>Gemini extracts the takeoff → Claude verifies the money fields → deterministic reconciler merges (fill blanks, flag conflicts as RFIs, boost confidence).</p></div></div>
+  <div class="flow-step" style="border-left-color:var(--stage-estimate)"><div class="flow-num" style="background:var(--stage-estimate)">3</div><div class="flow-content"><h4>Estimate</h4><p>Deterministic engine prices items: rate card (material/labor) + referenced equipment rate sheets → honest + draft totals. No model call.</p></div></div>
+  <div class="flow-step" style="border-left-color:#14b8a6"><div class="flow-num" style="background:#14b8a6">4</div><div class="flow-content"><h4>Review &amp; Approval</h4><p>Estimator submits; reviewer/manager approves or rejects with sign-off; audit-logged state machine.</p></div></div>
+  <div class="flow-step" style="border-left-color:var(--stage-quote)"><div class="flow-num" style="background:var(--stage-quote)">5</div><div class="flow-content"><h4>Deliver</h4><p>Excel pushed to FieldJetX (the only file sent); in-app summary PDF (findings + bid details) generated for view/download.</p></div></div>
+</section>
+
+<section id="stack">
+  <h2>6. Technology Stack</h2>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div><div class="tech-ver">0.115</div><div class="tech-role">Async REST + WebSocket</div></div>
+    <div class="tech-card"><div class="tech-icon">🌱</div><div class="tech-name">Celery</div><div class="tech-ver">5.6</div><div class="tech-role">Worker jobs</div></div>
+    <div class="tech-card"><div class="tech-icon">🐘</div><div class="tech-name">PostgreSQL</div><div class="tech-ver">Azure DB · 16</div><div class="tech-role">SQLAlchemy 2.0 async</div></div>
+    <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Blob Storage</div><div class="tech-ver">Azure</div><div class="tech-role">Drawings · images · quotes</div></div>
+    <div class="tech-card"><div class="tech-icon">🚌</div><div class="tech-name">Service Bus</div><div class="tech-ver">Azure</div><div class="tech-role">Async dispatch (KEDA)</div></div>
+    <div class="tech-card"><div class="tech-icon">🔥</div><div class="tech-name">Cache for Redis</div><div class="tech-ver">Azure</div><div class="tech-role">Results / cache</div></div>
+    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">2.5 Pro · Vertex</div><div class="tech-role">Primary extractor (DPA)</div></div>
+    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div></div>
+    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div></div>
+    <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div></div>
+    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">PDF/CAD intake — license reviewed</div></div>
+    <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div></div>
+  </div>
+  <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
+</section>
+
+<section id="services">
+  <h2>7. Core Services</h2>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📥</div><div><h4>Intake Service</h4><p>multi-format → text + images</p></div></div><p>Accepts PDF/DOC/CAD/images; converts and renders each page at 200 DPI; writes originals + page images to Blob and page rows to PostgreSQL.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🤖</div><div><h4>Analyze Service (two-model)</h4><p>Gemini + Claude</p></div></div><p><code>run_takeoff()</code> → Gemini structured extraction; <code>verify_takeoff()</code> → Claude re-checks the money fields. Produces case numbers, sizes, status (N/E/R/X), condensers, RFIs. Never emits a price.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🔀</div><div><h4>Reconciler</h4><p>deterministic merge</p></div></div><p><code>reconcile_takeoff()</code> — fill blanks on confidence ≥ 0.6, flag disagreements as RFIs (never silent overwrite), boost confidence on agreement.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fdf1e7;color:#f97316">💵</div><div><h4>Estimate &amp; Pricing</h4><p>rate card + rate sheets</p></div></div><p>Pure engine: rate card for material/labor + referenced equipment rate sheets; honest total + draft-with-assumptions total; re-runnable with no model call. Rate cards &amp; sheets versioned.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#e6f6f4;color:#14b8a6">✅</div><div><h4>Review &amp; Approval</h4><p>human sign-off</p></div></div><p>State machine <code>draft → in_review → approved/rejected → finalised</code>; assignment, comments, immutable audit trail of every transition.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#e7f6ee;color:#10b981">📤</div><div><h4>Export &amp; FieldJetX</h4><p>Excel + summary PDF</p></div></div><p>Excel workbook pushed to FieldJetX via its API (the only file sent, queued + retried); separately an in-app summary PDF (findings + bid details) for view/download.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#e5f0fb;color:#1a56db">👥</div><div><h4>Clients, Dashboard &amp; Analytics</h4><p>multi-tenant</p></div></div><p>Client registry with per-client bid history, search, reuse; KPI dashboard and win/margin analytics.</p></div>
+</section>
+
+<section id="data">
+  <h2>8. Data Model &amp; Schema</h2>
+  <p>Azure DB for PostgreSQL (Flexible Server) via SQLAlchemy 2.0 async. Multi-tenant by <code>customer_id</code>; AI-populated fields use <code>Text</code>.</p>
+  <div class="table-wrapper"><table><thead><tr><th>Table</th><th>Purpose &amp; key fields</th></tr></thead><tbody>
+    <tr><td><code>customers</code></td><td>id (PK), name, rules (JSON), contacts</td></tr>
+    <tr><td><code>bids</code></td><td>id (PK), customer_id (FK), domain, current_stage, review_state, assignee, approver, estimate (JSON), cost fields, prompt_version, timestamps</td></tr>
+    <tr><td><code>bid_pages</code></td><td>bid_id (FK), source_format, file_key, image_key, text</td></tr>
+    <tr><td><code>bid_items</code></td><td>case_id, type, status, sizes, lengths, source_sheets (JSON), confidence</td></tr>
+    <tr><td><code>bid_condensers</code></td><td>unit_id, unit_type, systems_served, status, model, capacity</td></tr>
+    <tr><td><code>rate_cards</code> / <code>rate_sheets</code></td><td>Rate card (material/labor) + referenced equipment rate sheets; versioned</td></tr>
+    <tr><td><code>users</code> / <code>roles</code></td><td>Entra-linked users + role assignments</td></tr>
+    <tr><td><code>audit_log</code> / <code>ai_calls</code> / <code>item_edits</code></td><td>Immutable audit; per-model-call telemetry; estimator-edit feedback signal</td></tr>
+  </tbody></table></div>
+  <div class="callout"><strong>Indexes:</strong> bids(customer_id, current_stage, review_state, created_at) + bid_id on children · <strong>Migrations:</strong> Alembic (pre-deploy) · <strong>PII/retention:</strong> client fields + drawings are PII, encrypted at rest, purged a configurable period after finalisation (default 90 days), cascade to Blob · <strong>Tenant isolation</strong> by customer_id.</div>
+</section>
+
+<section id="api">
+  <h2>9. API Contracts</h2>
+  <p>REST + JSON. <strong>All endpoints require an Entra ID Bearer token</strong>; RBAC per route. Errors: 400/401/403/404/409/413/422/429/500. Full schemas in the generated OpenAPI doc.</p>
+  <div class="table-wrapper"><table><thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/upload</code></td><td>Multi-format package → pages</td></tr>
+    <tr><td><span class="badge badge-202">202</span></td><td><code>POST /api/bids/{id}/analyze</code></td><td>Dispatch two-model analyze</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/bids/{id}/takeoff</code></td><td>project · items · condensers · rfis</td></tr>
+    <tr><td><span class="badge badge-patch">PATCH</span></td><td><code>/api/bids/{id}/items/{item_id}</code></td><td>Edit an extracted item</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/estimate</code></td><td>Deterministic pricing</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/review</code></td><td>Submit / approve / reject</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/quote</code></td><td>Push Excel to FieldJetX; render summary PDF</td></tr>
+    <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/customers[/{id}][/bids]</code></td><td>Client management</td></tr>
+  </tbody></table></div>
+  <pre><code><span class="cmt">// POST /api/bids/{id}/review  → 200</span>
+{ <span class="str">"action"</span>: <span class="str">"approve"</span>, <span class="str">"note"</span>: <span class="str">"sizes verified"</span> }
+<span class="cmt">// transitions in_review → approved; writes audit_log; 409 if not in_review</span></code></pre>
+</section>
+
+<section id="ai">
+  <h2>10. Applied-AI Engineering &amp; Governance</h2>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📊</div><div><h4>Observability &amp; audit trail</h4><p>per-call telemetry</p></div></div><p>Every model call logs bid_id, model+version, prompt_version, tokens, latency, cost to <code>ai_calls</code> + App Insights; raw outputs stored per run → chain <code>bid → prompt_version + raw outputs → reconciled items → estimate → approver</code>.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🧪</div><div><h4>Evaluation</h4><p>golden set + CI gate</p></div></div><p>Versioned golden set (refrigeration + HVAC) scores recall, status accuracy, size-match; evals run in CI and <strong>gate every prompt/model change</strong>; the 0.6 reconciler threshold is tuned against it.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#e7f6ee;color:#10b981">🔁</div><div><h4>Feedback loop</h4><p>edit capture</p></div></div><p>Estimator corrections captured in <code>item_edits</code>, reviewed on a cadence, folded into the golden set to improve prompts.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fef3c7;color:#d97706">🔒</div><div><h4>Compliance &amp; data governance</h4><p>managed DPA endpoints</p></div></div><p>Models via <strong>managed, zero-retention endpoints under DPAs</strong> (Gemini/Vertex region-pinned, no training; Claude zero-retention). Prompt/response content redacted before external log sinks; GDPR/CCPA mapped. Models never emit prices.</p></div>
+</section>
+
+<section id="security">
+  <h2>11. Security &amp; Access Control</h2>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-icon">🔐</div><div class="tech-name">Entra ID SSO</div><div class="tech-ver">OIDC</div><div class="tech-role">API validates JWT (issuer/aud/sig/exp)</div></div>
+    <div class="tech-card"><div class="tech-icon">📲</div><div class="tech-name">MFA</div><div class="tech-ver">Conditional Access</div><div class="tech-role">Tenant-enforced second factor</div></div>
+    <div class="tech-card"><div class="tech-icon">👮</div><div class="tech-name">RBAC</div><div class="tech-ver">4 roles</div><div class="tech-role">estimator · reviewer · manager · admin</div></div>
+    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Approval</div><div class="tech-ver">separation of duty</div><div class="tech-role">Approver ≠ estimator; audit-logged</div></div>
+    <div class="tech-card"><div class="tech-icon">🔑</div><div class="tech-name">Secrets</div><div class="tech-ver">Key Vault</div><div class="tech-role">No secrets in config/images</div></div>
+    <div class="tech-card"><div class="tech-icon">🕸️</div><div class="tech-name">Network</div><div class="tech-ver">VNet + Private Endpoints</div><div class="tech-role">Data services not public</div></div>
+  </div>
+</section>
+
+<section id="infra">
+  <h2>12. Infrastructure (Azure)</h2>
+  <div class="infra-grid">
+    <div class="infra-card"><div class="infra-icon">⚡</div><div class="infra-name">Container Apps</div><div class="infra-tech">API + Worker · KEDA</div><div class="infra-port">autoscale</div></div>
+    <div class="infra-card"><div class="infra-icon">🐘</div><div class="infra-name">Azure DB PostgreSQL</div><div class="infra-tech">Flexible Server · HA</div><div class="infra-port">PITR</div></div>
+    <div class="infra-card"><div class="infra-icon">📦</div><div class="infra-name">Blob Storage</div><div class="infra-tech">geo-redundant</div><div class="infra-port">drawings/quotes</div></div>
+    <div class="infra-card"><div class="infra-icon">🚌</div><div class="infra-name">Service Bus</div><div class="infra-tech">async jobs</div><div class="infra-port">dead-letter</div></div>
+    <div class="infra-card"><div class="infra-icon">🔥</div><div class="infra-name">Cache for Redis</div><div class="infra-tech">results/cache</div><div class="infra-port">managed</div></div>
+    <div class="infra-card"><div class="infra-icon">🔑</div><div class="infra-name">Key Vault</div><div class="infra-tech">secrets</div><div class="infra-port">managed keys</div></div>
+    <div class="infra-card"><div class="infra-icon">🚪</div><div class="infra-name">Front Door + WAF</div><div class="infra-tech">edge · DDoS</div><div class="infra-port">App Gateway</div></div>
+    <div class="infra-card"><div class="infra-icon">📊</div><div class="infra-name">Monitor + App Insights</div><div class="infra-tech">telemetry</div><div class="infra-port">dashboards</div></div>
+    <div class="infra-card"><div class="infra-icon">🧱</div><div class="infra-name">Bicep / Terraform</div><div class="infra-tech">IaC</div><div class="infra-port">dev · staging · prod</div></div>
+  </div>
+  <div class="callout"><strong>DR:</strong> Postgres PITR + geo-redundant Blob — RPO ≤ 1 h, RTO ≤ 4 h. <strong>Scaling:</strong> API on CPU/RPS, workers on Service Bus queue depth. <strong>Networking:</strong> data reachable only via private endpoints.</div>
+</section>
+
+<section id="cicd">
+  <h2>13. CI/CD &amp; Release Management</h2>
+  <div class="pipeline">
+    <div class="stage-node"><div class="stage-circle" style="background:#6366f1">🧹</div><div class="stage-label">Lint</div></div>
+    <div class="stage-arrow">➜</div>
+    <div class="stage-node"><div class="stage-circle" style="background:#8b5cf6">🧪</div><div class="stage-label">Unit + Evals</div></div>
+    <div class="stage-arrow">➜</div>
+    <div class="stage-node"><div class="stage-circle" style="background:#f97316">🐳</div><div class="stage-label">Build → ACR</div></div>
+    <div class="stage-arrow">➜</div>
+    <div class="stage-node"><div class="stage-circle" style="background:#14b8a6">🚦</div><div class="stage-label">Staging (auto)</div></div>
+    <div class="stage-arrow">➜</div>
+    <div class="stage-node"><div class="stage-circle" style="background:#10b981">✅</div><div class="stage-label">Prod (gated)</div></div>
+  </div>
+  <div class="callout"><strong>Pipeline (Azure DevOps / GitHub Actions):</strong> lint → unit tests → <strong>extraction evals (release gate)</strong> → image to ACR → staging auto → prod behind manual approval. <strong>Migrations:</strong> Alembic pre-deploy. <strong>Safe rollout:</strong> blue/green via Container Apps revisions; prompt changes behind feature flags. <strong>Rollback:</strong> shift traffic to prior revision + Alembic downgrade.</div>
+</section>
+
+<section id="observability">
+  <h2>14. Observability, Reliability &amp; SLOs</h2>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-icon">📈</div><div class="tech-name">Telemetry</div><div class="tech-ver">App Insights</div><div class="tech-role">Logs · traces · metrics · correlation IDs</div></div>
+    <div class="tech-card"><div class="tech-icon">💰</div><div class="tech-name">Cost telemetry</div><div class="tech-ver">per model call</div><div class="tech-role">tokens · latency · $ dashboards</div></div>
+    <div class="tech-card"><div class="tech-icon">🚨</div><div class="tech-name">Alerting</div><div class="tech-ver">SLO burn</div><div class="tech-role">dead-letter · error rate · cost ceiling</div></div>
+    <div class="tech-card"><div class="tech-icon">🛟</div><div class="tech-name">Reliability</div><div class="tech-ver">retries + DLQ</div><div class="tech-role">best-effort verifier · health probes</div></div>
+  </div>
+  <div class="callout"><strong>SLO targets:</strong> API availability 99.9% monthly · Analyze P95 &lt; 5 min · Upload P99 &lt; 30 s.</div>
+</section>
+
+<section id="cost">
+  <h2>15. Cost Projection</h2>
+  <p>Two components: <strong>model cost</strong> (image-token dominated; two models per analyze) and <strong>Azure infrastructure</strong>. Modelled as a stated-assumption low/expected/high range; figures re-checked against current published rates before commitment.</p>
+  <div class="table-wrapper"><table><thead><tr><th>Scenario</th><th>Model $/bid</th><th>Infra $/mo</th><th>Total $/mo</th></tr></thead><tbody>
+    <tr><td>Low</td><td>L</td><td>I_low</td><td>volume·L + I_low</td></tr>
+    <tr><td>Expected</td><td>E</td><td>I_exp</td><td>volume·E + I_exp</td></tr>
+    <tr><td>High</td><td>H</td><td>I_high</td><td>volume·H + I_high</td></tr>
+  </tbody></table></div>
+  <div class="callout"><strong>Levers:</strong> downscale extractor input images (biggest lever) · gate/skip the verifier by bid value · cache extraction for unchanged re-submissions · right-size worker autoscale floors · reserved-capacity discounts on steady infra.</div>
+</section>
+
+<div style="margin-top:60px;padding:24px;border-top:1px solid var(--border);text-align:center;color:var(--text-muted);font-size:13px">
+  ClimatePros — Technical Architecture (Final Application) · Prepared by Techjays · v1.0
+</div>
+
+</div>
+</body></html>
