@@ -583,7 +583,7 @@
   <p>Gemini extracts, Claude verifies the money fields, a deterministic reconciler merges them, and a deterministic engine prices the result — so every estimate is reproducible and traceable, and no model ever emits a price.</p></div>
   <h3>Key Capabilities</h3>
   <div class="tech-grid">
-    <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF · DOC · CAD · images</div><div class="tech-role">Normalised to per-page text + images</div></div>
+    <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF · DOC · CAD · scans · photos</div><div class="tech-role">Convert · render · OCR fallback · quality gate</div></div>
     <div class="tech-card"><div class="tech-icon">🤖</div><div class="tech-name">Two-model AI Takeoff</div><div class="tech-ver">Gemini + Claude</div><div class="tech-role">Extract → verify → reconcile</div></div>
     <div class="tech-card"><div class="tech-icon">💵</div><div class="tech-name">Deterministic Estimate</div><div class="tech-ver">rate card + rate sheets</div><div class="tech-role">Honest + draft totals, re-runnable</div></div>
     <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review &amp; Approval</div><div class="tech-ver">estimator → manager</div><div class="tech-role">Sign-off before finalisation</div></div>
@@ -611,7 +611,7 @@
   <h2>3. Core Features</h2>
   <div class="tech-grid">
     <div class="tech-card"><div class="tech-icon">❄️🔥</div><div class="tech-name">Multi-domain</div><div class="tech-ver">Refrigeration + HVAC</div><div class="tech-role">RFP &amp; RFQ estimation</div></div>
-    <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF/DOC/CAD/images</div><div class="tech-role">Per-page text + rendered images</div></div>
+    <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF/DOC/CAD/scans/photos</div><div class="tech-role">Native text or OCR · quality-gated</div></div>
     <div class="tech-card"><div class="tech-icon">🤖</div><div class="tech-name">Two-model Takeoff</div><div class="tech-ver">extract + verify + reconcile</div><div class="tech-role">Project facts · items · condensers · RFIs</div></div>
     <div class="tech-card"><div class="tech-icon">💵</div><div class="tech-name">Estimate</div><div class="tech-ver">rate card + equipment rate sheets</div><div class="tech-role">Honest + draft totals</div></div>
     <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review &amp; Approval</div><div class="tech-ver">state machine</div><div class="tech-role">Estimator → reviewer/manager sign-off</div></div>
@@ -643,7 +643,7 @@
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-logic">
     <div class="arch-title">Domain Services (Azure Container Apps)</div>
-    <div class="arch-row"><div class="arch-box ">📥 Intake<small>multi-format</small></div> <div class="arch-box ">🤖 Analyze<small>two-model</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic</small></div> <div class="arch-box ">💵 Estimate<small>rate card + rate sheets</small></div></div>
+    <div class="arch-row"><div class="arch-box ">📥 Intake<small>convert · render · OCR</small></div> <div class="arch-box ">🤖 Analyze<small>two-model</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic</small></div> <div class="arch-box ">💵 Estimate<small>rate card + rate sheets</small></div></div>
     <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing</div> <div class="arch-box ">✅ Review/Approval</div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients</div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
@@ -680,7 +680,7 @@
 
 <section id="workflow">
   <h2>5. Application Workflow (Data Flow)</h2>
-  <div class="flow-step" style="border-left-color:var(--stage-upload)"><div class="flow-num" style="background:var(--stage-upload)">1</div><div class="flow-content"><h4>Upload &amp; Normalise</h4><p>Multi-format package (PDF · DOC · CAD · images) → per-page text + 200-DPI images in Blob + PostgreSQL.</p></div></div>
+  <div class="flow-step" style="border-left-color:var(--stage-upload)"><div class="flow-num" style="background:var(--stage-upload)">1</div><div class="flow-content"><h4>Upload &amp; Normalise <span style="font-size:12px;font-weight:600;color:var(--text-muted)">— deterministic, no AI</span></h4><p>Detect format → convert everything to PDF (DOC via LibreOffice, CAD via exporter, images wrapped) → render each page (200 DPI, auto-bumped to 300 for dense schedule/E-size sheets) → obtain a text layer: native extraction for born-digital PDFs, <strong>OCR fallback</strong> (Azure AI Document Intelligence, with deskew/dewarp/denoise) for scans, photos and image-only pages → <strong>quality gate</strong> flags blank/blurry/garbled pages instead of passing them silently. Uniform per-page text + images land in Blob + PostgreSQL so the models see consistent inputs for <em>every</em> document type.</p></div></div>
   <div class="flow-step" style="border-left-color:var(--stage-analyze)"><div class="flow-num" style="background:var(--stage-analyze)">2</div><div class="flow-content"><h4>Analyze (async worker)</h4><p>Gemini extracts the takeoff → Claude verifies the money fields → deterministic reconciler merges (fill blanks, flag conflicts as RFIs, boost confidence).</p></div></div>
   <div class="flow-step" style="border-left-color:var(--stage-estimate)"><div class="flow-num" style="background:var(--stage-estimate)">3</div><div class="flow-content"><h4>Estimate</h4><p>Deterministic engine prices items: rate card (material/labor) + referenced equipment rate sheets → honest + draft totals. No model call.</p></div></div>
   <div class="flow-step" style="border-left-color:#14b8a6"><div class="flow-num" style="background:#14b8a6">4</div><div class="flow-content"><h4>Review &amp; Approval</h4><p>Estimator submits; reviewer/manager approves or rejects with sign-off; audit-logged state machine.</p></div></div>
@@ -700,7 +700,10 @@
     <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div></div>
     <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div></div>
     <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div></div>
-    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">PDF/CAD intake — license reviewed</div></div>
+    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">Page render + native text</div></div>
+    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Azure AI Document Intelligence</div><div class="tech-ver">OCR</div><div class="tech-role">Text layer for scans/photos</div></div>
+    <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div></div>
+    <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div></div>
     <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div></div>
   </div>
   <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
@@ -708,7 +711,17 @@
 
 <section id="services">
   <h2>7. Core Services</h2>
-  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📥</div><div><h4>Intake Service</h4><p>multi-format → text + images</p></div></div><p>Accepts PDF/DOC/CAD/images; converts and renders each page at 200 DPI; writes originals + page images to Blob and page rows to PostgreSQL.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📥</div><div><h4>Intake &amp; Normalisation Service</h4><p>any format → uniform text + images (deterministic, no AI)</p></div></div>
+  <p>A deterministic pipeline that turns a messy, mixed-format package into consistent, indexed pages so the two-model takeoff sees the same clean shape for every document — vector PDF, scanned PDF, phone photo, Word, or CAD:</p>
+  <ol style="padding-left:24px;font-size:14px;margin-bottom:8px">
+    <li><strong>Detect</strong> — identify true format by content (magic bytes), not file extension.</li>
+    <li><strong>Convert to PDF</strong> — DOC/DOCX via LibreOffice headless; CAD (DWG/DXF) via a CAD→PDF exporter; images wrapped to single-page PDF; PDFs pass through. One canonical path downstream.</li>
+    <li><strong>Render image</strong> — each page rasterised at 200 DPI, auto-bumped to 300 DPI for dense equipment-schedule / E-size sheets.</li>
+    <li><strong>Get text</strong> — native text layer when present (born-digital PDFs: free + exact); <strong>OCR fallback</strong> (Azure AI Document Intelligence, with deskew / dewarp / denoise pre-clean) for scans, photos and image-only pages, so <em>every</em> page ends with a real text layer.</li>
+    <li><strong>Quality gate</strong> — score each page; blank-after-OCR, low-resolution/blurry, or garbled pages are flagged <code>needs_review</code> (or bounced at upload with capture guidance) — never passed as if clean.</li>
+  </ol>
+  <p>Writes originals + page images to Blob and one indexed row per page to PostgreSQL, tagging <code>text_source</code> (native/ocr) and <code>norm_quality</code> for full downstream traceability.</p></div>
+  <div class="callout"><strong>All-document-type robustness:</strong> the OCR fallback + format converters make normalisation format-agnostic — clean scans and straight photos process automatically; genuinely unreadable inputs (very low-res, blurry, glare) are <strong>caught and flagged for a human or re-capture</strong>, so a bad scan never silently produces a wrong takeoff. Serialisation is deliberately AI-free for reproducibility — all understanding happens in the Analyze step.</div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🤖</div><div><h4>Analyze Service (two-model)</h4><p>Gemini + Claude</p></div></div><p><code>run_takeoff()</code> → Gemini structured extraction; <code>verify_takeoff()</code> → Claude re-checks the money fields. Produces case numbers, sizes, status (N/E/R/X), condensers, RFIs. Never emits a price.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🔀</div><div><h4>Reconciler</h4><p>deterministic merge</p></div></div><p><code>reconcile_takeoff()</code> — fill blanks on confidence ≥ 0.6, flag disagreements as RFIs (never silent overwrite), boost confidence on agreement.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#fdf1e7;color:#f97316">💵</div><div><h4>Estimate &amp; Pricing</h4><p>rate card + rate sheets</p></div></div><p>Pure engine: rate card for material/labor + referenced equipment rate sheets; honest total + draft-with-assumptions total; re-runnable with no model call. Rate cards &amp; sheets versioned.</p></div>
@@ -723,7 +736,7 @@
   <div class="table-wrapper"><table><thead><tr><th>Table</th><th>Purpose &amp; key fields</th></tr></thead><tbody>
     <tr><td><code>customers</code></td><td>id (PK), name, rules (JSON), contacts</td></tr>
     <tr><td><code>bids</code></td><td>id (PK), customer_id (FK), domain, current_stage, review_state, assignee, approver, estimate (JSON), cost fields, prompt_version, timestamps</td></tr>
-    <tr><td><code>bid_pages</code></td><td>bid_id (FK), source_format, file_key, image_key, text</td></tr>
+    <tr><td><code>bid_pages</code></td><td>bid_id (FK), source_format, file_key, image_key, dpi, text, text_source (native/ocr), norm_quality (clean/ocr_used/low_quality/failed)</td></tr>
     <tr><td><code>bid_items</code></td><td>case_id, type, status, sizes, lengths, source_sheets (JSON), confidence</td></tr>
     <tr><td><code>bid_condensers</code></td><td>unit_id, unit_type, systems_served, status, model, capacity</td></tr>
     <tr><td><code>rate_cards</code> / <code>rate_sheets</code></td><td>Rate card (material/labor) + referenced equipment rate sheets; versioned</td></tr>
