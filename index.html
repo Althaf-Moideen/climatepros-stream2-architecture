@@ -683,7 +683,7 @@
   <div class="arch-split">
     <div class="arch-layer layer-integration">
       <div class="arch-title">Integration (managed · DPA · zero-retention)</div>
-      <div class="arch-row"><div class="arch-box ">🧠 Gemini / Vertex<small>primary extractor</small></div> <div class="arch-box ">🔎 Claude / Anthropic<small>verifier</small></div> <div class="arch-box dashed">📤 FieldJetX API<small>Excel push</small></div></div>
+      <div class="arch-row"><div class="arch-box ">🧠 Gemini<small>primary extractor</small></div> <div class="arch-box ">🔎 Claude / Anthropic<small>verifier</small></div> <div class="arch-box dashed">📤 FieldJetX API<small>Excel push</small></div></div>
     </div>
     <div class="arch-layer layer-data">
       <div class="arch-title">Data (Azure)</div>
@@ -759,7 +759,7 @@
     <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Blob Storage</div><div class="tech-ver">Azure</div><div class="tech-role">Drawings · images · quotes</div></div>
     <div class="tech-card"><div class="tech-icon">🚌</div><div class="tech-name">Service Bus</div><div class="tech-ver">Azure</div><div class="tech-role">Async dispatch (KEDA)</div></div>
     <div class="tech-card"><div class="tech-icon">🔥</div><div class="tech-name">Cache for Redis</div><div class="tech-ver">Azure</div><div class="tech-role">Results / cache</div></div>
-    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">2.5 Pro · Vertex</div><div class="tech-role">Primary extractor (DPA)</div></div>
+    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">2.5 Pro</div><div class="tech-role">Primary extractor (DPA)</div></div>
     <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div></div>
     <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div></div>
     <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div></div>
@@ -837,7 +837,7 @@
   <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📊</div><div><h4>Observability &amp; audit trail</h4><p>per-call telemetry</p></div></div><p>Every model call logs bid_id, model+version, prompt_version, tokens, latency, cost to <code>ai_calls</code> + App Insights; raw outputs stored per run → chain <code>bid → prompt_version + raw outputs → reconciled items → estimate → approver</code>.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🧪</div><div><h4>Evaluation</h4><p>golden set + CI gate</p></div></div><p>Versioned golden set (refrigeration + HVAC) scores recall, status accuracy, size-match; evals run in CI and <strong>gate every prompt/model change</strong>; the 0.6 reconciler threshold is tuned against it.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#e7f6ee;color:#10b981">🔁</div><div><h4>Feedback loop</h4><p>edit capture</p></div></div><p>Estimator corrections captured in <code>item_edits</code>, reviewed on a cadence, folded into the golden set to improve prompts.</p></div>
-  <div class="card"><div class="card-header"><div class="icon" style="background:#fef3c7;color:#d97706">🔒</div><div><h4>Compliance &amp; data governance</h4><p>managed DPA endpoints</p></div></div><p>Models via <strong>managed, zero-retention endpoints under DPAs</strong> (Gemini/Vertex region-pinned, no training; Claude zero-retention). Prompt/response content redacted before external log sinks; GDPR/CCPA mapped. Models never emit prices.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fef3c7;color:#d97706">🔒</div><div><h4>Compliance &amp; data governance</h4><p>managed DPA endpoints</p></div></div><p>Models via <strong>managed, zero-retention endpoints under DPAs</strong> (Gemini region-pinned, no training; Claude zero-retention). Prompt/response content redacted before external log sinks; GDPR/CCPA mapped. Models never emit prices.</p></div>
 </section>
 
 <section id="security">
