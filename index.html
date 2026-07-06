@@ -713,44 +713,8 @@
   <div class="flow-step" style="border-left-color:var(--stage-estimate)"><div class="flow-num" style="background:var(--stage-estimate)">3</div><div class="flow-content"><h4>Estimate</h4><p>Deterministic engine maps each item to a rate line (no rate → <code>unpriced</code> flag, never $0), prices by status (N/E/R/X) in <code>Decimal</code>, and pins the rate-card version → honest + draft totals, fully re-runnable. No model call.</p></div></div>
   <div class="flow-step" style="border-left-color:#14b8a6"><div class="flow-num" style="background:#14b8a6">4</div><div class="flow-content"><h4>Review &amp; Approval</h4><p>Estimator submits; reviewer/manager approves or rejects with sign-off; audit-logged state machine.</p></div></div>
   <div class="flow-step" style="border-left-color:var(--stage-quote)"><div class="flow-num" style="background:var(--stage-quote)">5</div><div class="flow-content"><h4>Deliver</h4><p>Excel pushed to FieldJetX (the only file sent); in-app summary PDF (findings + bid details) generated for view/download.</p></div></div>
-</section>
 
-<section id="stack">
-  <h2>6. Technology Stack</h2>
-  <div class="tech-grid">
-    <div class="tech-card"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div><div class="tech-ver">0.115</div><div class="tech-role">Async REST + WebSocket</div></div>
-    <div class="tech-card"><div class="tech-icon">🌱</div><div class="tech-name">Celery</div><div class="tech-ver">5.6</div><div class="tech-role">Worker jobs</div></div>
-    <div class="tech-card"><div class="tech-icon">🐘</div><div class="tech-name">PostgreSQL</div><div class="tech-ver">Azure DB · 16</div><div class="tech-role">SQLAlchemy 2.0 async</div></div>
-    <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Blob Storage</div><div class="tech-ver">Azure</div><div class="tech-role">Drawings · images · quotes</div></div>
-    <div class="tech-card"><div class="tech-icon">🚌</div><div class="tech-name">Service Bus</div><div class="tech-ver">Azure</div><div class="tech-role">Async dispatch (KEDA)</div></div>
-    <div class="tech-card"><div class="tech-icon">🔥</div><div class="tech-name">Cache for Redis</div><div class="tech-ver">Azure</div><div class="tech-role">Results / cache</div></div>
-    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">2.5 Pro · Vertex</div><div class="tech-role">Primary extractor (DPA)</div></div>
-    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div></div>
-    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div></div>
-    <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div></div>
-    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">Page render + native text</div></div>
-    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Azure AI Document Intelligence</div><div class="tech-ver">OCR</div><div class="tech-role">Text layer for scans/photos</div></div>
-    <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div></div>
-    <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div></div>
-    <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div></div>
-  </div>
-  <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
-</section>
-
-<section id="services">
-  <h2>7. Core Services</h2>
-  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📥</div><div><h4>Intake &amp; Normalisation Service</h4><p>any format → uniform text + images (deterministic, no AI)</p></div></div>
-  <p>A deterministic pipeline that turns a messy, mixed-format package into consistent, indexed pages so the two-model takeoff sees the same clean shape for every document — vector PDF, scanned PDF, phone photo, Word, or CAD:</p>
-  <ol style="padding-left:24px;font-size:14px;margin-bottom:8px">
-    <li><strong>Detect</strong> — identify true format by content (magic bytes), not file extension.</li>
-    <li><strong>Convert to PDF</strong> — DOC/DOCX via LibreOffice headless; CAD (DWG/DXF) via a CAD→PDF exporter; images wrapped to single-page PDF; PDFs pass through. One canonical path downstream.</li>
-    <li><strong>Render image</strong> — each page rasterised at 200 DPI, auto-bumped to 300 DPI for dense equipment-schedule / E-size sheets.</li>
-    <li><strong>Get text</strong> — native text layer when present (born-digital PDFs: free + exact); <strong>OCR fallback</strong> (Azure AI Document Intelligence, with deskew / dewarp / denoise pre-clean) for scans, photos and image-only pages, so <em>every</em> page ends with a real text layer.</li>
-    <li><strong>Quality gate</strong> — score each page; blank-after-OCR, low-resolution/blurry, or garbled pages are flagged <code>needs_review</code> (or bounced at upload with capture guidance) — never passed as if clean.</li>
-  </ol>
-  <p>Writes originals + page images to Blob and one indexed row per page to PostgreSQL, tagging <code>text_source</code> (native/ocr) and <code>norm_quality</code> for full downstream traceability.</p></div>
-  <div class="callout"><strong>All-document-type robustness:</strong> the OCR fallback + format converters make normalisation format-agnostic — clean scans and straight photos process automatically; genuinely unreadable inputs (very low-res, blurry, glare) are <strong>caught and flagged for a human or re-capture</strong>, so a bad scan never silently produces a wrong takeoff. Serialisation is deliberately AI-free for reproducibility — all understanding happens in the Analyze step.</div>
-
+  <h3>Step 1 in detail — Intake &amp; Normalisation data flow</h3>
   <div class="df">
     <div class="df-title">Step 1 — Intake &amp; Normalisation · Data Flow &nbsp;(deterministic · no AI)</div>
     <div class="df-col">
@@ -800,6 +764,43 @@
       </div>
     </div>
   </div>
+</section>
+
+<section id="stack">
+  <h2>6. Technology Stack</h2>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div><div class="tech-ver">0.115</div><div class="tech-role">Async REST + WebSocket</div></div>
+    <div class="tech-card"><div class="tech-icon">🌱</div><div class="tech-name">Celery</div><div class="tech-ver">5.6</div><div class="tech-role">Worker jobs</div></div>
+    <div class="tech-card"><div class="tech-icon">🐘</div><div class="tech-name">PostgreSQL</div><div class="tech-ver">Azure DB · 16</div><div class="tech-role">SQLAlchemy 2.0 async</div></div>
+    <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Blob Storage</div><div class="tech-ver">Azure</div><div class="tech-role">Drawings · images · quotes</div></div>
+    <div class="tech-card"><div class="tech-icon">🚌</div><div class="tech-name">Service Bus</div><div class="tech-ver">Azure</div><div class="tech-role">Async dispatch (KEDA)</div></div>
+    <div class="tech-card"><div class="tech-icon">🔥</div><div class="tech-name">Cache for Redis</div><div class="tech-ver">Azure</div><div class="tech-role">Results / cache</div></div>
+    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">2.5 Pro · Vertex</div><div class="tech-role">Primary extractor (DPA)</div></div>
+    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div></div>
+    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div></div>
+    <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div></div>
+    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">Page render + native text</div></div>
+    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Azure AI Document Intelligence</div><div class="tech-ver">OCR</div><div class="tech-role">Text layer for scans/photos</div></div>
+    <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div></div>
+    <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div></div>
+    <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div></div>
+  </div>
+  <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
+</section>
+
+<section id="services">
+  <h2>7. Core Services</h2>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📥</div><div><h4>Intake &amp; Normalisation Service</h4><p>any format → uniform text + images (deterministic, no AI)</p></div></div>
+  <p>A deterministic pipeline that turns a messy, mixed-format package into consistent, indexed pages so the two-model takeoff sees the same clean shape for every document — vector PDF, scanned PDF, phone photo, Word, or CAD:</p>
+  <ol style="padding-left:24px;font-size:14px;margin-bottom:8px">
+    <li><strong>Detect</strong> — identify true format by content (magic bytes), not file extension.</li>
+    <li><strong>Convert to PDF</strong> — DOC/DOCX via LibreOffice headless; CAD (DWG/DXF) via a CAD→PDF exporter; images wrapped to single-page PDF; PDFs pass through. One canonical path downstream.</li>
+    <li><strong>Render image</strong> — each page rasterised at 200 DPI, auto-bumped to 300 DPI for dense equipment-schedule / E-size sheets.</li>
+    <li><strong>Get text</strong> — native text layer when present (born-digital PDFs: free + exact); <strong>OCR fallback</strong> (Azure AI Document Intelligence, with deskew / dewarp / denoise pre-clean) for scans, photos and image-only pages, so <em>every</em> page ends with a real text layer.</li>
+    <li><strong>Quality gate</strong> — score each page; blank-after-OCR, low-resolution/blurry, or garbled pages are flagged <code>needs_review</code> (or bounced at upload with capture guidance) — never passed as if clean.</li>
+  </ol>
+  <p>Writes originals + page images to Blob and one indexed row per page to PostgreSQL, tagging <code>text_source</code> (native/ocr) and <code>norm_quality</code> for full downstream traceability.</p></div>
+  <div class="callout"><strong>All-document-type robustness:</strong> the OCR fallback + format converters make normalisation format-agnostic — clean scans and straight photos process automatically; genuinely unreadable inputs (very low-res, blurry, glare) are <strong>caught and flagged for a human or re-capture</strong>, so a bad scan never silently produces a wrong takeoff. Serialisation is deliberately AI-free for reproducibility — all understanding happens in the Analyze step.</div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🤖</div><div><h4>Analyze Service (two-model)</h4><p>Gemini + Claude</p></div></div>
   <p><strong>2a · Gemini extractor</strong> — <code>run_takeoff()</code> reads the normalised pages into a <strong>constrained JSON schema</strong> (native structured output, <strong>validated on receipt + auto-retried</strong> on malformed/truncated output). Accuracy at the source: domain prompt + <strong>few-shot examples</strong>, high-DPI <strong>schedule-table crops</strong> for small text, and <strong>page grounding</strong> (every item cites <code>source_sheets</code>) to suppress hallucination. Emits case numbers, sizes, status (N/E/R/X), condensers — never a price.</p>
   <p><strong>2b · Claude verifier</strong> — <code>verify_takeoff()</code> runs an <strong>independent pass</strong>: re-checks the money fields <em>and</em> sweeps for items Gemini missed (protects recall), assigns per-item confidence, and flags inconsistencies. It never silently overwrites Gemini — a disagreement becomes a question.</p></div>
