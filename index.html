@@ -655,12 +655,12 @@
   <div class="arch">
   <div class="arch-layer layer-user">
     <div class="arch-title">User Layer &mdash; roles</div>
-    <div class="arch-row"><div class="arch-box ">👤 Estimator</div> <div class="arch-box ">🔎 Reviewer</div> <div class="arch-box ">🧑‍💼 Manager</div> <div class="arch-box ">⚙️ Admin</div></div>
+    <div class="arch-row"><div class="arch-box ">👤 Estimator<small>creates &amp; submits bids</small></div> <div class="arch-box ">🔎 Reviewer<small>checks takeoff &amp; estimate</small></div> <div class="arch-box ">🧑‍💼 Manager<small>approves / signs off</small></div> <div class="arch-box ">⚙️ Admin<small>users, roles &amp; rate cards</small></div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-present">
     <div class="arch-title">Presentation &mdash; Angular SPA</div>
-    <div class="arch-row"><div class="arch-box ">📈 Dashboard</div> <div class="arch-box ">🧾 Bid Stepper</div> <div class="arch-box ">✅ Review/Approval</div> <div class="arch-box ">👥 Clients</div> <div class="arch-box ">💲 Pricing Admin</div></div>
+    <div class="arch-row"><div class="arch-box ">📈 Dashboard<small>KPIs &amp; bid overview</small></div> <div class="arch-box ">🧾 Bid Stepper<small>upload → review → deliver</small></div> <div class="arch-box ">✅ Review/Approval<small>check &amp; sign-off screens</small></div> <div class="arch-box ">👥 Clients<small>customer records &amp; history</small></div> <div class="arch-box ">💲 Pricing Admin<small>manage rate cards &amp; sheets</small></div></div>
   </div>
   <div class="arch-arrow">&#8597; &nbsp;<span style="font-size:12px">HTTPS · Entra ID SSO (OIDC) + MFA</span></div>
   <div class="arch-layer layer-api">
@@ -671,13 +671,13 @@
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-logic">
     <div class="arch-title">Domain Services (Azure Container Apps)</div>
-    <div class="arch-row"><div class="arch-box ">📥 Intake<small>convert · render · OCR</small></div> <div class="arch-box ">🤖 Analyze<small>two-model</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic</small></div> <div class="arch-box ">💵 Estimate<small>rate card + rate sheets</small></div></div>
-    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing</div> <div class="arch-box ">✅ Review/Approval</div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients</div></div>
+    <div class="arch-row"><div class="arch-box ">📥 Intake<small>convert · render · text/vision</small></div> <div class="arch-box ">🤖 Analyze<small>two-model AI takeoff</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic merge</small></div> <div class="arch-box ">💵 Estimate<small>rate card + rate sheets</small></div></div>
+    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing<small>material · labor · equipment rates</small></div> <div class="arch-box ">✅ Review/Approval<small>sign-off state machine</small></div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients<small>records, history &amp; reuse</small></div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-worker">
     <div class="arch-title">Async Processing</div>
-    <div class="arch-row"><div class="arch-box ">🚌 Service Bus<small>async jobs</small></div> <div class="arch-box ">📈 KEDA autoscale + Celery workers</div></div>
+    <div class="arch-row"><div class="arch-box ">🚌 Service Bus<small>async job queue</small></div> <div class="arch-box ">📈 KEDA autoscale + Celery workers<small>scale workers to queue depth</small></div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-split">
@@ -687,7 +687,7 @@
     </div>
     <div class="arch-layer layer-data">
       <div class="arch-title">Data (Azure)</div>
-      <div class="arch-row"><div class="arch-box ">🐘 PostgreSQL<small>HA + PITR</small></div> <div class="arch-box ">📦 Blob Storage<small>drawings/quotes</small></div> <div class="arch-box ">🔥 Cache for Redis</div></div>
+      <div class="arch-row"><div class="arch-box ">🐘 PostgreSQL<small>HA + PITR</small></div> <div class="arch-box ">📦 Blob Storage<small>drawings/quotes</small></div> <div class="arch-box ">🔥 Cache for Redis<small>fast results cache</small></div></div>
     </div>
   </div>
   <div class="arch-arrow">&#8595;</div>
