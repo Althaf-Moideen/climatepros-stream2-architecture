@@ -538,6 +538,34 @@
             .main { margin-left: 0; }
         }
         .hero p { color: #fff; }
+
+        /* Step 1 data-flow diagram */
+        .df { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; overflow-x: auto; }
+        .df-title { text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 18px; }
+        .df-col { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 760px; }
+        .df-node { background: #fff; border: 1.5px solid var(--stage-upload); border-radius: 9px; padding: 10px 18px; font-size: 13px; font-weight: 600; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .df-node small { display: block; font-weight: 400; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+        .df-arrow { color: #94a3b8; font-size: 16px; line-height: 1; margin: 7px 0; font-weight: 600; }
+        .df-arrow small { color: var(--text-muted); font-size: 11px; font-weight: 400; }
+        .df-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .df-lane { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 11px; text-align: center; min-width: 120px; }
+        .df-lane b { display: block; color: var(--stage-upload); font-size: 12px; margin-bottom: 2px; }
+        .df-lane small { color: var(--text-muted); }
+        .df-merge { background: var(--stage-upload); color: #fff; border-radius: 9px; padding: 10px 20px; font-size: 13px; font-weight: 700; text-align: center; }
+        .df-split { display: flex; gap: 16px; align-items: stretch; justify-content: center; width: 100%; }
+        .df-panel { flex: 1; background: #fbfaff; border: 1px solid var(--border); border-radius: 10px; padding: 14px; min-width: 240px; display: flex; flex-direction: column; align-items: center; }
+        .df-panel .ph { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); text-align: center; margin-bottom: 10px; }
+        .df-decision { border: 1.5px dashed var(--stage-analyze); border-radius: 9px; padding: 8px 14px; font-size: 12px; font-weight: 600; text-align: center; background: #fff; margin-bottom: 8px; }
+        .df-two { display: flex; gap: 10px; justify-content: center; width: 100%; }
+        .df-branch { flex: 1; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 11px; text-align: center; }
+        .df-branch b { color: var(--stage-analyze); }
+        .df-branch code { font-size: 10px; }
+        .df-blob { background: var(--primary-light); border: 1.5px solid var(--primary); color: var(--primary-dark); border-radius: 9px; padding: 8px 14px; font-size: 12px; font-weight: 600; text-align: center; }
+        .df-gate-out { display: flex; gap: 14px; justify-content: center; width: 100%; }
+        .df-ok { flex: 1; background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 9px 12px; font-size: 12px; text-align: center; }
+        .df-flag { flex: 1; background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning); border-radius: 8px; padding: 9px 12px; font-size: 12px; text-align: center; }
+        .df-ok code, .df-flag code { font-size: 10px; background: rgba(255,255,255,0.5); }
+        .df-store { background: #fceaf0; border: 1.5px solid #db2777; color: #9d174d; border-radius: 9px; padding: 10px 18px; font-size: 12px; font-family: 'Consolas', monospace; text-align: center; font-weight: 600; }
     </style></head>
 <body>
 <nav class="sidebar">
@@ -722,6 +750,56 @@
   </ol>
   <p>Writes originals + page images to Blob and one indexed row per page to PostgreSQL, tagging <code>text_source</code> (native/ocr) and <code>norm_quality</code> for full downstream traceability.</p></div>
   <div class="callout"><strong>All-document-type robustness:</strong> the OCR fallback + format converters make normalisation format-agnostic — clean scans and straight photos process automatically; genuinely unreadable inputs (very low-res, blurry, glare) are <strong>caught and flagged for a human or re-capture</strong>, so a bad scan never silently produces a wrong takeoff. Serialisation is deliberately AI-free for reproducibility — all understanding happens in the Analyze step.</div>
+
+  <div class="df">
+    <div class="df-title">Step 1 — Intake &amp; Normalisation · Data Flow &nbsp;(deterministic · no AI)</div>
+    <div class="df-col">
+      <div class="df-node">📥 Upload<small>mixed-format bid package</small></div>
+      <div class="df-arrow">&#8595;</div>
+      <div class="df-node">① Detect format<small>by content / magic bytes — not the file extension</small></div>
+      <div class="df-arrow">&#8595; &nbsp;<small>route by true type</small></div>
+      <div class="df-row">
+        <div class="df-lane"><b>PDF</b><small>born-digital<br>pass through</small></div>
+        <div class="df-lane"><b>DOC / DOCX</b><small>LibreOffice<br>headless → PDF</small></div>
+        <div class="df-lane"><b>DWG / DXF</b><small>CAD exporter<br>→ PDF</small></div>
+        <div class="df-lane"><b>JPG / PNG / TIFF</b><small>wrap →<br>1-page PDF</small></div>
+        <div class="df-lane"><b>Scanned PDF</b><small>image-only<br>→ OCR path</small></div>
+      </div>
+      <div class="df-arrow">&#8595;</div>
+      <div class="df-merge">② Canonical PDF — one path downstream</div>
+      <div class="df-arrow">&#8595; &nbsp;<small>for each page</small></div>
+      <div class="df-split">
+        <div class="df-panel">
+          <div class="ph">③ Render image</div>
+          <div class="df-node" style="border-color:var(--primary)">200 DPI<small>auto-bumped to 300 DPI for dense / E-size schedule sheets</small></div>
+          <div class="df-arrow">&#8595;</div>
+          <div class="df-blob">📦 Blob Storage — page image</div>
+        </div>
+        <div class="df-panel">
+          <div class="ph">④ Get text layer</div>
+          <div class="df-decision">native text present?</div>
+          <div class="df-two">
+            <div class="df-branch"><b>YES</b><br>native text<br><small>exact · free</small><br><code>text_source=native</code></div>
+            <div class="df-branch"><b>NO</b><br>pre-clean<br><small>deskew · dewarp · denoise</small><br>→ Azure AI Doc Intelligence (OCR)<br><code>text_source=ocr</code></div>
+          </div>
+        </div>
+      </div>
+      <div class="df-arrow">&#8595;</div>
+      <div class="df-node" style="border-color:var(--stage-analyze)">⑤ Quality gate — score each page</div>
+      <div class="df-arrow">&#8595;</div>
+      <div class="df-gate-out">
+        <div class="df-ok">✅ clean / readable<br><code>norm_quality = clean | ocr_used</code></div>
+        <div class="df-flag">⚠️ blank / blurry / garbled<br><code>norm_quality = low_quality | failed</code><br>flag <code>needs_review</code> · or bounce at upload with capture guidance</div>
+      </div>
+      <div class="df-arrow">&#8595;</div>
+      <div class="df-store">WRITE bid_pages &rarr; PostgreSQL<br>{ page, image_key, text, dpi, text_source, norm_quality }</div>
+      <div class="df-arrow">&#8595;</div>
+      <div class="df-gate-out">
+        <div class="df-ok">clean pages &rarr; <strong>Step 2 · Analyze</strong> (two-model takeoff)</div>
+        <div class="df-flag">flagged pages &rarr; human review / re-capture</div>
+      </div>
+    </div>
+  </div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🤖</div><div><h4>Analyze Service (two-model)</h4><p>Gemini + Claude</p></div></div><p><code>run_takeoff()</code> → Gemini structured extraction; <code>verify_takeoff()</code> → Claude re-checks the money fields. Produces case numbers, sizes, status (N/E/R/X), condensers, RFIs. Never emits a price.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🔀</div><div><h4>Reconciler</h4><p>deterministic merge</p></div></div><p><code>reconcile_takeoff()</code> — fill blanks on confidence ≥ 0.6, flag disagreements as RFIs (never silent overwrite), boost confidence on agreement.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#fdf1e7;color:#f97316">💵</div><div><h4>Estimate &amp; Pricing</h4><p>rate card + rate sheets</p></div></div><p>Pure engine: rate card for material/labor + referenced equipment rate sheets; honest total + draft-with-assumptions total; re-runnable with no model call. Rate cards &amp; sheets versioned.</p></div>
