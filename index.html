@@ -716,52 +716,36 @@
 
   <h3>Step 1 in detail — Intake &amp; Normalisation data flow</h3>
   <div class="df">
-    <div class="df-title">Step 1 — Intake &amp; Normalisation · Data Flow &nbsp;(deterministic · no AI)</div>
+    <div class="df-title">Step 1 — How the drawings get prepared &nbsp;(simple flow · no AI)</div>
     <div class="df-col">
-      <div class="df-node">📥 Upload<small>mixed-format bid package</small></div>
+      <div class="df-node">① 📥 Upload<small>any file — PDF · Word · CAD · scan · photo</small></div>
       <div class="df-arrow">&#8595;</div>
-      <div class="df-node">① Detect format<small>by content / magic bytes — not the file extension</small></div>
-      <div class="df-arrow">&#8595; &nbsp;<small>route by true type</small></div>
-      <div class="df-row">
-        <div class="df-lane"><b>PDF</b><small>born-digital<br>pass through</small></div>
-        <div class="df-lane"><b>DOC / DOCX</b><small>LibreOffice<br>headless → PDF</small></div>
-        <div class="df-lane"><b>DWG / DXF</b><small>CAD exporter<br>→ PDF</small></div>
-        <div class="df-lane"><b>JPG / PNG / TIFF</b><small>wrap →<br>1-page PDF</small></div>
-        <div class="df-lane"><b>Scanned PDF</b><small>image-only<br>→ OCR path</small></div>
-      </div>
-      <div class="df-arrow">&#8595;</div>
-      <div class="df-merge">② Canonical PDF — one path downstream</div>
-      <div class="df-arrow">&#8595; &nbsp;<small>for each page</small></div>
+      <div class="df-node">② 🔄 Convert to one standard PDF<small>Word, CAD &amp; images are converted · PDFs kept as-is</small></div>
+      <div class="df-arrow">&#8595; &nbsp;<small>then, for each page…</small></div>
       <div class="df-split">
         <div class="df-panel">
-          <div class="ph">③ Render image</div>
-          <div class="df-node" style="border-color:var(--primary)">200 DPI<small>auto-bumped to 300 DPI for dense / E-size schedule sheets</small></div>
+          <div class="ph">③ Make a clean picture</div>
+          <div class="df-node" style="border-color:var(--primary)">Render the page as an image<small>200 DPI · 300 for tiny text</small></div>
           <div class="df-arrow">&#8595;</div>
-          <div class="df-blob">📦 Blob Storage — page image</div>
+          <div class="df-blob">📦 Saved to storage</div>
         </div>
         <div class="df-panel">
-          <div class="ph">④ Get text layer</div>
-          <div class="df-decision">native text present?</div>
+          <div class="ph">④ Get the text</div>
           <div class="df-two">
-            <div class="df-branch"><b>YES</b><br>native text<br><small>exact · free</small><br><code>text_source=native</code></div>
-            <div class="df-branch"><b>NO</b><br>pre-clean<br><small>deskew · dewarp · denoise</small><br>→ Azure AI Doc Intelligence (OCR)<br><code>text_source=ocr</code></div>
+            <div class="df-branch">Text already<br>in the file?<br><b>YES → use it</b><br><small>exact · free</small></div>
+            <div class="df-branch">No text<br>(scan / photo)?<br><b>OCR reads<br>the picture</b></div>
           </div>
         </div>
       </div>
       <div class="df-arrow">&#8595;</div>
-      <div class="df-node" style="border-color:var(--stage-analyze)">⑤ Quality gate — score each page</div>
+      <div class="df-node" style="border-color:var(--stage-analyze)">⑤ ✅ Quality check — is the page clear?</div>
       <div class="df-arrow">&#8595;</div>
       <div class="df-gate-out">
-        <div class="df-ok">✅ clean / readable<br><code>norm_quality = clean | ocr_used</code></div>
-        <div class="df-flag">⚠️ blank / blurry / garbled<br><code>norm_quality = low_quality | failed</code><br>flag <code>needs_review</code> · or bounce at upload with capture guidance</div>
+        <div class="df-ok">✅ Clear page<br>continue</div>
+        <div class="df-flag">⚠️ Blurry / blank<br>flag for a human or re-upload</div>
       </div>
       <div class="df-arrow">&#8595;</div>
-      <div class="df-store">WRITE bid_pages &rarr; PostgreSQL<br>{ page, image_key, text, dpi, text_source, norm_quality }</div>
-      <div class="df-arrow">&#8595;</div>
-      <div class="df-gate-out">
-        <div class="df-ok">clean pages &rarr; <strong>Step 2 · Analyze</strong> (two-model takeoff)</div>
-        <div class="df-flag">flagged pages &rarr; human review / re-capture</div>
-      </div>
+      <div class="df-store">💾 Clean pages saved — ready for the AI &nbsp;(Step 2)</div>
     </div>
   </div>
 </section>
