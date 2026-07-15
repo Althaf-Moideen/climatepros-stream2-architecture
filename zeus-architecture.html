@@ -163,8 +163,9 @@
         /* Tech Stack Grid */
         .tech-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 16px;
+            align-items: stretch;
         }
         .tech-card {
             background: var(--surface);
@@ -173,13 +174,15 @@
             padding: 20px;
             text-align: center;
             transition: transform 0.15s;
+            display: flex;
+            flex-direction: column;
         }
         .tech-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .tech-card .tech-icon { font-size: 32px; margin-bottom: 10px; }
         .tech-card .tech-name { font-weight: 700; font-size: 15px; }
         .tech-card .tech-ver { font-size: 12px; color: var(--text-muted); }
         .tech-card .tech-role { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
-        .tech-card .tech-why { font-size: 11px; color: var(--primary-dark); margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--border); line-height: 1.45; }
+        .tech-card .tech-why { font-size: 11px; color: var(--primary-dark); margin-top: auto; padding-top: 9px; border-top: 1px solid var(--border); line-height: 1.5; padding-top: 9px; margin-top: 10px; }
 
         /* Pipeline Diagram */
         .pipeline {
@@ -755,22 +758,22 @@
 <section id="stack">
   <h2>6. Technology Stack</h2>
   <div class="tech-grid">
-    <div class="tech-card"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div><div class="tech-ver">0.115</div><div class="tech-role">Async REST + WebSocket</div><div class="tech-why">We use it because it can handle many users uploading files at the same time without slowing down, and it supports live status updates to the browser.</div></div>
-    <div class="tech-card"><div class="tech-icon">🌱</div><div class="tech-name">Celery</div><div class="tech-ver">5.6</div><div class="tech-role">Worker jobs</div><div class="tech-why">We use it to run heavy AI tasks in the background so the user doesn't have to wait on screen — the work happens behind the scenes.</div></div>
-    <div class="tech-card"><div class="tech-icon">🐘</div><div class="tech-name">PostgreSQL</div><div class="tech-ver">Azure DB · 16</div><div class="tech-role">SQLAlchemy 2.0 async</div><div class="tech-why">We use it to store all bid data reliably, with a full history of every change so nothing is ever lost and everything is auditable.</div></div>
-    <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Blob Storage</div><div class="tech-ver">Azure</div><div class="tech-role">Drawings · images · quotes</div><div class="tech-why">We use it to store large files like drawings and PDFs cheaply, without overloading the main database.</div></div>
-    <div class="tech-card"><div class="tech-icon">🚌</div><div class="tech-name">Service Bus</div><div class="tech-ver">Azure</div><div class="tech-role">Async dispatch (KEDA)</div><div class="tech-why">We use it to queue up analysis jobs so they don't pile up or get lost if something fails — jobs are retried automatically.</div></div>
-    <div class="tech-card"><div class="tech-icon">🔥</div><div class="tech-name">Cache for Redis</div><div class="tech-ver">Azure</div><div class="tech-role">Results / cache</div><div class="tech-why">We use it to remember recent results so the same page isn't analysed twice — saves time and reduces AI API costs.</div></div>
-    <div class="tech-card"><div class="tech-icon">🏛️</div><div class="tech-name">Zeus</div><div class="tech-ver">Claude Sonnet 4.6</div><div class="tech-role">Primary extractor · client-operated · FieldJetX-linked (prior-bid grounding)</div><div class="tech-why">We use it as the lead AI because it's ClimatePros' own — it knows the company's real equipment names, statuses, and rates from past bids, so it's far more accurate than a generic model.</div></div>
-    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">3.5 Flash</div><div class="tech-role">Verifier (DPA) · golden-set validated</div><div class="tech-why">We use it as a second pair of eyes — a completely separate AI that re-checks the work to catch anything Zeus may have missed.</div></div>
-    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div><div class="tech-why">We use it as a third independent checker. It has a zero data-retention agreement, meaning it never stores any of the drawing content — important for client data privacy.</div></div>
-    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div><div class="tech-why">We use it to build the web app — it's structured, fast, and has built-in support for the Microsoft login (Entra ID) that ClimatePros already uses.</div></div>
-    <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div><div class="tech-why">We use it to style the interface quickly and consistently — no need to write a custom CSS file from scratch.</div></div>
-    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">Page render + native text</div><div class="tech-why">We use it to read and render PDF pages. For digital PDFs, it pulls the text directly — no OCR needed, which is faster and more accurate.</div></div>
-    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Azure AI Document Intelligence</div><div class="tech-ver">OCR · optional</div><div class="tech-role">Word-level bounding boxes for source-highlighting</div><div class="tech-why">We use it to know exactly where on the page each word sits, so the UI can highlight the exact source of every extracted item.</div></div>
-    <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div><div class="tech-why">We use it to convert Word documents to PDF on the server — no Microsoft Office installation required.</div></div>
-    <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div><div class="tech-why">We use it to convert CAD files to PDF so they go through the exact same process as every other file type.</div></div>
-    <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div><div class="tech-why">We use it to generate the Excel file sent to FieldJetX — no Excel software needed on the server, it works anywhere.</div></div>
+    <div class="tech-card"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div><div class="tech-ver">0.115</div><div class="tech-role">Async REST + WebSocket</div><div class="tech-why">Handles many users uploading at once without slowing down, and supports live status updates to the browser.</div></div>
+    <div class="tech-card"><div class="tech-icon">🌱</div><div class="tech-name">Celery</div><div class="tech-ver">5.6</div><div class="tech-role">Worker jobs</div><div class="tech-why">Runs heavy AI jobs in the background so users don't have to wait on screen.</div></div>
+    <div class="tech-card"><div class="tech-icon">🐘</div><div class="tech-name">PostgreSQL</div><div class="tech-ver">Azure DB · 16</div><div class="tech-role">SQLAlchemy 2.0 async</div><div class="tech-why">Stores all bid data reliably with a full change history — nothing is lost and everything is auditable.</div></div>
+    <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Blob Storage</div><div class="tech-ver">Azure</div><div class="tech-role">Drawings · images · quotes</div><div class="tech-why">Stores large files like drawings and PDFs cheaply, keeping the main database lean.</div></div>
+    <div class="tech-card"><div class="tech-icon">🚌</div><div class="tech-name">Service Bus</div><div class="tech-ver">Azure</div><div class="tech-role">Async dispatch (KEDA)</div><div class="tech-why">Queues analysis jobs so none are lost if something fails — retried automatically.</div></div>
+    <div class="tech-card"><div class="tech-icon">🔥</div><div class="tech-name">Cache for Redis</div><div class="tech-ver">Azure</div><div class="tech-role">Results / cache</div><div class="tech-why">Remembers recent results so the same page is never analysed twice — saves time and cost.</div></div>
+    <div class="tech-card"><div class="tech-icon">🏛️</div><div class="tech-name">Zeus</div><div class="tech-ver">Claude Sonnet 4.6</div><div class="tech-role">Primary extractor · client-operated · FieldJetX-linked</div><div class="tech-why">ClimatePros' own AI — knows real equipment names, statuses &amp; rates from past bids, so it's far more accurate than a generic model.</div></div>
+    <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">3.5 Flash</div><div class="tech-role">Verifier (DPA) · golden-set validated</div><div class="tech-why">A separate AI that re-checks Zeus's work and catches anything it may have missed.</div></div>
+    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Opus 4.8</div><div class="tech-role">Verifier (zero-retention)</div><div class="tech-why">Third independent checker — zero data-retention means drawing content is never stored by Anthropic.</div></div>
+    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2 · MSAL</div><div class="tech-role">Standalone, signals, Entra sign-in</div><div class="tech-why">Builds the web app with built-in Microsoft (Entra ID) login support out of the box.</div></div>
+    <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div><div class="tech-why">Styles the UI quickly and consistently — no custom CSS file needed.</div></div>
+    <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">Page render + native text</div><div class="tech-why">Reads and renders PDFs; pulls text directly from digital files — no OCR needed.</div></div>
+    <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Azure AI Document Intelligence</div><div class="tech-ver">OCR · optional</div><div class="tech-role">Word-level bounding boxes for source-highlighting</div><div class="tech-why">Pinpoints where each word sits on the page so the UI can highlight exactly where each item came from.</div></div>
+    <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div><div class="tech-why">Converts Word documents to PDF on the server — no Office installation needed.</div></div>
+    <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div><div class="tech-why">Converts CAD files to PDF so all file types follow the exact same pipeline.</div></div>
+    <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div><div class="tech-why">Generates the FieldJetX Excel file — no Excel software needed on the server.</div></div>
   </div>
   <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
 </section>
