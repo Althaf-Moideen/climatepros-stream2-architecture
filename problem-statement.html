@@ -531,12 +531,11 @@
       <div class="pain-card fade-up">
         <div class="pain-num">Failure Mode 01</div>
         <div class="pain-icon">📐</div>
-        <h3>Spec-to-Material Mismatches</h3>
+        <h3>Wrong Materials Get Priced</h3>
         <p>
-          Pipe type, pressure rating, insulation thickness, condensate drain
-          material, and furnished valves repeatedly diverge between specs and
-          what's actually entered in the bid workbook. One undetected spec
-          requirement cascades into multiple wrong workbook inputs.
+          The spec says one pipe type or insulation thickness — the estimator
+          enters another. Nobody catches it. One wrong spec line silently
+          corrupts multiple rows in the bid workbook.
         </p>
         <span class="pain-tag">High Frequency · High Cost</span>
       </div>
@@ -544,12 +543,11 @@
       <div class="pain-card fade-up">
         <div class="pain-num">Failure Mode 02</div>
         <div class="pain-icon">📅</div>
-        <h3>Stale &amp; Volatile Pricing</h3>
+        <h3>Prices Are Out of Date</h3>
         <p>
-          Bids often rely on pricing grids that haven't been updated to reflect
-          recent commodity changes or vendor quote revisions. The system has
-          no date-awareness and cannot warn when material costs have drifted
-          since the last price pull — a silent, expensive mistake.
+          Estimators look up material costs from vendor price grids that may
+          be weeks or months old. There's no warning when prices have changed —
+          so bids go out with stale numbers and margin quietly disappears.
         </p>
         <span class="pain-tag">Direct Margin Impact</span>
       </div>
@@ -557,12 +555,12 @@
       <div class="pain-card fade-up">
         <div class="pain-num">Failure Mode 03</div>
         <div class="pain-icon">🗂️</div>
-        <h3>Missing Secondary Material Categories</h3>
+        <h3>Scope Items Get Missed</h3>
         <p>
-          Case drains, PVC, Portapacks, oil/filter/drier changes, condensers,
-          demo labor, jacketing, and customer-specific hardware are easy
-          omissions because they sit outside the main pipe-and-labor takeoff
-          flow. No checklist catches them systematically.
+          Certain materials — case drains, demo labor, jacketing,
+          customer-specific hardware — sit outside the main takeoff flow
+          and get skipped. There's no checklist to catch them, so they
+          simply don't make it into the bid.
         </p>
         <span class="pain-tag">Scope Exposure</span>
       </div>
@@ -570,12 +568,12 @@
       <div class="pain-card fade-up">
         <div class="pain-num">Failure Mode 04</div>
         <div class="pain-icon">🔢</div>
-        <h3>Quantity Reconciliation Gaps</h3>
+        <h3>Counts Don't Match the Drawings</h3>
         <p>
-          Bid workbook inputs are rarely cross-checked against equipment
-          schedules or RS drawings. Case counts, evaporator counts, valve
-          counts, and piping quantities drift between documents with no
-          automated flag — leaving reviewers to find discrepancies by eye.
+          The number of cases, evaporators, or valves entered in the Excel
+          doesn't always match what's shown in the equipment schedules or
+          drawings. No one checks automatically — discrepancies are found
+          by eye, if at all.
         </p>
         <span class="pain-tag">High Detection Difficulty</span>
       </div>
@@ -583,13 +581,12 @@
       <div class="pain-card fade-up">
         <div class="pain-num">Failure Mode 05</div>
         <div class="pain-icon">⚙️</div>
-        <h3>Indirect &amp; Job-Condition Assumptions</h3>
+        <h3>Hidden Assumptions Drive Hidden Risk</h3>
         <p>
-          HFG factors are used as a catch-all risk bucket. Fittings, clamps,
-          ½" hardware, and XHP-related costs are hidden in a percentage rather
-          than explicitly priced. After-hours work, phasing restrictions,
-          night-work rules, and temporary refrigeration requirements are assumed,
-          not verified.
+          Costs like fittings, clamps, and after-hours work are guessed
+          using a blanket percentage rather than priced explicitly. When
+          those assumptions are wrong, the exposure only shows up after
+          the job is won and work has started.
         </p>
         <span class="pain-tag">Hidden Risk</span>
       </div>
@@ -597,12 +594,12 @@
       <div class="pain-card fade-up">
         <div class="pain-num">Failure Mode 06</div>
         <div class="pain-icon">📝</div>
-        <h3>Workbook &amp; Version-Control Issues</h3>
+        <h3>No Record of What Changed or Why</h3>
         <p>
-          Multiple estimators work off different spreadsheet versions with no
-          audit trail. When a reviewer finds a problem, there's no systematic
-          record of what assumption changed, who changed it, and what the
-          financial impact was — making continuous improvement impossible.
+          Estimators work off different versions of the same spreadsheet
+          with no audit trail. When a reviewer finds an error, there's no
+          way to know who changed what, when, or what it cost — so the
+          same mistakes repeat on the next bid.
         </p>
         <span class="pain-tag">Operational Risk</span>
       </div>
