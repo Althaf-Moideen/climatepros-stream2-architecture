@@ -775,7 +775,7 @@
     <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div></div>
     <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div></div>
     <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div></div>
-    <div class="tech-card"><div class="tech-icon">🕸️</div><div class="tech-name">Neo4j</div><div class="tech-ver">Graph DB</div><div class="tech-role">Feedback knowledge graph · RFI + flag resolution → model learning</div></div>
+    <div class="tech-card" style="border:2px solid #10b981;background:#f0fdf4;position:relative"><div style="position:absolute;top:-10px;right:8px;background:#10b981;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:0.5px">KEY DIFFERENTIATOR</div><div class="tech-icon">🕸️</div><div class="tech-name">Neo4j</div><div class="tech-ver">Graph DB</div><div class="tech-role">Feedback knowledge graph · RFI + flag resolution → model learning · <a href="#feedback-graph" style="color:#10b981;font-weight:600">→ §18</a></div></div>
   </div>
   <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
 </section>
@@ -1313,6 +1313,10 @@ redis.setex(cache_key, ttl=86400 * 7, value=result.json())   <span class="cmt">#
 
 <section id="feedback-graph">
   <h2>18. Feedback Learning Loop — Neo4j Knowledge Graph</h2>
+  <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #10b981;border-radius:10px;padding:20px 24px;margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:#059669;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">⭐ Key Differentiator</div>
+    <p style="margin:0;font-size:15px;line-height:1.6;color:#1a1a1a"><strong>Neo4j is what makes this system learn.</strong> Every estimator correction feeds back into a knowledge graph, grounding future extractions with real ClimatePros bid history and continuously improving accuracy over time. This is the mechanism that separates the platform from a one-shot AI tool — the more bids run through the system, the smarter and more accurate extraction becomes.</p>
+  </div>
   <p>Every time an estimator resolves an RFI or corrects a flag, that resolution is a ground-truth signal. Rather than letting it sit in a flat <code>item_edits</code> table, we store it in a <strong>Neo4j graph database</strong> — where bid items, equipment, corrections, and their relationships across bids and customers are connected as nodes and edges. This graph serves two purposes: it <strong>grounds future extractions</strong> (Zeus and verifiers query it for similar historical items before extraction) and it <strong>promotes high-confidence corrections into the golden set</strong> to improve prompts over time.</p>
 
   <div class="callout"><strong>Why a graph, not a relational table?</strong> Corrections have rich relationships — the same equipment type appears across dozens of bids, a corrected size on one bid informs the confidence of a similar item on the next, and RFI resolution patterns cluster by customer and drawing type. A graph lets us traverse these relationships in a single query; a relational JOIN chain across <code>item_edits → bid_items → bids → customers</code> would be slow and miss the cross-bid similarity signal entirely.</div>
