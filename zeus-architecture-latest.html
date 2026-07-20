@@ -657,7 +657,7 @@
 
 <section id="architecture">
   <h2>4. Architecture Diagram</h2>
-  <p>A modular monolith deployed as an <strong>API service</strong> and a <strong>worker service</strong> on Azure Container Apps, coordinated through Azure Service Bus. Requests enter through Front Door + WAF; heavy analyze jobs autoscale on queue depth (KEDA).</p>
+  <p>A monolith codebase deployed as two separate services — a dedicated <strong>API service</strong> and a <strong>worker service</strong> — on Azure Container Apps, coordinated through Azure Service Bus. The worker is never co-located with the API server. Requests enter through Front Door + WAF; heavy analyze jobs autoscale on queue depth (KEDA).</p>
   <div class="arch">
   <div class="arch-layer layer-user">
     <div class="arch-title">User Layer &mdash; roles</div>
