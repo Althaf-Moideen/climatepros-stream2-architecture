@@ -988,7 +988,11 @@
   <div class="pipeline">
     <div class="stage-node"><div class="stage-circle" style="background:#6366f1">🧹</div><div class="stage-label">Lint</div></div>
     <div class="stage-arrow">➜</div>
-    <div class="stage-node"><div class="stage-circle" style="background:#8b5cf6">🧪</div><div class="stage-label">Unit + Evals</div></div>
+    <div class="stage-node"><div class="stage-circle" style="background:#8b5cf6">🧪</div><div class="stage-label">Unit Tests</div></div>
+    <div class="stage-arrow">➜</div>
+    <div class="stage-node"><div class="stage-circle" style="background:#f59e0b">🧠</div><div class="stage-label">Prompt Evals</div></div>
+    <div class="stage-arrow">➜</div>
+    <div class="stage-node"><div class="stage-circle" style="background:#ef4444">🎯</div><div class="stage-label">Extraction Evals (gate)</div></div>
     <div class="stage-arrow">➜</div>
     <div class="stage-node"><div class="stage-circle" style="background:#f97316">🐳</div><div class="stage-label">Build → ACR</div></div>
     <div class="stage-arrow">➜</div>
@@ -996,7 +1000,7 @@
     <div class="stage-arrow">➜</div>
     <div class="stage-node"><div class="stage-circle" style="background:#10b981">✅</div><div class="stage-label">Prod (gated)</div></div>
   </div>
-  <div class="callout"><strong>Pipeline (Azure DevOps / GitHub Actions):</strong> lint → unit tests → <strong>extraction evals (release gate)</strong> → image to ACR → staging auto → prod behind manual approval. <strong>Migrations:</strong> Alembic pre-deploy. <strong>Safe rollout:</strong> blue/green via Container Apps revisions; prompt changes behind feature flags. <strong>Rollback:</strong> shift traffic to prior revision + Alembic downgrade.</div>
+  <div class="callout"><strong>Pipeline (Azure DevOps / GitHub Actions):</strong> lint → unit tests → <strong>prompt evals</strong> (verify every prompt template behaves as designed: role-framing respected, price output suppressed, structured-output schema conformance, few-shot examples applied correctly, injection-defence instructions honoured — runs on every prompt_version change) → <strong>extraction evals (release gate)</strong> (recall ≥ 95%, size-match ≥ 90%, status accuracy ≥ 95% on the golden set — blocks promotion on regression) → image to ACR → staging auto → prod behind manual approval. <strong>Migrations:</strong> Alembic pre-deploy. <strong>Safe rollout:</strong> blue/green via Container Apps revisions; prompt changes behind feature flags. <strong>Rollback:</strong> shift traffic to prior revision + Alembic downgrade.</div>
 </section>
 
 <section id="observability">
