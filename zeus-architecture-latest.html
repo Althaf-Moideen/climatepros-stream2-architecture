@@ -592,6 +592,7 @@
   <a href="#observability" class="nav-link">Observability &amp; SLOs</a>
   <a href="#cost" class="nav-link">Cost Projection</a>
   <a href="#events" class="nav-link">Event-Driven &amp; Parallel</a>
+  <a href="#zeus-constraints" class="nav-link">Zeus Scaling Constraints</a>
 </nav>
 <div class="main">
 <div class="hero">
@@ -1205,6 +1206,69 @@ redis.setex(cache_key, ttl=86400 * 7, value=result.json())   <span class="cmt">#
     <tr><td>Job failure (persistent)</td><td>Service Bus DLQ after max_delivery_count=3</td><td>—</td><td>Ops alert + manual review; bid marked <code>failed</code></td></tr>
     <tr><td>Re-upload unchanged file</td><td>Redis cache hit on <code>hash(file + prompt_version)</code></td><td>—</td><td>Zero model cost + instant result on duplicate submission</td></tr>
   </tbody></table></div>
+</section>
+
+<section id="zeus-constraints">
+  <h2>17. Zeus Scaling Constraints &amp; Known Bottlenecks</h2>
+  <div style="background:#fef9ec;border:1.5px solid #f59e0b;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:13px;color:#92400e">
+    <strong>⚠️ Internal review section</strong> — This section documents known constraints of the Zeus system as identified by Zeus itself. Review before including in client-facing deliverables.
+  </div>
+  <p>Zeus is ClimatePros' own AI, running on-premise on a Mac Studio (Tundra). It is the primary extractor in this architecture. The constraints below are Zeus's self-identified scaling limits — understanding them is essential for setting realistic expectations and planning the production-grade pipeline around Zeus rather than assuming it scales transparently.</p>
+
+  <h3>What our architecture already resolves</h3>
+  <p>Several of Zeus's bottlenecks are addressed by the infrastructure we've built around it — Zeus is called as an API inside our worker pipeline, so these concerns are handled on our side:</p>
+  <div class="table-wrapper"><table><thead><tr><th>Zeus bottleneck</th><th>How our architecture handles it</th><th>Where documented</th></tr></thead><tbody>
+    <tr><td>No job queue or job tracker</td><td>Azure Service Bus + Celery workers + KEDA autoscale — Zeus is one step inside a managed async pipeline</td><td>§4, §16</td></tr>
+    <tr><td>No retry logic or failure alerts</td><td>Celery exponential backoff (3×) + Service Bus DLQ + WebSocket error push + App Insights alerts</td><td>§14, §16</td></tr>
+    <tr><td>Structured output drift across runs</td><td>Constrained <code>bid_item</code> JSON schema enforced at the Zeus API boundary — auto-retried on parse/validation fail; Gemini + Claude verifiers catch field-level inconsistencies</td><td>§9, §10</td></tr>
+    <tr><td>No persistent extraction pipeline</td><td>Entire async pipeline (queue → worker → reconcile → price → approve → export) is built and managed by Techjays; Zeus is a single callable inside it</td><td>§5, §7, §16</td></tr>
+    <tr><td>No monitoring or failure alerting</td><td>Per-call telemetry logged to <code>ai_calls</code> + Azure App Insights; SLO dashboard tracks Zeus latency and error rate separately</td><td>§14</td></tr>
+  </tbody></table></div>
+
+  <h3>Constraints that remain open</h3>
+  <p>The following bottlenecks are genuine and not resolved by wrapping Zeus in our pipeline. They need explicit mitigation or acceptance at the architecture level:</p>
+
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fee2e2;color:#dc2626">🖥️</div><div><h4>1 · Hardware ceiling — CPU-bound, single machine</h4><p>highest risk at scale</p></div></div>
+  <p>Zeus runs on a single Mac Studio (Tundra) with no GPU acceleration. Inference is CPU-bound. Concurrent extraction requests queue on Zeus's side — our <code>Celery group()</code> can fan out 15 page tasks in parallel, but each one calls Zeus sequentially on the same hardware. One heavy PDF holds up everything behind it. There is no horizontal scaling path without additional Mac Studio hardware or a migration to a cloud-hosted model endpoint.</p>
+  <div style="background:#fef2f2;border-left:3px solid #dc2626;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;margin-top:10px">
+    <strong>Mitigation options:</strong> (a) add a second Mac Studio as a load-balanced extraction node; (b) migrate Zeus to a cloud endpoint (Anthropic API / AWS Bedrock) — removes the hardware ceiling entirely but changes the cost model; (c) implement a Zeus-side request queue with a concurrency cap so our workers back-pressure gracefully instead of timing out.
+  </div></div>
+
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fef3c7;color:#d97706">📄</div><div><h4>2 · Context window on large packages (100+ pages)</h4><p>cross-page relationship risk</p></div></div>
+  <p>Our architecture chunks by page — one <code>page_task</code> per page. For large bid packages (100+ pages with specs, addenda, and drawings), cross-page relationships can be missed: a scope exclusion on page 3 that modifies a line item on page 87 would not be caught by single-page extraction. Chunking is the only viable option given the hardware, but it is a known accuracy trade-off on complex packages.</p>
+  <div style="background:#fffbeb;border-left:3px solid #d97706;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;margin-top:10px">
+    <strong>Mitigation options:</strong> (a) document-level summary pass — a single low-cost model call on the full text index to flag cross-page dependencies before page-level extraction; (b) few-shot examples in the Zeus prompt that specifically target cross-page scope exclusions; (c) the Gemini + Claude verifiers provide a second sweep that can catch missed items (partial mitigation — they also work per-page). This is a known gap; estimators should be briefed that complex addenda packages carry higher RFI rates.
+  </div></div>
+
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fef3c7;color:#d97706">🖼️</div><div><h4>3 · CAD / drawing files — no native parsing</h4><p>quality drops on complex drawings</p></div></div>
+  <p>Zeus cannot read DWG/DXF natively. Our intake pipeline converts CAD to PDF first (ODA exporter), then renders each page as an image for Zeus vision. Extraction quality on complex equipment schedules in CAD format is lower than on born-digital PDFs — especially where CAD layers carry annotation data that doesn't survive the rasterisation step. Handwritten annotations and rotated pages also degrade quality.</p>
+  <div style="background:#fffbeb;border-left:3px solid #d97706;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;margin-top:10px">
+    <strong>Mitigation options:</strong> (a) Azure AI Document Intelligence as an optional pre-processing step for complex CAD-derived pages (already in the stack as optional OCR for source-highlighting — can be extended); (b) render DPI bump to 400 for CAD-origin pages flagged during conversion; (c) estimator review gate specifically for CAD-sourced items (higher RFI threshold).
+  </div></div>
+
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">⏱️</div><div><h4>4 · Throughput vs. latency at volume</h4><p>30–90 s per complex job; queuing risk at 20+ bids/day</p></div></div>
+  <p>A single complex extraction (multi-section bid, many line items) takes 30–90 seconds on Zeus. At low volume (≤10 bids/day) this is acceptable — the async pipeline absorbs the wait. At 20+ bids/day with overlapping submissions, the Zeus hardware becomes the bottleneck even with our parallel page-task fan-out, because all page tasks for all concurrent bids compete for the same CPU.</p>
+  <div style="background:#eef0fd;border-left:3px solid #6366f1;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;margin-top:10px">
+    <strong>Mitigation options:</strong> (a) priority queue — high-value bids processed first; (b) off-peak scheduling for non-urgent re-runs; (c) the hardware ceiling mitigation (§1 above) is the direct fix — a second node or cloud endpoint doubles effective throughput.
+  </div></div>
+
+  <div class="card"><div class="card-header"><div class="icon" style="background:#e7f6ee;color:#10b981">🔄</div><div><h4>5 · Model version drift</h4><p>on-prem stability advantage — but requires active maintenance</p></div></div>
+  <p>When Anthropic updates the underlying Claude Sonnet model, extraction behaviour can subtly shift without a version bump. On-prem (Todd controls when model versions change) is actually a <strong>stability advantage</strong> here — Zeus doesn't silently update. However it means the ClimatePros team must actively monitor Anthropic release notes and re-run the golden-set eval after any Zeus model update before promoting to production.</p>
+  <div style="background:#e7f6ee;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;margin-top:10px">
+    <strong>Already handled:</strong> our CI eval gate (§13) runs the golden set on every <code>prompt_version</code> change and blocks promotion if recall / accuracy thresholds are not met. The same gate should be triggered by the client after a Zeus model update — documented in the Zeus API contract as a required step.
+  </div></div>
+
+  <h3>What would need to be built for production-grade scale</h3>
+  <p>Zeus's own assessment of what the pipeline around it needs — mapped to our architecture:</p>
+  <div class="table-wrapper"><table><thead><tr><th>Zeus requirement</th><th>Status in our architecture</th></tr></thead><tbody>
+    <tr><td>Job queue (async — submit bid, get result when done)</td><td>✅ Built — Service Bus + Celery + KEDA (§16)</td></tr>
+    <tr><td>OCR pre-processing layer for scanned docs</td><td>⚠️ Partial — Azure AI Document Intelligence in stack as optional; full pipeline for low-res scans not yet specified</td></tr>
+    <tr><td>Output schema + validation</td><td>✅ Built — constrained <code>bid_item</code> schema, validated + auto-retried (§9, §10)</td></tr>
+    <tr><td>Monitoring / failure alerting</td><td>✅ Built — App Insights + <code>ai_calls</code> telemetry + DLQ alerts (§14, §16)</td></tr>
+    <tr><td>Second Mac Studio or dedicated inference node for parallelism</td><td>❌ Open — hardware decision sits with the client; cloud endpoint migration is the alternative</td></tr>
+  </tbody></table></div>
+
+  <div class="callout"><strong>Summary:</strong> Zeus is production-capable for the expected bid volume (≤200/month) within the constraints above. The hardware ceiling is the only item that requires a client decision before scaling beyond ~20 concurrent bids/day. All pipeline infrastructure (queue, retry, schema validation, monitoring) is built on the Techjays side. The cross-page context limitation and CAD quality drop are known accuracy trade-offs that should be communicated to estimators as part of onboarding.</div>
 </section>
 
 <div style="margin-top:60px;padding:24px;border-top:1px solid var(--border);text-align:center;color:var(--text-muted);font-size:13px">
