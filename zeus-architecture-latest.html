@@ -593,6 +593,7 @@
   <a href="#cost" class="nav-link">Cost Projection</a>
   <a href="#events" class="nav-link">Event-Driven &amp; Parallel</a>
   <a href="#zeus-constraints" class="nav-link">Zeus Scaling Constraints</a>
+  <a href="#scaling-roadmap" class="nav-link">Scaling Roadmap</a>
   <a href="#feedback-graph" class="nav-link">Feedback &amp; Knowledge Graph</a>
 </nav>
 <div class="main">
@@ -1271,6 +1272,66 @@ redis.setex(cache_key, ttl=86400 * 7, value=result.json())   <span class="cmt">#
   </tbody></table></div>
 
   <div class="callout"><strong>Summary:</strong> Zeus is production-capable for the expected bid volume (≤200/month) within the constraints above. The hardware ceiling is the only item that requires a client decision before scaling beyond ~20 concurrent bids/day. All pipeline infrastructure (queue, retry, schema validation, monitoring) is built on the Techjays side. The cross-page context limitation and CAD quality drop are known accuracy trade-offs that should be communicated to estimators as part of onboarding.</div>
+</section>
+
+<section id="scaling-roadmap">
+  <h2>19. Scaling Roadmap &amp; Recommendations</h2>
+  <div style="background:#fef9ec;border:1.5px solid #f59e0b;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:13px;color:#92400e">
+    <strong>⚠️ Internal review section</strong> — Recommended actions for Zeus bottlenecks identified in §17. Review before sharing with the client.
+  </div>
+  <p>§17 identifies the open bottlenecks. This section turns them into prioritised, actionable recommendations — clearly separating what <strong>Techjays owns</strong> from what requires a <strong>client decision</strong>, so there is no ambiguity when planning the production rollout.</p>
+
+  <h3>Priority recommendations</h3>
+  <div class="table-wrapper"><table><thead><tr><th>Bottleneck</th><th>Recommendation</th><th>Priority</th><th>Effort</th><th>Owner</th></tr></thead><tbody>
+    <tr>
+      <td><strong>CPU-bound single machine</strong><br><small style="color:var(--text-muted)">Zeus on Mac Studio · no horizontal scale</small></td>
+      <td>Migrate Zeus to a cloud-hosted model endpoint (Anthropic API enterprise or AWS Bedrock). Removes the hardware ceiling entirely — our Celery workers simply call a different endpoint. No changes to our pipeline architecture required.</td>
+      <td><span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">High</span></td>
+      <td>Low (endpoint swap) — decision effort is higher than technical effort</td>
+      <td><strong>Client</strong> (ClimatePros) — cost + data control tradeoff to evaluate</td>
+    </tr>
+    <tr>
+      <td><strong>Cross-page context gaps</strong><br><small style="color:var(--text-muted)">100+ page packages · scope exclusions missed</small></td>
+      <td>Add a <strong>document-level pre-pass</strong> before the Celery page fan-out: one low-cost model call on the full text index to identify cross-page dependencies (scope exclusions, addenda overrides) and inject them as a shared context block into every page_task prompt.</td>
+      <td><span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">Medium</span></td>
+      <td>Medium — new pre-pass task + prompt engineering</td>
+      <td><strong>Techjays</strong></td>
+    </tr>
+    <tr>
+      <td><strong>CAD drawing quality drop</strong><br><small style="color:var(--text-muted)">Low-res scans · rotated pages · CAD rasterisation</small></td>
+      <td>Promote <strong>Azure AI Document Intelligence</strong> from optional to mandatory for all CAD-origin and scanned pages. Already in the stack — needs config change + DPI bump to 400 for CAD-rasterised pages. Add a per-page quality score to the intake pipeline so low-confidence pages are flagged before reaching Zeus.</td>
+      <td><span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">Medium</span></td>
+      <td>Low — Azure Doc Intelligence already in stack</td>
+      <td><strong>Techjays</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Throughput at volume (20+ bids/day)</strong><br><small style="color:var(--text-muted)">30–90 s per job · concurrent submissions queue on Zeus</small></td>
+      <td>Implement a <strong>priority queue</strong> on the Service Bus — high-value bids (above a configurable dollar threshold) get a dedicated high-priority queue; standard bids queue normally. Off-peak scheduling for non-urgent re-runs. This is a short-term lever; the hardware ceiling fix (row 1) is the definitive solution.</td>
+      <td><span style="background:#e7f6ee;color:#10b981;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">Low</span><br><small style="color:var(--text-muted)">until volume grows</small></td>
+      <td>Low — Service Bus supports priority queues natively</td>
+      <td><strong>Techjays</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Model version drift</strong><br><small style="color:var(--text-muted)">Zeus model update → silent behaviour change</small></td>
+      <td>Document the Zeus model update as a <strong>mandatory CI trigger</strong> in the client's ops runbook. When the client updates Zeus, they run our eval gate (§13) before routing live bids through the new version. Add a <code>zeus_model_version</code> field to <code>ai_calls</code> telemetry so any drift is traceable in App Insights.</td>
+      <td><span style="background:#e7f6ee;color:#10b981;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">Low</span></td>
+      <td>Low — process + one telemetry field</td>
+      <td><strong>Both</strong> — Techjays documents the runbook; client runs it</td>
+    </tr>
+  </tbody></table></div>
+
+  <h3>Decision required from the client</h3>
+  <div class="callout"><strong>The only item that blocks scaling beyond ~20 concurrent bids/day is the hardware ceiling.</strong> The client needs to decide between two options before the production launch at volume:<br><br>
+  <strong>Option A — Cloud endpoint migration</strong>: Zeus calls the Anthropic API (enterprise) or AWS Bedrock instead of running on the Mac Studio. Cost moves from fixed hardware to per-token inference. Zero changes to Techjays' pipeline. Recommended.<br><br>
+  <strong>Option B — Add a second Mac Studio</strong>: Load-balance extraction across two on-prem nodes. Keeps data fully on-premise. Doubles hardware cost; still has a ceiling at 2 nodes. Requires Zeus load-balancer configuration on the client side.<br><br>
+  All other bottlenecks are either already handled by our architecture or are Techjays-owned improvements that do not require client input.</div>
+
+  <h3>Implementation sequence</h3>
+  <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Actions</th><th>When</th></tr></thead><tbody>
+    <tr><td><strong>Before launch</strong></td><td>① Client decides hardware vs. cloud endpoint (§17 row 1) · ② Azure Doc Intelligence promoted to mandatory for CAD pages · ③ <code>zeus_model_version</code> added to telemetry</td><td>Pre-production</td></tr>
+    <tr><td><strong>Post-launch · Month 1–2</strong></td><td>④ Document-level pre-pass for cross-page context (prompt engineering + new Celery task) · ⑤ Priority queue on Service Bus</td><td>After first real bid volume observed</td></tr>
+    <tr><td><strong>Ongoing</strong></td><td>⑥ Zeus model update runbook in place · ⑦ Neo4j feedback loop (§18) starts populating — review correction confidence at 4-week cadence</td><td>Continuous</td></tr>
+  </tbody></table></div>
 </section>
 
 <section id="feedback-graph">
