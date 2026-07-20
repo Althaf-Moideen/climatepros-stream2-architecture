@@ -1017,7 +1017,7 @@
 <section id="cost">
   <h2>15. Cost Projection</h2>
   <p>Two components: <strong>model cost</strong> (image-token dominated; a Zeus extract pass plus two verifier models per analyze) and <strong>Azure infrastructure</strong>. Modelled bottom-up from explicit volume assumptions and per-bid token math, as a low/expected/high range. <strong>Unit rates below are the published list rates at time of writing and are re-validated against current pricing before commitment.</strong> Note the <strong>Zeus extract pass runs on ClimatePros' own Zeus</strong>, so its inference cost (marked <code>*</code>) sits on the client side and is shown for transparency but excluded from the Techjays-billed roll-up.</p>
-  <div class="callout" style="border-left-color:#10b981;background:#f0fdf4"><strong>FieldJetX already has an active Azure subscription.</strong> Infrastructure costs below are <strong>incremental additions</strong> on top of the existing FJX Azure environment — not a greenfield setup. The following are already confirmed as provisioned by FJX: <strong>Azure VNet</strong> (vnet-fjx-prod-mi), <strong>Blob Storage</strong> (cpfjxbackups account), <strong>VPN Gateway</strong>, and <strong>Azure AD / Entra ID</strong>. Resources marked <em>TBC</em> are not yet confirmed — FJX Azure team (VP Architecture) to advise. Actual infra cost will be lower than shown once shared resources are confirmed.</div>
+  <div class="callout" style="border-left-color:#10b981;background:#f0fdf4"><strong>FieldJetX already has an active Azure subscription.</strong> Infrastructure costs below are <strong>incremental additions</strong> on top of the existing FJX Azure environment — not a greenfield setup. The following are already confirmed as provisioned by FJX: <strong>Azure VNet</strong> (vnet-fjx-prod-mi), <strong>Blob Storage</strong> (cpfjxbackups account), <strong>VPN Gateway</strong>, and <strong>Azure AD / Entra ID</strong>. Resources marked <em>To be confirmed at integration</em> will be clarified during the integration phase as FJX completes their full Azure migration. Actual infra cost will be lower than shown once shared resources are confirmed.</div>
 
   <h3>Volume assumptions</h3>
   <div class="table-wrapper"><table><thead><tr><th>Assumption</th><th>Low</th><th>Expected</th><th>High</th></tr></thead><tbody>
@@ -1039,13 +1039,13 @@
 
   <h3>Azure infrastructure — incremental cost ($/month)</h3>
   <div class="table-wrapper"><table><thead><tr><th>Component</th><th>Status</th><th>Low</th><th>Expected</th><th>High</th></tr></thead><tbody>
-    <tr><td>Container Apps (API service + worker service, autoscale)</td><td><span style="color:#f59e0b;font-weight:600">TBC — FJX Azure team</span></td><td>$180</td><td>$350</td><td>$700</td></tr>
+    <tr><td>Container Apps (API service + worker service, autoscale)</td><td><span style="color:#f59e0b;font-weight:600">To be confirmed at integration</span></td><td>$180</td><td>$350</td><td>$700</td></tr>
     <tr><td>PostgreSQL Flexible Server <small style="color:var(--text-muted)">(ClimatePros app DB only — new server or shared, decided at integration)</small></td><td><span style="color:#f59e0b;font-weight:600">TBC at integration</span></td><td>$120</td><td>$250</td><td>$400</td></tr>
     <tr><td>Blob Storage <small style="color:var(--text-muted)">(incremental — FJX cpfjxbackups account already exists; ClimatePros adds drawings/quotes container)</small></td><td><span style="color:#10b981;font-weight:600">✅ FJX existing</span></td><td>$10</td><td>$20</td><td>$50</td></tr>
-    <tr><td>Service Bus + Redis Cache</td><td><span style="color:#f59e0b;font-weight:600">TBC — FJX Azure team</span></td><td>$40</td><td>$80</td><td>$160</td></tr>
+    <tr><td>Service Bus + Redis Cache</td><td><span style="color:#f59e0b;font-weight:600">To be confirmed at integration</span></td><td>$40</td><td>$80</td><td>$160</td></tr>
     <tr><td>VNet + Private Endpoints <small style="color:var(--text-muted)">(vnet-fjx-prod-mi confirmed existing)</small></td><td><span style="color:#10b981;font-weight:600">✅ FJX existing</span></td><td>$0</td><td>$0</td><td>$0</td></tr>
     <tr><td>Front Door + WAF / App Gateway <small style="color:var(--text-muted)">(FJX existing — reused, TLS cert reused)</small></td><td><span style="color:#10b981;font-weight:600">✅ FJX existing</span></td><td>$0</td><td>$0</td><td>$0</td></tr>
-    <tr><td>Key Vault · Monitor · App Insights</td><td><span style="color:#f59e0b;font-weight:600">TBC — FJX Azure team</span></td><td>$50</td><td>$100</td><td>$200</td></tr>
+    <tr><td>Key Vault · Monitor · App Insights</td><td><span style="color:#f59e0b;font-weight:600">To be confirmed at integration</span></td><td>$50</td><td>$100</td><td>$200</td></tr>
     <tr style="font-weight:700;background:var(--primary-light)"><td colspan="2">Estimated infra subtotal / month <small style="font-weight:400;color:var(--text-muted)">(will reduce once TBC items confirmed)</small></td><td>≈ $400</td><td>≈ $800</td><td>≈ $1,510</td></tr>
   </tbody></table></div>
 
