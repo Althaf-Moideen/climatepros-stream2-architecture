@@ -1017,6 +1017,7 @@
 <section id="cost">
   <h2>15. Cost Projection</h2>
   <p>Two components: <strong>model cost</strong> (image-token dominated; a Zeus extract pass plus two verifier models per analyze) and <strong>Azure infrastructure</strong>. Modelled bottom-up from explicit volume assumptions and per-bid token math, as a low/expected/high range. <strong>Unit rates below are the published list rates at time of writing and are re-validated against current pricing before commitment.</strong> Note the <strong>Zeus extract pass runs on ClimatePros' own Zeus</strong>, so its inference cost (marked <code>*</code>) sits on the client side and is shown for transparency but excluded from the Techjays-billed roll-up.</p>
+  <div class="callout" style="border-left-color:#10b981;background:#f0fdf4"><strong>FieldJetX already has an active Azure subscription.</strong> Infrastructure costs below are <strong>incremental additions</strong> on top of the existing FJX Azure environment — not a greenfield setup. The following are already confirmed as provisioned by FJX: <strong>Azure VNet</strong> (vnet-fjx-prod-mi), <strong>Blob Storage</strong> (cpfjxbackups account), <strong>VPN Gateway</strong>, and <strong>Azure AD / Entra ID</strong>. Resources marked <em>TBC</em> are not yet confirmed — Paul Prieur (VP Architecture) to advise. Actual infra cost will be lower than shown once shared resources are confirmed.</div>
 
   <h3>Volume assumptions</h3>
   <div class="table-wrapper"><table><thead><tr><th>Assumption</th><th>Low</th><th>Expected</th><th>High</th></tr></thead><tbody>
@@ -1036,22 +1037,23 @@
   </tbody></table></div>
   <div class="callout"><strong>The Claude Fable 5 verifier is ~98% of the Techjays-billed per-bid model cost</strong> — this is exactly why "gate/skip the Fable 5 verifier by bid value" is the highest-value cost lever. Low scenario assumes it runs on ~40% of bids (≈ $0.29/bid blended); High assumes full sweep on larger packages plus occasional reruns (≈ $1.45/bid). The Gemini 3.5 Flash verify pass is negligible (~$0.01), and the <strong>Zeus extract pass (≈ $0.23/bid) is borne on the client's Zeus</strong>, so moving to Zeus-primary shifts a slice of model spend off the Techjays bill.</div>
 
-  <h3>Azure infrastructure ($/month)</h3>
-  <div class="table-wrapper"><table><thead><tr><th>Component</th><th>Low</th><th>Expected</th><th>High</th></tr></thead><tbody>
-    <tr><td>Container Apps (API + workers, autoscale)</td><td>$180</td><td>$350</td><td>$700</td></tr>
-    <tr><td>PostgreSQL Flexible Server (HA + PITR)</td><td>$120</td><td>$250</td><td>$400</td></tr>
-    <tr><td>Blob Storage (geo-redundant)</td><td>$30</td><td>$60</td><td>$120</td></tr>
-    <tr><td>Service Bus + Redis Cache</td><td>$40</td><td>$80</td><td>$160</td></tr>
-    <tr><td>Front Door + WAF / App Gateway <small style="color:var(--text-muted)">(FJX existing — reused, no separate cost)</small></td><td>$0</td><td>$0</td><td>$0</td></tr>
-    <tr><td>Key Vault · Monitor · App Insights</td><td>$50</td><td>$100</td><td>$200</td></tr>
-    <tr style="font-weight:700;background:var(--primary-light)"><td>Infra subtotal / month</td><td>≈ $420</td><td>≈ $840</td><td>≈ $1,580</td></tr>
+  <h3>Azure infrastructure — incremental cost ($/month)</h3>
+  <div class="table-wrapper"><table><thead><tr><th>Component</th><th>Status</th><th>Low</th><th>Expected</th><th>High</th></tr></thead><tbody>
+    <tr><td>Container Apps (API service + worker service, autoscale)</td><td><span style="color:#f59e0b;font-weight:600">TBC — Paul Prieur</span></td><td>$180</td><td>$350</td><td>$700</td></tr>
+    <tr><td>PostgreSQL Flexible Server <small style="color:var(--text-muted)">(ClimatePros app DB only — new server or shared, decided at integration)</small></td><td><span style="color:#f59e0b;font-weight:600">TBC at integration</span></td><td>$120</td><td>$250</td><td>$400</td></tr>
+    <tr><td>Blob Storage <small style="color:var(--text-muted)">(incremental — FJX cpfjxbackups account already exists; ClimatePros adds drawings/quotes container)</small></td><td><span style="color:#10b981;font-weight:600">✅ FJX existing</span></td><td>$10</td><td>$20</td><td>$50</td></tr>
+    <tr><td>Service Bus + Redis Cache</td><td><span style="color:#f59e0b;font-weight:600">TBC — Paul Prieur</span></td><td>$40</td><td>$80</td><td>$160</td></tr>
+    <tr><td>VNet + Private Endpoints <small style="color:var(--text-muted)">(vnet-fjx-prod-mi confirmed existing)</small></td><td><span style="color:#10b981;font-weight:600">✅ FJX existing</span></td><td>$0</td><td>$0</td><td>$0</td></tr>
+    <tr><td>Front Door + WAF / App Gateway <small style="color:var(--text-muted)">(FJX existing — reused, TLS cert reused)</small></td><td><span style="color:#10b981;font-weight:600">✅ FJX existing</span></td><td>$0</td><td>$0</td><td>$0</td></tr>
+    <tr><td>Key Vault · Monitor · App Insights</td><td><span style="color:#f59e0b;font-weight:600">TBC — Paul Prieur</span></td><td>$50</td><td>$100</td><td>$200</td></tr>
+    <tr style="font-weight:700;background:var(--primary-light)"><td colspan="2">Estimated infra subtotal / month <small style="font-weight:400;color:var(--text-muted)">(will reduce once TBC items confirmed)</small></td><td>≈ $400</td><td>≈ $800</td><td>≈ $1,510</td></tr>
   </tbody></table></div>
 
   <h3>Roll-up</h3>
   <div class="table-wrapper"><table><thead><tr><th>Scenario</th><th>Model $/bid</th><th>Bids/mo</th><th>Model $/mo</th><th>Infra $/mo</th><th>Total $/mo</th><th>Effective $/bid</th></tr></thead><tbody>
-    <tr><td>Low</td><td>$0.29</td><td>80</td><td>$23</td><td>$420</td><td><strong>≈ $450</strong></td><td>$5.54</td></tr>
-    <tr><td>Expected</td><td>$0.71</td><td>200</td><td>$142</td><td>$840</td><td><strong>≈ $980</strong></td><td>$4.91</td></tr>
-    <tr><td>High</td><td>$1.45</td><td>500</td><td>$725</td><td>$1,580</td><td><strong>≈ $2,310</strong></td><td>$4.62</td></tr>
+    <tr><td>Low</td><td>$0.29</td><td>80</td><td>$23</td><td>$400</td><td><strong>≈ $430</strong></td><td>$5.31</td></tr>
+    <tr><td>Expected</td><td>$0.71</td><td>200</td><td>$142</td><td>$800</td><td><strong>≈ $940</strong></td><td>$4.70</td></tr>
+    <tr><td>High</td><td>$1.45</td><td>500</td><td>$725</td><td>$1,510</td><td><strong>≈ $2,240</strong></td><td>$4.48</td></tr>
   </tbody></table></div>
   <div class="callout"><strong>Levers (in priority order):</strong> ① gate/skip the Fable 5 verifier by bid value (largest single lever — ~98% of model cost) · ② downscale extractor input images / tile only dense schedule regions · ③ cache extraction for unchanged re-submissions · ④ right-size worker autoscale floors · ⑤ reserved-capacity / savings-plan discounts on steady infra. <strong>Note:</strong> infra dominates at low volume (fixed HA baseline); model cost dominates as bid volume scales — the crossover sits near the Expected row.</div>
 </section>
