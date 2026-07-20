@@ -657,7 +657,7 @@
 
 <section id="architecture">
   <h2>4. Architecture Diagram</h2>
-  <p>A monolith codebase deployed as two separate services — a dedicated <strong>API service</strong> and a <strong>worker service</strong> — on Azure Container Apps, coordinated through Azure Service Bus. The worker is never co-located with the API server. Requests enter through Front Door + WAF; heavy analyze jobs autoscale on queue depth (KEDA).</p>
+  <p>A monolith codebase deployed as two separate services — a dedicated <strong>API service</strong> and a <strong>worker service</strong> — on Azure Container Apps, coordinated through Azure Service Bus. The worker is never co-located with the API server. The platform is <strong>embedded within FieldJetX</strong> — no separate domain or URL; requests are routed through <strong>FJX's existing Front Door + WAF and App Gateway</strong> (TLS covered by FJX's existing certificate, no separate cert or edge provisioning required). Heavy analyze jobs autoscale on queue depth (KEDA).</p>
   <div class="arch">
   <div class="arch-layer layer-user">
     <div class="arch-title">User Layer &mdash; roles</div>
@@ -665,13 +665,13 @@
   </div>
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-present">
-    <div class="arch-title">Presentation &mdash; Angular SPA</div>
+    <div class="arch-title">Presentation &mdash; Angular module embedded in FieldJetX</div>
     <div class="arch-row"><div class="arch-box ">📈 Dashboard<small>KPIs &amp; bid overview</small></div> <div class="arch-box ">🧾 Bid Stepper<small>upload → review → deliver</small></div> <div class="arch-box ">✅ Review/Approval<small>check &amp; sign-off screens</small></div> <div class="arch-box ">👥 Clients<small>customer records &amp; history</small></div> <div class="arch-box ">💲 Pricing Admin<small>manage rate cards &amp; sheets</small></div></div>
   </div>
   <div class="arch-arrow">&#8597; &nbsp;<span style="font-size:12px">HTTPS · FJX Session Token (GUID — usersessions table)</span></div>
   <div class="arch-layer layer-api">
     <div class="arch-title">Edge &amp; API</div>
-    <div class="arch-row"><div class="arch-box ">🚪 Front Door<small>+ WAF</small></div> <div class="arch-box ">🛡️ App Gateway<small>TLS · routing · rate-limit</small></div> <div class="arch-box ">🔐 FJX Auth<small>Session token validation · feature-gate</small></div></div>
+    <div class="arch-row"><div class="arch-box ">🚪 Front Door + WAF<small>FJX existing · reused</small></div> <div class="arch-box ">🛡️ App Gateway<small>FJX existing · TLS cert reused · no separate cert</small></div> <div class="arch-box ">🔐 FJX Auth<small>Session token validation · feature-gate</small></div></div>
     <div class="arch-row" style="margin-top:10px"><div class="arch-box ">⚡ API Service — FastAPI / Uvicorn<small>REST + WebSocket · RBAC</small></div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
@@ -705,7 +705,7 @@
   <h3>Request Flow</h3>
   <ol style="padding-left:24px">
     <li>User is already authenticated by <strong>FieldJetX</strong>; the embedded SPA passes the FJX session token (GUID from <code>usersessions</code>) to the ClimatePros API — no separate login required.</li>
-    <li>Traffic passes <strong>Front Door + WAF → App Gateway</strong> (TLS, filtering, rate-limiting) to the API.</li>
+    <li>Traffic is routed through <strong>FieldJetX's existing Front Door + WAF → App Gateway</strong> (filtering, rate-limiting; TLS covered by FJX's existing certificate — no separate cert required) to the ClimatePros API.</li>
     <li>The <strong>API</strong> validates the FJX session token + feature-gate permissions (<code>UserFeatureXref</code>), then serves sync actions or enqueues an analyze job on <strong>Service Bus</strong>.</li>
     <li><strong>Workers</strong> (autoscaled by KEDA) run Zeus → Gemini + Claude verify → reconcile, writing results to <strong>PostgreSQL</strong>.</li>
     <li>Once the estimator finalises the bid, <strong>Export</strong> pushes the Excel to <strong>FieldJetX</strong> and renders the in-app summary PDF.</li>
@@ -768,7 +768,7 @@
     <div class="tech-card"><div class="tech-icon">🏛️</div><div class="tech-name">Zeus</div><div class="tech-ver">Claude Sonnet 4.6</div><div class="tech-role">Primary extractor · client-operated · FieldJetX-linked (prior-bid grounding)</div></div>
     <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Gemini</div><div class="tech-ver">3.5 Flash</div><div class="tech-role">Verifier (DPA) · golden-set validated</div></div>
     <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Claude</div><div class="tech-ver">Fable 5</div><div class="tech-role">Verifier (DPA · enterprise)</div></div>
-    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2</div><div class="tech-role">Standalone, signals, FJX session integration (no MSAL)</div></div>
+    <div class="tech-card"><div class="tech-icon">🅰️</div><div class="tech-name">Angular</div><div class="tech-ver">19.2</div><div class="tech-role">Embedded module within FieldJetX · signals · FJX session integration (no MSAL) · no separate domain or deployment</div></div>
     <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind</div><div class="tech-ver">3.4</div><div class="tech-role">UI styling</div></div>
     <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">PyMuPDF</div><div class="tech-ver">AGPL-3.0</div><div class="tech-role">Page render + native text</div></div>
     <div class="tech-card"><div class="tech-icon">🔎</div><div class="tech-name">Azure AI Document Intelligence</div><div class="tech-ver">OCR · optional</div><div class="tech-role">Word-level bounding boxes for source-highlighting</div></div>
@@ -976,7 +976,7 @@
     <div class="infra-card"><div class="infra-icon">🚌</div><div class="infra-name">Service Bus</div><div class="infra-tech">async jobs</div><div class="infra-port">dead-letter</div></div>
     <div class="infra-card"><div class="infra-icon">🔥</div><div class="infra-name">Cache for Redis</div><div class="infra-tech">results/cache</div><div class="infra-port">managed</div></div>
     <div class="infra-card"><div class="infra-icon">🔑</div><div class="infra-name">Key Vault</div><div class="infra-tech">secrets</div><div class="infra-port">managed keys</div></div>
-    <div class="infra-card"><div class="infra-icon">🚪</div><div class="infra-name">Front Door + WAF</div><div class="infra-tech">edge · DDoS</div><div class="infra-port">App Gateway</div></div>
+    <div class="infra-card"><div class="infra-icon">🚪</div><div class="infra-name">Front Door + WAF</div><div class="infra-tech">FJX existing · reused</div><div class="infra-port">no separate provisioning · TLS cert reused</div></div>
     <div class="infra-card"><div class="infra-icon">📊</div><div class="infra-name">Monitor + App Insights</div><div class="infra-tech">telemetry</div><div class="infra-port">dashboards</div></div>
     <div class="infra-card"><div class="infra-icon">🧱</div><div class="infra-name">Bicep / Terraform</div><div class="infra-tech">IaC</div><div class="infra-port">dev · staging · prod</div></div>
   </div>
@@ -1042,16 +1042,16 @@
     <tr><td>PostgreSQL Flexible Server (HA + PITR)</td><td>$120</td><td>$250</td><td>$400</td></tr>
     <tr><td>Blob Storage (geo-redundant)</td><td>$30</td><td>$60</td><td>$120</td></tr>
     <tr><td>Service Bus + Redis Cache</td><td>$40</td><td>$80</td><td>$160</td></tr>
-    <tr><td>Front Door + WAF / App Gateway</td><td>$40</td><td>$60</td><td>$120</td></tr>
+    <tr><td>Front Door + WAF / App Gateway <small style="color:var(--text-muted)">(FJX existing — reused, no separate cost)</small></td><td>$0</td><td>$0</td><td>$0</td></tr>
     <tr><td>Key Vault · Monitor · App Insights</td><td>$50</td><td>$100</td><td>$200</td></tr>
-    <tr style="font-weight:700;background:var(--primary-light)"><td>Infra subtotal / month</td><td>≈ $460</td><td>≈ $900</td><td>≈ $1,700</td></tr>
+    <tr style="font-weight:700;background:var(--primary-light)"><td>Infra subtotal / month</td><td>≈ $420</td><td>≈ $840</td><td>≈ $1,580</td></tr>
   </tbody></table></div>
 
   <h3>Roll-up</h3>
   <div class="table-wrapper"><table><thead><tr><th>Scenario</th><th>Model $/bid</th><th>Bids/mo</th><th>Model $/mo</th><th>Infra $/mo</th><th>Total $/mo</th><th>Effective $/bid</th></tr></thead><tbody>
-    <tr><td>Low</td><td>$0.29</td><td>80</td><td>$23</td><td>$460</td><td><strong>≈ $490</strong></td><td>$6.13</td></tr>
-    <tr><td>Expected</td><td>$0.71</td><td>200</td><td>$142</td><td>$900</td><td><strong>≈ $1,040</strong></td><td>$5.20</td></tr>
-    <tr><td>High</td><td>$1.45</td><td>500</td><td>$725</td><td>$1,700</td><td><strong>≈ $2,430</strong></td><td>$4.86</td></tr>
+    <tr><td>Low</td><td>$0.29</td><td>80</td><td>$23</td><td>$420</td><td><strong>≈ $450</strong></td><td>$5.54</td></tr>
+    <tr><td>Expected</td><td>$0.71</td><td>200</td><td>$142</td><td>$840</td><td><strong>≈ $980</strong></td><td>$4.91</td></tr>
+    <tr><td>High</td><td>$1.45</td><td>500</td><td>$725</td><td>$1,580</td><td><strong>≈ $2,310</strong></td><td>$4.62</td></tr>
   </tbody></table></div>
   <div class="callout"><strong>Levers (in priority order):</strong> ① gate/skip the Fable 5 verifier by bid value (largest single lever — ~98% of model cost) · ② downscale extractor input images / tile only dense schedule regions · ③ cache extraction for unchanged re-submissions · ④ right-size worker autoscale floors · ⑤ reserved-capacity / savings-plan discounts on steady infra. <strong>Note:</strong> infra dominates at low volume (fixed HA baseline); model cost dominates as bid volume scales — the crossover sits near the Expected row.</div>
 </section>
