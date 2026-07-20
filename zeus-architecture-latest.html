@@ -591,6 +591,7 @@
   <a href="#cicd" class="nav-link">CI/CD &amp; Release</a>
   <a href="#observability" class="nav-link">Observability &amp; SLOs</a>
   <a href="#cost" class="nav-link">Cost Projection</a>
+  <a href="#events" class="nav-link">Event-Driven &amp; Parallel</a>
 </nav>
 <div class="main">
 <div class="hero">
@@ -1045,6 +1046,165 @@
     <tr><td>High</td><td>$1.45</td><td>500</td><td>$725</td><td>$1,700</td><td><strong>≈ $2,430</strong></td><td>$4.86</td></tr>
   </tbody></table></div>
   <div class="callout"><strong>Levers (in priority order):</strong> ① gate/skip the Fable 5 verifier by bid value (largest single lever — ~98% of model cost) · ② downscale extractor input images / tile only dense schedule regions · ③ cache extraction for unchanged re-submissions · ④ right-size worker autoscale floors · ⑤ reserved-capacity / savings-plan discounts on steady infra. <strong>Note:</strong> infra dominates at low volume (fixed HA baseline); model cost dominates as bid volume scales — the crossover sits near the Expected row.</div>
+</section>
+
+<section id="events">
+  <h2>16. Event-Driven Architecture &amp; Parallel Processing</h2>
+  <p>The analyze pipeline is the most time-critical path — a 15-page drawing package must clear Zeus extract + two verifier models + reconcile in under 5 minutes. Achieving this requires a fully event-driven, fan-out/fan-in execution model rather than sequential processing. This section defines the exact event wiring, task graph, progress contract, and failure-recovery flow.</p>
+
+  <div class="callout"><strong>Core pattern:</strong> one Service Bus message → KEDA-scaled Celery worker → <strong>Celery <code>group()</code></strong> fans out one task per page (all pages run in parallel) → each page task fires <strong><code>asyncio.gather()</code></strong> for simultaneous Gemini + Claude verification → <strong>Celery <code>chord()</code></strong> fans back in when all pages finish and triggers the reconciler. The UI tracks granular per-page, per-model progress over WebSocket.</div>
+
+  <!-- ── Full event flow diagram ── -->
+  <h3>Full event flow — API to delivery</h3>
+  <div class="df">
+    <div class="df-title">Event-Driven Analyze Pipeline</div>
+    <div class="df-col">
+      <div class="df-node" style="border-color:var(--primary)">① API — POST /api/bids/{id}/analyze<small>validates FJX session · returns 202 + job_id immediately</small></div>
+      <div class="df-arrow">↓ publishes</div>
+      <div class="df-node" style="border-color:#f97316">② Azure Service Bus — <code>analyze_job</code> message<small>{ job_id, bid_id, page_ids[], prompt_version }</small></div>
+      <div class="df-arrow">↓ KEDA scales workers on queue depth</div>
+      <div class="df-node" style="border-color:#8b5cf6">③ Celery Worker — picks up job · marks job <code>running</code> in Redis</div>
+      <div class="df-arrow">↓ fan-out</div>
+      <div class="df-node" style="border-color:var(--stage-analyze);background:#f3f0ff"><strong>④ Celery <code>group()</code> — one task per page · all tasks fire simultaneously</strong><small>group([page_task.s(page_id) for page_id in page_ids])</small></div>
+      <div class="df-arrow">↓ inside each page task</div>
+
+      <div class="df-split">
+        <div class="df-panel">
+          <div class="ph">④a Zeus extract (sequential — grounds verifiers)</div>
+          <div class="df-node" style="border-color:var(--stage-analyze)">🏛️ Zeus · Claude Sonnet 4.6<small>structured JSON extraction · constrained schema · auto-retry on parse fail</small></div>
+          <div class="df-arrow">↓ zeus_result ready → triggers both verifiers</div>
+          <div class="df-node" style="border-color:#10b981;background:#f0fdf4"><strong>④b asyncio.gather() — Gemini + Claude fire simultaneously</strong><small>await asyncio.gather(gemini_verify(page, zeus_result), claude_verify(page, zeus_result))</small></div>
+          <div class="df-split" style="margin-top:10px">
+            <div class="df-panel">
+              <div class="ph">Gemini 2.5 Flash</div>
+              <div class="df-node" style="border-color:#0ea5e9">🧠 verify confidence + flags<small>independent re-sweep</small></div>
+            </div>
+            <div class="df-panel">
+              <div class="ph">Claude Fable 5</div>
+              <div class="df-node" style="border-color:#8b5cf6">🔎 verify confidence + flags<small>independent re-sweep</small></div>
+            </div>
+          </div>
+          <div class="df-arrow">↓ both done → page_result emitted</div>
+          <div class="df-blob">page_result { zeus, gemini, claude, page_id }</div>
+        </div>
+      </div>
+
+      <div class="df-arrow">↓ fan-in (Celery chord fires when ALL page tasks complete)</div>
+      <div class="df-node" style="border-color:#f97316;background:#fff7ed"><strong>⑤ Celery <code>chord()</code> callback — reconcile_task</strong><small>chord(group([...]), reconcile_task.s())</small></div>
+      <div class="df-arrow">↓</div>
+      <div class="df-node" style="border-color:var(--accent)">⑥ Deterministic reconciler — merges all page_results<small>writes bid_items to PostgreSQL · logs to ai_calls</small></div>
+      <div class="df-arrow">↓</div>
+      <div class="df-node" style="border-color:#10b981">⑦ Pricing engine runs · bid state → <code>ready_for_review</code></div>
+      <div class="df-arrow">↓ WebSocket push</div>
+      <div class="df-store">⑧ WS push: status=succeeded · UI renders takeoff</div>
+    </div>
+  </div>
+
+  <!-- ── Per-page task code shape ── -->
+  <h3>Per-page task — code shape</h3>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#f3f0ff;color:#8b5cf6">⚙️</div><div><h4>page_task (Celery task)</h4><p>fan-out unit · one per page · all run in parallel</p></div></div>
+  <pre><code><span class="cmt"># Celery task — one instance per page, all fire simultaneously via group()</span>
+@app.task(bind=True, max_retries=3, acks_late=True)
+def page_task(self, job_id: str, page_id: str, prompt_version: str):
+    <span class="cmt"># Step 1: Zeus extraction (sequential — verifiers need this output)</span>
+    zeus_result = zeus_client.extract(page_id, prompt_version)   <span class="cmt"># auto-retried internally on schema fail</span>
+
+    <span class="cmt"># Step 2: Gemini + Claude fire simultaneously — asyncio.gather()</span>
+    gemini_result, claude_result = asyncio.run(asyncio.gather(
+        gemini_client.verify(page_id, zeus_result),
+        claude_client.verify(page_id, zeus_result),
+    ))
+
+    <span class="cmt"># Step 3: emit progress event over Redis pub/sub → WebSocket broker</span>
+    publish_progress(job_id, page_id, stage=<span class="str">"verified"</span>,
+                     zeus=<span class="str">"done"</span>, gemini=<span class="str">"done"</span>, claude=<span class="str">"done"</span>)
+
+    return PageResult(page_id=page_id, zeus=zeus_result,
+                      gemini=gemini_result, claude=claude_result)
+
+
+<span class="cmt"># Fan-out + fan-in wiring at job level</span>
+def dispatch_analyze_job(job_id: str, page_ids: list[str], prompt_version: str):
+    workflow = chord(
+        group(page_task.s(job_id, pid, prompt_version) for pid in page_ids),
+        reconcile_task.s(job_id)          <span class="cmt"># fires only when ALL page tasks finish</span>
+    )
+    workflow.delay()</code></pre></div>
+
+  <!-- ── WebSocket progress event schema ── -->
+  <h3>WebSocket progress event — granular schema</h3>
+  <p>Every <code>publish_progress()</code> call in a page task writes to a Redis pub/sub channel; the WebSocket broker relays it to the connected frontend in real time. The frontend can render a per-page, per-model progress grid rather than a single progress bar.</p>
+  <pre><code><span class="cmt">// WS push — emitted on every meaningful state change</span>
+{
+  <span class="str">"job_id"</span>:       <span class="str">"uuid"</span>,
+  <span class="str">"bid_id"</span>:       <span class="str">"uuid"</span>,
+  <span class="str">"status"</span>:       <span class="str">"queued | running | succeeded | failed"</span>,
+  <span class="str">"stage"</span>:        <span class="str">"extract | verify | reconcile | complete"</span>,
+  <span class="str">"pages_total"</span>:  <span class="num">15</span>,
+  <span class="str">"pages_done"</span>:   <span class="num">8</span>,            <span class="cmt">// increments as each page_task finishes</span>
+  <span class="str">"models"</span>: {
+    <span class="str">"zeus"</span>:   <span class="str">"done | running | pending"</span>,
+    <span class="str">"gemini"</span>: <span class="str">"done | running | pending"</span>,
+    <span class="str">"claude"</span>: <span class="str">"done | running | pending"</span>
+  },
+  <span class="str">"progress"</span>:     <span class="num">0.6</span>,           <span class="cmt">// pages_done / pages_total</span>
+  <span class="str">"result"</span>:       <span class="kw">null</span>,          <span class="cmt">// populated on succeeded</span>
+  <span class="str">"error"</span>:        <span class="kw">null</span>           <span class="cmt">// populated on failed: { code, message, retryable }</span>
+}
+<span class="cmt">// Redis channel: jobs:{job_id}:progress</span>
+<span class="cmt">// WS endpoint:   /ws/jobs/{job_id}  (falls back to GET /api/jobs/{job_id} polling)</span>
+<span class="cmt">// Socket closes with a terminal status (succeeded | failed)</span></code></pre>
+
+  <!-- ── DLQ + retry ── -->
+  <h3>Failure handling — Dead Letter Queue &amp; retry</h3>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fee2e2;color:#dc2626">🔁</div><div><h4>Retry &amp; DLQ strategy</h4><p>Service Bus + Celery two-layer retry</p></div></div>
+  <p>Failures are handled at two layers so transient errors (model timeout, rate limit) are retried automatically and persistent failures surface for human action rather than silently dropping.</p>
+  <div class="table-wrapper"><table><thead><tr><th>Layer</th><th>Mechanism</th><th>Config</th><th>On exhaustion</th></tr></thead><tbody>
+    <tr><td><strong>Celery task retry</strong></td><td><code>self.retry(exc, countdown=2**retries)</code> — exponential backoff</td><td>max_retries=3 · delays: 2 s → 4 s → 8 s</td><td>Task raises <code>MaxRetriesExceededError</code> → nacks Service Bus message</td></tr>
+    <tr><td><strong>Service Bus DLQ</strong></td><td>Undeliverable messages routed to <code>analyze-jobs/$DeadLetterQueue</code></td><td>max_delivery_count=3 · lock timeout=5 min</td><td>Alert fires → ops reviews DLQ · manual re-queue or bid marked <code>failed</code></td></tr>
+    <tr><td><strong>Model-level auto-retry</strong></td><td>Schema validation fail or empty response → re-call model (up to 2x)</td><td>Per model client — Zeus, Gemini, Claude all retry internally</td><td>Returns <code>confidence=0</code>, item flagged as RFI rather than crashing page task</td></tr>
+    <tr><td><strong>WebSocket error push</strong></td><td>On terminal failure: <code>status=failed, error.retryable=true/false</code> pushed to client</td><td>Frontend shows retry button for retryable errors</td><td>Non-retryable → user shown error + support ref</td></tr>
+  </tbody></table></div></div>
+
+  <pre><code><span class="cmt"># Celery retry with exponential backoff — inside page_task</span>
+except (ModelTimeoutError, RateLimitError) as exc:
+    raise self.retry(exc=exc, countdown=2 ** self.request.retries)
+
+<span class="cmt"># Graceful model degradation — schema fail doesn't crash the page task</span>
+except SchemaValidationError:
+    <span class="cmt"># item flagged RFI with confidence=0, page_task still succeeds</span>
+    return PageResult(page_id=page_id, zeus=FallbackResult(), ...)</code></pre>
+
+  <!-- ── Redis cache bypass ── -->
+  <h3>Cache bypass — unchanged re-submissions</h3>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#e7f6ee;color:#10b981">⚡</div><div><h4>Redis result cache</h4><p>skip the full pipeline on re-upload of unchanged drawings</p></div></div>
+  <p>Before dispatching to Service Bus, the API computes a <strong>content hash</strong> of the uploaded file. If a cache entry exists for <code>hash(file_hash + prompt_version)</code>, the analyze result is served directly from Redis — no Service Bus message, no worker spin-up, no model calls. Cache is invalidated when the <code>prompt_version</code> changes (prompt update or model swap) so cached results always correspond to the current extraction logic.</p>
+  <pre><code><span class="cmt"># API — cache-check before enqueue</span>
+cache_key = f<span class="str">"analyze:{sha256(file_bytes)}:{prompt_version}"</span>
+cached = redis.get(cache_key)
+if cached:
+    <span class="cmt"># return cached result immediately — no queue, no worker, no model cost</span>
+    return JobResult.from_cache(cached)
+
+<span class="cmt"># cache miss → publish to Service Bus as normal</span>
+service_bus.send(AnalyzeJobMessage(job_id=job_id, bid_id=bid_id, ...))
+
+<span class="cmt"># worker writes result to cache after reconcile completes</span>
+redis.setex(cache_key, ttl=86400 * 7, value=result.json())   <span class="cmt"># 7-day TTL</span></code></pre></div>
+
+  <!-- ── Summary table ── -->
+  <h3>Event &amp; mechanism summary</h3>
+  <div class="table-wrapper"><table><thead><tr><th>Event / trigger</th><th>Mechanism</th><th>Parallel?</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td><code>analyze</code> job submitted</td><td>Azure Service Bus publish · returns 202 + job_id</td><td>—</td><td>Async handoff — API never blocks on AI calls</td></tr>
+    <tr><td>Queue depth rises</td><td>KEDA scales Celery worker replicas</td><td>—</td><td>Auto-scale to bid volume without manual tuning</td></tr>
+    <tr><td>Per-page fan-out</td><td>Celery <code>group()</code> — one task per page</td><td>✅ All pages parallel</td><td>15 pages process simultaneously → time ∝ slowest page, not sum</td></tr>
+    <tr><td>Zeus → verifiers</td><td><code>asyncio.gather(gemini, claude)</code> inside each page task</td><td>✅ Both verifiers parallel</td><td>Gemini + Claude run simultaneously after Zeus finishes; no sequential wait</td></tr>
+    <tr><td>All pages complete</td><td>Celery <code>chord()</code> callback fires <code>reconcile_task</code></td><td>—</td><td>Fan-in — reconciler runs exactly once, only after all pages are done</td></tr>
+    <tr><td>Page task progress</td><td>Redis pub/sub → WebSocket broker → <code>/ws/jobs/{job_id}</code></td><td>—</td><td>Real-time per-page, per-model progress to the UI</td></tr>
+    <tr><td>Task failure (transient)</td><td>Celery retry with exponential backoff (max 3)</td><td>—</td><td>Handles model timeouts + rate limits automatically</td></tr>
+    <tr><td>Job failure (persistent)</td><td>Service Bus DLQ after max_delivery_count=3</td><td>—</td><td>Ops alert + manual review; bid marked <code>failed</code></td></tr>
+    <tr><td>Re-upload unchanged file</td><td>Redis cache hit on <code>hash(file + prompt_version)</code></td><td>—</td><td>Zero model cost + instant result on duplicate submission</td></tr>
+  </tbody></table></div>
 </section>
 
 <div style="margin-top:60px;padding:24px;border-top:1px solid var(--border);text-align:center;color:var(--text-muted);font-size:13px">
