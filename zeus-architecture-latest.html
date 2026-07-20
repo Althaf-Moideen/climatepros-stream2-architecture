@@ -593,6 +593,7 @@
   <a href="#cost" class="nav-link">Cost Projection</a>
   <a href="#events" class="nav-link">Event-Driven &amp; Parallel</a>
   <a href="#zeus-constraints" class="nav-link">Zeus Scaling Constraints</a>
+  <a href="#feedback-graph" class="nav-link">Feedback &amp; Knowledge Graph</a>
 </nav>
 <div class="main">
 <div class="hero">
@@ -773,6 +774,7 @@
     <div class="tech-card"><div class="tech-icon">📝</div><div class="tech-name">LibreOffice</div><div class="tech-ver">headless</div><div class="tech-role">DOC/DOCX → PDF</div></div>
     <div class="tech-card"><div class="tech-icon">📐</div><div class="tech-name">CAD → PDF exporter</div><div class="tech-ver">ODA / converter</div><div class="tech-role">DWG/DXF normalise</div></div>
     <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">openpyxl</div><div class="tech-ver">3.1</div><div class="tech-role">Excel export</div></div>
+    <div class="tech-card"><div class="tech-icon">🕸️</div><div class="tech-name">Neo4j</div><div class="tech-ver">Graph DB</div><div class="tech-role">Feedback knowledge graph · RFI + flag resolution → model learning</div></div>
   </div>
   <div class="callout"><strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial license or permissive alternative (pypdf/pdfplumber) is confirmed before release; dependency license audit is a release gate. Model SDK versions are pinned.</div>
 </section>
@@ -1269,6 +1271,141 @@ redis.setex(cache_key, ttl=86400 * 7, value=result.json())   <span class="cmt">#
   </tbody></table></div>
 
   <div class="callout"><strong>Summary:</strong> Zeus is production-capable for the expected bid volume (≤200/month) within the constraints above. The hardware ceiling is the only item that requires a client decision before scaling beyond ~20 concurrent bids/day. All pipeline infrastructure (queue, retry, schema validation, monitoring) is built on the Techjays side. The cross-page context limitation and CAD quality drop are known accuracy trade-offs that should be communicated to estimators as part of onboarding.</div>
+</section>
+
+<section id="feedback-graph">
+  <h2>18. Feedback Learning Loop — Neo4j Knowledge Graph</h2>
+  <p>Every time an estimator resolves an RFI or corrects a flag, that resolution is a ground-truth signal. Rather than letting it sit in a flat <code>item_edits</code> table, we store it in a <strong>Neo4j graph database</strong> — where bid items, equipment, corrections, and their relationships across bids and customers are connected as nodes and edges. This graph serves two purposes: it <strong>grounds future extractions</strong> (Zeus and verifiers query it for similar historical items before extraction) and it <strong>promotes high-confidence corrections into the golden set</strong> to improve prompts over time.</p>
+
+  <div class="callout"><strong>Why a graph, not a relational table?</strong> Corrections have rich relationships — the same equipment type appears across dozens of bids, a corrected size on one bid informs the confidence of a similar item on the next, and RFI resolution patterns cluster by customer, domain (refrigeration vs. HVAC), and drawing type. A graph lets us traverse these relationships in a single query; a relational JOIN chain across <code>item_edits → bid_items → bids → customers</code> would be slow and miss the cross-bid similarity signal entirely.</div>
+
+  <!-- Graph schema -->
+  <h3>Graph schema — nodes &amp; relationships</h3>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#f0fdf4;color:#10b981">🕸️</div><div><h4>Node types</h4><p>what lives in Neo4j</p></div></div>
+  <div class="table-wrapper"><table><thead><tr><th>Node label</th><th>Key properties</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td><code>BidItem</code></td><td>item_id, type, size, qty, status (N/E/R/X), confidence, source_page, bid_id</td><td>Every extracted line item — from Zeus, Gemini, or Claude</td></tr>
+    <tr><td><code>Equipment</code></td><td>name, type, manufacturer, capacity, unit</td><td>Canonical equipment entity — normalised across bids</td></tr>
+    <tr><td><code>RFI</code></td><td>rfi_id, field, zeus_value, gemini_value, claude_value, resolved_value, resolved_by</td><td>Each disagreement or flag raised during reconciliation</td></tr>
+    <tr><td><code>Correction</code></td><td>correction_id, field, old_value, new_value, estimator_id, timestamp, confidence</td><td>Estimator's explicit override of an AI-extracted field</td></tr>
+    <tr><td><code>Bid</code></td><td>bid_id, customer_id, domain, stage, prompt_version</td><td>Bid context — links items to customer and prompt</td></tr>
+    <tr><td><code>Customer</code></td><td>customer_id, name, domain</td><td>Tenant — corrections cluster by customer trade patterns</td></tr>
+    <tr><td><code>PromptVersion</code></td><td>version, hash, model, created_at</td><td>Tracks which prompt produced which extractions</td></tr>
+  </tbody></table></div></div>
+
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">🔗</div><div><h4>Relationship types</h4><p>what connects them</p></div></div>
+  <div class="table-wrapper"><table><thead><tr><th>Relationship</th><th>Direction</th><th>Meaning</th></tr></thead><tbody>
+    <tr><td><code>BELONGS_TO</code></td><td>(BidItem)→(Bid)</td><td>Item is part of this bid</td></tr>
+    <tr><td><code>REFERS_TO</code></td><td>(BidItem)→(Equipment)</td><td>Item maps to a canonical equipment entity</td></tr>
+    <tr><td><code>RAISED_RFI</code></td><td>(BidItem)→(RFI)</td><td>This item triggered a flag or disagreement</td></tr>
+    <tr><td><code>RESOLVED_BY</code></td><td>(RFI)→(Correction)</td><td>Estimator resolved the RFI with this correction</td></tr>
+    <tr><td><code>SIMILAR_TO</code></td><td>(BidItem)↔(BidItem) {score}</td><td>Cross-bid similarity — same equipment, similar context</td></tr>
+    <tr><td><code>CORRECTED_IN</code></td><td>(Equipment)→(Bid)</td><td>This equipment type was corrected in this bid (frequency signal)</td></tr>
+    <tr><td><code>PRODUCED_BY</code></td><td>(BidItem)→(PromptVersion)</td><td>Which prompt version extracted this item</td></tr>
+    <tr><td><code>PROMOTED_TO_GOLDEN</code></td><td>(Correction)→(PromptVersion)</td><td>Correction was folded into this prompt version's few-shot examples</td></tr>
+  </tbody></table></div></div>
+
+  <!-- Write path -->
+  <h3>Write path — feedback into the graph</h3>
+  <div class="df">
+    <div class="df-title">How estimator feedback flows into Neo4j</div>
+    <div class="df-col">
+      <div class="df-node" style="border-color:var(--stage-analyze)">Estimator opens a flagged item or RFI in the UI</div>
+      <div class="df-arrow">↓</div>
+      <div class="df-split">
+        <div class="df-panel">
+          <div class="ph">Resolves RFI</div>
+          <div class="df-node" style="border-color:#f97316">Picks correct value from Zeus / Gemini / Claude output, or enters manually</div>
+          <div class="df-arrow">↓</div>
+          <div class="df-blob">RFI node → <code>RESOLVED_BY</code> → Correction node written to Neo4j</div>
+        </div>
+        <div class="df-panel">
+          <div class="ph">Edits a field directly</div>
+          <div class="df-node" style="border-color:#8b5cf6">Overrides AI-extracted value (size, qty, status)</div>
+          <div class="df-arrow">↓</div>
+          <div class="df-blob">Correction node + <code>item_edits</code> row written; BidItem updated</div>
+        </div>
+      </div>
+      <div class="df-arrow">↓ both paths</div>
+      <div class="df-node" style="border-color:#10b981">Neo4j: <code>SIMILAR_TO</code> edges computed — links this BidItem to historically similar items across bids</div>
+      <div class="df-arrow">↓</div>
+      <div class="df-node" style="border-color:#6366f1">Correction confidence score updated — multiple estimators agreeing on the same correction raises confidence</div>
+    </div>
+  </div>
+
+  <!-- Read path -->
+  <h3>Read path — graph grounds future extractions</h3>
+  <p>Before Zeus and the verifiers are called on a new page, the worker queries Neo4j for the most similar historical <code>BidItem</code> nodes. The top-N results — including their corrections and resolved values — are injected into the extraction prompt as <strong>dynamic few-shot examples</strong>. This means the models learn from real estimator corrections on real ClimatePros bids, not just from static training examples.</p>
+  <pre><code><span class="cmt">// Cypher — find similar historical items to ground extraction</span>
+MATCH (b:BidItem {type: $equipment_type})-[:SIMILAR_TO]-(similar:BidItem)
+      -[:RAISED_RFI]->(rfi:RFI)-[:RESOLVED_BY]->(c:Correction)
+WHERE similar.customer_id = $customer_id
+  AND c.confidence > 0.8
+RETURN similar.size, similar.qty, similar.status,
+       c.field, c.old_value, c.new_value, c.confidence
+ORDER BY c.confidence DESC
+LIMIT 5
+
+<span class="cmt">// Result injected as few-shot context into Zeus + verifier prompts:</span>
+<span class="cmt">// "For a {type} in this customer's bids, estimators previously corrected</span>
+<span class="cmt">//  size from {old} to {new} with high confidence — use as reference."</span></code></pre>
+
+  <pre><code><span class="cmt">// Cypher — find equipment types most frequently corrected for this customer</span>
+MATCH (e:Equipment)-[:CORRECTED_IN]->(bid:Bid {customer_id: $customer_id})
+RETURN e.type, e.name, count(*) AS correction_count
+ORDER BY correction_count DESC
+LIMIT 10
+<span class="cmt">// Used to raise the reconciler confidence threshold for high-correction equipment types</span></code></pre>
+
+  <!-- Promotion to golden set -->
+  <h3>Promotion path — corrections become golden-set examples</h3>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#fdf1e7;color:#f97316">⭐</div><div><h4>High-confidence corrections → golden set → prompt update</h4><p>closed feedback loop</p></div></div>
+  <p>On a scheduled cadence (weekly review), a promotion job queries Neo4j for corrections that meet the promotion threshold:</p>
+  <pre><code><span class="cmt">// Cypher — find corrections ready for golden-set promotion</span>
+MATCH (c:Correction)
+WHERE c.confidence >= <span class="num">0.9</span>            <span class="cmt">// multiple estimators agreed</span>
+  AND NOT (c)-[:PROMOTED_TO_GOLDEN]->() <span class="cmt">// not yet promoted</span>
+  AND c.timestamp > datetime() - duration(<span class="str">'P30D'</span>)
+RETURN c ORDER BY c.confidence DESC</code></pre>
+  <p>Promoted corrections are converted into <strong>few-shot examples</strong> appended to the relevant prompt template, triggering a new <code>prompt_version</code>. That version must clear the <strong>CI eval gate</strong> (§13 — recall ≥ 95%, size-match ≥ 90%) before it is promoted to production. The <code>PROMOTED_TO_GOLDEN</code> relationship is then written back to Neo4j so the correction is not re-promoted on the next cycle.</p></div>
+
+  <!-- Full loop diagram -->
+  <h3>End-to-end learning loop</h3>
+  <div class="df">
+    <div class="df-title">RFI / Flag → Neo4j → Grounding → Better Extraction</div>
+    <div class="df-col">
+      <div class="df-node" style="border-color:var(--stage-analyze)">AI extracts bid items → reconciler raises RFIs + flags</div>
+      <div class="df-arrow">↓</div>
+      <div class="df-node" style="border-color:#f97316">Estimator resolves RFIs, corrects flags in UI</div>
+      <div class="df-arrow">↓ write path</div>
+      <div class="df-node" style="border-color:#10b981;background:#f0fdf4"><strong>Neo4j — Correction nodes written · SIMILAR_TO edges computed</strong></div>
+      <div class="df-arrow">↓ two parallel paths</div>
+      <div class="df-split">
+        <div class="df-panel">
+          <div class="ph">Immediate — next extraction</div>
+          <div class="df-node" style="border-color:#6366f1">Worker queries Neo4j → top-N similar corrections injected as few-shot context into Zeus + verifier prompts</div>
+          <div class="df-arrow">↓</div>
+          <div class="df-blob">Higher extraction accuracy on similar equipment types</div>
+        </div>
+        <div class="df-panel">
+          <div class="ph">Scheduled — weekly promotion</div>
+          <div class="df-node" style="border-color:#8b5cf6">High-confidence corrections promoted → new prompt_version → CI eval gate</div>
+          <div class="df-arrow">↓</div>
+          <div class="df-blob">Improved baseline for all future bids</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Integration summary -->
+  <h3>Integration points with the rest of the system</h3>
+  <div class="table-wrapper"><table><thead><tr><th>System</th><th>How it connects to Neo4j</th></tr></thead><tbody>
+    <tr><td><strong>Celery worker (page_task)</strong></td><td>Queries Neo4j before calling Zeus — fetches top-N similar corrections as few-shot context</td></tr>
+    <tr><td><strong>Reconciler</strong></td><td>Writes <code>RFI</code> nodes and <code>RAISED_RFI</code> edges after merging Zeus + Gemini + Claude outputs</td></tr>
+    <tr><td><strong>API — review endpoints</strong></td><td>Writes <code>Correction</code> nodes and <code>RESOLVED_BY</code> edges when estimator submits an RFI resolution or field edit</td></tr>
+    <tr><td><strong>PostgreSQL</strong></td><td><code>item_edits</code> remains the authoritative audit log; Neo4j holds the relationship graph for querying — the two are kept in sync via the same write transaction</td></tr>
+    <tr><td><strong>CI / eval gate (§13)</strong></td><td>Promotion job runs Cypher to find ready corrections → generates new prompt version → CI gate must pass before production deploy</td></tr>
+    <tr><td><strong>Observability (§14)</strong></td><td>Neo4j query latency and promotion job results logged to App Insights; graph size (node/edge counts) tracked as a KPI</td></tr>
+  </tbody></table></div>
 </section>
 
 <div style="margin-top:60px;padding:24px;border-top:1px solid var(--border);text-align:center;color:var(--text-muted);font-size:13px">
