@@ -648,7 +648,7 @@
     <div class="tech-card"><div class="tech-icon">📥</div><div class="tech-name">Multi-format Intake</div><div class="tech-ver">PDF/DOC/CAD/scans/photos</div><div class="tech-role">Native text or OCR · quality-gated</div></div>
     <div class="tech-card"><div class="tech-icon">🏛️</div><div class="tech-name">Zeus-primary Takeoff</div><div class="tech-ver">Zeus extract + Gemini/Claude verify</div><div class="tech-role">Project facts · items · condensers · RFIs</div></div>
     <div class="tech-card"><div class="tech-icon">💵</div><div class="tech-name">Estimate</div><div class="tech-ver">rate card + equipment rate sheets</div><div class="tech-role">Honest + draft totals</div></div>
-    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review &amp; Approval</div><div class="tech-ver">state machine</div><div class="tech-role">Estimator → reviewer/manager sign-off</div></div>
+    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review &amp; Approval</div><div class="tech-ver">state machine</div><div class="tech-role">Estimator → manager review &amp; feedback</div></div>
     <div class="tech-card"><div class="tech-icon">📤</div><div class="tech-name">Deliverables</div><div class="tech-ver">Excel → FieldJetX</div><div class="tech-role">+ in-app summary PDF (not sent)</div></div>
     <div class="tech-card"><div class="tech-icon">👥</div><div class="tech-name">Client Management</div><div class="tech-ver">multi-tenant</div><div class="tech-role">History · search · reuse · audit</div></div>
     <div class="tech-card"><div class="tech-icon">🔐</div><div class="tech-name">Security</div><div class="tech-ver">FJX Auth · Session tokens · Feature flags</div><div class="tech-role">FJX SecJobRoles: ADM / MGR / USR / LOA</div></div>
@@ -661,12 +661,12 @@
   <div class="arch">
   <div class="arch-layer layer-user">
     <div class="arch-title">User Layer &mdash; roles</div>
-    <div class="arch-row"><div class="arch-box ">👤 Estimator<small>creates &amp; submits bids</small></div> <div class="arch-box ">🔎 Reviewer<small>checks takeoff &amp; estimate</small></div> <div class="arch-box ">🧑‍💼 Manager<small>approves / signs off</small></div> <div class="arch-box ">⚙️ Admin<small>users, roles &amp; rate cards</small></div></div>
+    <div class="arch-row"><div class="arch-box ">👤 Estimator<small>creates &amp; submits bids</small></div> <div class="arch-box ">🧑‍💼 Manager<small>reviews &amp; adds feedback</small></div> <div class="arch-box ">⚙️ Admin<small>users, roles &amp; rate cards</small></div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-present">
     <div class="arch-title">Presentation &mdash; Angular module embedded in FieldJetX</div>
-    <div class="arch-row"><div class="arch-box ">📈 Dashboard<small>KPIs &amp; bid overview</small></div> <div class="arch-box ">🧾 Bid Stepper<small>upload → review → deliver</small></div> <div class="arch-box ">✅ Review/Approval<small>check &amp; sign-off screens</small></div> <div class="arch-box ">👥 Clients<small>customer records &amp; history</small></div> <div class="arch-box ">💲 Pricing Admin<small>manage rate cards &amp; sheets</small></div></div>
+    <div class="arch-row"><div class="arch-box ">📈 Dashboard<small>KPIs &amp; bid overview</small></div> <div class="arch-box ">🧾 Bid Stepper<small>upload → review → deliver</small></div> <div class="arch-box ">✅ Review<small>manager feedback screen</small></div> <div class="arch-box ">👥 Clients<small>customer records &amp; history</small></div> <div class="arch-box ">💲 Pricing Admin<small>manage rate cards &amp; sheets</small></div></div>
   </div>
   <div class="arch-arrow">&#8597; &nbsp;<span style="font-size:12px">HTTPS · FJX Session Token (GUID — usersessions table)</span></div>
   <div class="arch-layer layer-api">
@@ -678,7 +678,7 @@
   <div class="arch-layer layer-logic">
     <div class="arch-title">Domain Services (Azure Container Apps)</div>
     <div class="arch-row"><div class="arch-box ">📥 Intake<small>convert · render · text/vision</small></div> <div class="arch-box ">🤖 Analyze<small>Zeus extract + verify ensemble</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic merge</small></div> <div class="arch-box ">💵 Estimate<small>rate card + FieldJetX history (Zeus)</small></div></div>
-    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing<small>material · labor · equipment rates</small></div> <div class="arch-box ">✅ Review/Approval<small>sign-off state machine</small></div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients<small>records, history &amp; reuse</small></div></div>
+    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing<small>material · labor · equipment rates</small></div> <div class="arch-box ">✅ Review<small>manager feedback state machine</small></div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients<small>records, history &amp; reuse</small></div></div>
   </div>
   <div class="arch-arrow">&#8595;</div>
   <div class="arch-layer layer-worker">
@@ -717,7 +717,7 @@
   <div class="flow-step" style="border-left-color:var(--stage-upload)"><div class="flow-num" style="background:var(--stage-upload)">1</div><div class="flow-content"><h4>Upload &amp; Normalise <span style="font-size:12px;font-weight:600;color:var(--text-muted)">— deterministic, no AI</span></h4><p>Detect format → convert everything to PDF (DOC via LibreOffice, CAD via exporter, images wrapped) → render each page (200 DPI, auto-bumped to 300 for dense schedule/E-size sheets) → obtain the text by the most accurate route: <strong>native text extraction for born-digital (vector) PDFs</strong> (exact + free); scans, photos and image-only pages carry no text layer, so they are marked <code>needs_vision</code> and <strong>read directly by Zeus vision in Step 2</strong> (more accurate than OCR on messy drawings) → <strong>quality gate</strong> flags blank/blurry/garbled pages instead of passing them silently. Uniform per-page images (+ native text where present) land in Blob + PostgreSQL so the models see consistent inputs for <em>every</em> document type.</p></div></div>
   <div class="flow-step" style="border-left-color:var(--stage-analyze)"><div class="flow-num" style="background:var(--stage-analyze)">2</div><div class="flow-content"><h4>Analyze — Zeus-primary takeoff + verify ensemble (async worker)</h4><p><strong>Zeus extracts</strong> into a constrained JSON schema (validated + auto-retried), guided by a domain prompt + few-shot examples and <strong>grounded in the client's prior FieldJetX bids</strong> (real equipment names, statuses and quantities), each item tied to its source page and read from high-DPI schedule crops. <strong>Gemini and Claude then independently re-sweep for missed items</strong> (protects recall) and re-check the money fields (sizes, quantities, N/E/R/X status), assigning confidence and flagging inconsistencies — never a silent overwrite. A <strong>deterministic reconciler</strong> merges all three: agreement boosts confidence, disagreements/misses become RFIs. No prices.</p></div></div>
   <div class="flow-step" style="border-left-color:var(--stage-estimate)"><div class="flow-num" style="background:var(--stage-estimate)">3</div><div class="flow-content"><h4>Estimate</h4><p>Deterministic engine maps each item to a rate line (no rate → <code>unpriced</code> flag, never $0), prices by status (N/E/R/X) in <code>Decimal</code>, and pins the rate-card version → honest + draft totals, fully re-runnable. <strong>Rate lines &amp; formula inputs are drawn from the client's FieldJetX bid history via Zeus</strong> — but every dollar is computed by code, never emitted by a model. No model call in this step.</p></div></div>
-  <div class="flow-step" style="border-left-color:#14b8a6"><div class="flow-num" style="background:#14b8a6">4</div><div class="flow-content"><h4>Review &amp; Approval</h4><p>Estimator submits; reviewer/manager approves or rejects with sign-off; audit-logged state machine.</p></div></div>
+  <div class="flow-step" style="border-left-color:#14b8a6"><div class="flow-num" style="background:#14b8a6">4</div><div class="flow-content"><h4>Review</h4><p>Estimator submits; manager adds comments and feedback; estimator makes any adjustments and finalises; audit-logged state machine.</p></div></div>
   <div class="flow-step" style="border-left-color:var(--stage-quote)"><div class="flow-num" style="background:var(--stage-quote)">5</div><div class="flow-content"><h4>Deliver</h4><p>Excel pushed to FieldJetX (the only file sent); in-app summary PDF (findings + bid details) generated for view/download.</p></div></div>
 
   <h3>Step 1 in detail — Intake &amp; Normalisation data flow</h3>
@@ -864,7 +864,7 @@
     <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/bids/{id}/takeoff</code></td><td>project · items · condensers · rfis</td></tr>
     <tr><td><span class="badge badge-patch">PATCH</span></td><td><code>/api/bids/{id}/items/{item_id}</code></td><td>Edit an extracted item</td></tr>
     <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/estimate</code></td><td>Deterministic pricing</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/review</code></td><td>Submit / approve / reject</td></tr>
+    <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/review</code></td><td>Submit manager feedback / comments</td></tr>
     <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/bids/{id}/quote</code></td><td>Push Excel to FieldJetX; render summary PDF</td></tr>
     <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/customers[/{id}][/bids]</code></td><td>Client management</td></tr>
   </tbody></table></div>
@@ -888,8 +888,8 @@
   <span class="str">"currency"</span>: <span class="str">"USD"</span>, <span class="str">"rate_card_version"</span>: <span class="str">"2026.02"</span>, <span class="str">"unpriced"</span>: <span class="num">3</span> }
 
 <span class="cmt">// POST /api/bids/{id}/review  → 200</span>
-{ <span class="str">"action"</span>: <span class="str">"approve"</span>, <span class="str">"note"</span>: <span class="str">"sizes verified"</span> }
-<span class="cmt">// transitions in_review → approved; writes audit_log; 409 if not in_review or open RFIs</span>
+{ <span class="str">"note"</span>: <span class="str">"sizes verified"</span> }
+<span class="cmt">// manager adds feedback note; writes audit_log; 409 if not in_review</span>
 
 <span class="cmt">// POST /api/bids/{id}/quote  → 200   (push Excel to FieldJetX + render PDF)</span>
 { <span class="str">"fieldjetx"</span>: { <span class="str">"status"</span>: <span class="str">"pushed"</span>, <span class="str">"external_ref"</span>: <span class="str">"FJX-…"</span> },
@@ -932,7 +932,7 @@
 
 <section id="ai">
   <h2>10. Applied-AI Engineering &amp; Governance</h2>
-  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📊</div><div><h4>Observability &amp; audit trail</h4><p>per-call telemetry</p></div></div><p>Every model call — <strong>Zeus, Gemini and Claude alike</strong> — logs bid_id, model+version, prompt_version, tokens, latency, cost to <code>ai_calls</code> + App Insights; raw outputs stored per run → chain <code>bid → prompt_version + raw outputs (all 3 models) → reconciled items → estimate → approver</code>. Zeus is called over a documented API contract so its per-call telemetry lands in the same trail as the verifiers.</p></div>
+  <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">📊</div><div><h4>Observability &amp; audit trail</h4><p>per-call telemetry</p></div></div><p>Every model call — <strong>Zeus, Gemini and Claude alike</strong> — logs bid_id, model+version, prompt_version, tokens, latency, cost to <code>ai_calls</code> + App Insights; raw outputs stored per run → chain <code>bid → prompt_version + raw outputs (all 3 models) → reconciled items → estimate → manager feedback</code>. Zeus is called over a documented API contract so its per-call telemetry lands in the same trail as the verifiers.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#f2ecfd;color:#8b5cf6">🧪</div><div><h4>Evaluation</h4><p>golden set + CI gate</p></div></div><p>Versioned golden set (refrigeration) scores recall, status accuracy, size-match; evals run in CI and <strong>gate every prompt/model change</strong>; the 0.6 reconciler threshold is tuned against it. <strong>The gate is a hard pass/fail with explicit thresholds</strong> — a change is blocked from promotion unless it meets: <strong>extraction recall ≥ 95%</strong>, <strong>size-match ≥ 90%</strong>, <strong>status (N/E/R/X) accuracy ≥ 95%</strong>, and <strong>no metric regresses more than 2 percentage points</strong> below the current production baseline for that <code>prompt_version</code>. Thresholds mirror the §2 success criteria so CI enforces the product targets directly.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#e7f6ee;color:#10b981">🔁</div><div><h4>Feedback loop</h4><p>edit capture</p></div></div><p>Estimator corrections captured in <code>item_edits</code>, reviewed on a cadence, folded into the golden set to improve prompts.</p></div>
   <div class="card"><div class="card-header"><div class="icon" style="background:#eef0fd;color:#6366f1">🏷️</div><div><h4>Prompt versioning &amp; rollout</h4><p>every change is addressable</p></div></div><p>Prompts (system + few-shot) live in the repo as versioned templates; a content hash produces the <code>prompt_version</code> stamped on every <code>bids</code> row and <code>ai_calls</code> record — so any estimate maps to the exact prompt that produced it. Changes ship <strong>behind a feature flag</strong>, must clear the <strong>eval gate</strong> (§13) before promotion, and can be <strong>rolled back instantly</strong> by flipping the flag to the prior version (no redeploy). Golden-set scores are tracked per <code>prompt_version</code> for regression comparison.</p></div>
@@ -960,8 +960,8 @@
   <div class="tech-grid">
     <div class="tech-card"><div class="tech-icon">🔐</div><div class="tech-name">FJX Session Validation</div><div class="tech-ver">usersessions · GUID</div><div class="tech-role">Token checked on every API request; expired or unknown sessions → 401</div></div>
     <div class="tech-card"><div class="tech-icon">🏷️</div><div class="tech-name">Feature-gate AuthZ</div><div class="tech-ver">UserFeatureXref</div><div class="tech-role">Per-route feature code check; Rights (1 = read, higher = write/admin)</div></div>
-    <div class="tech-card"><div class="tech-icon">👮</div><div class="tech-name">SecJobRoles</div><div class="tech-ver">ADM · MGR · USR · LOA</div><div class="tech-role">Maps to estimator / reviewer-manager / admin / no-access</div></div>
-    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Approval</div><div class="tech-ver">separation of duty</div><div class="tech-role">Approver ≠ estimator; audit-logged</div></div>
+    <div class="tech-card"><div class="tech-icon">👮</div><div class="tech-name">SecJobRoles</div><div class="tech-ver">ADM · MGR · USR · LOA</div><div class="tech-role">Maps to estimator / manager (review + comments) / admin / no-access</div></div>
+    <div class="tech-card"><div class="tech-icon">✅</div><div class="tech-name">Review</div><div class="tech-ver">separation of duty</div><div class="tech-role">Manager ≠ estimator; audit-logged</div></div>
     <div class="tech-card"><div class="tech-icon">🔑</div><div class="tech-name">Secrets</div><div class="tech-ver">Key Vault</div><div class="tech-role">No secrets in config/images; FJX IntegrationToken stored here</div></div>
     <div class="tech-card"><div class="tech-icon">🕸️</div><div class="tech-name">Network</div><div class="tech-ver">VNet + Private Endpoints</div><div class="tech-role">Data services not public</div></div>
   </div>
