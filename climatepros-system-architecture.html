@@ -256,7 +256,10 @@ h1{
 
       <div class="box bx-orange" id="b-api">
         <div class="box-t">⚡ FastAPI + WebSocket API <span class="new">NEW</span></div>
-        <div class="box-s">REST API + async WebSocket · RBAC per route · Uvicorn<br/>FJX session validation on every request · Swagger at /api/docs</div>
+        <div class="box-s">REST API · RBAC per route · Uvicorn · Swagger at /api/docs<br/>FJX session validation on every request<br/>
+          <b>Job status (either):</b> WebSocket <code>/ws/jobs/{job_id}</code> for real-time push
+          &nbsp;·&nbsp; HTTP polling <code>GET /api/jobs/{job_id}</code> as fallback or alternative
+        </div>
       </div>
 
       <div class="box bx-orange" id="b-sb">
