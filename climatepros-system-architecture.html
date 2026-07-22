@@ -78,6 +78,10 @@ h1{
 .g-onprem{ border:2px dashed #8050d0; background:#f5f0ff; }
 .g-onprem .grp-title{ color:#5e2dab; }
 
+.g-verifiers{ border:2px dashed #0891b2; background:#ecfeff; }
+.g-verifiers .grp-title{ color:#0e7490; }
+.bx-cyan{ border:1.5px solid #0891b2; }
+
 /* ── component boxes ─────────────────────────────────────────── */
 .box{
   background:#fff;
@@ -305,7 +309,25 @@ h1{
       </div>
     </div>
 
-    <!-- PRIVATE MODEL INFRA -->
+    <!-- CLOUD AI VERIFIERS -->
+    <div class="grp g-verifiers" id="g-verifiers">
+      <div class="grp-title">Cloud AI Verifiers<span class="grp-sub">suggested for accuracy · experimental · subject to change</span></div>
+
+      <div class="row2">
+        <div class="box bx-cyan" id="b-gemini">
+          <div class="box-t">✨ Gemini 3.5 Flash <span class="exp">Experimental</span></div>
+          <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
+        </div>
+        <div class="box bx-cyan" id="b-claude">
+          <div class="box-t">🌟 Claude Fable 5 <span class="exp">Experimental</span></div>
+          <div class="box-s">Anthropic API enterprise · cloud API<br/>≤30d retention · DPA · not for training<br/>Higher token usage — can be swapped based on cost &amp; accuracy</div>
+        </div>
+      </div>
+
+      <span class="note">Not on-prem · called via cloud APIs to cross-verify on-prem Zeus extraction for higher accuracy · either model can be replaced or skipped</span>
+    </div>
+
+    <!-- PRIVATE MODEL INFRA (on-prem, Zeus only) -->
     <div class="grp g-onprem" id="g-onprem">
       <div class="grp-title">Private Model Infra · ClimatePros Client<span class="grp-sub">on-prem · Mac Studio "Tundra"</span></div>
 
@@ -314,18 +336,7 @@ h1{
         <div class="box-s">Claude Sonnet 4.6 · client-operated · FieldJetX-linked<br/>Grounded in prior FJX bids · constrained JSON schema output<br/><span class="warn">💡 Scaling path available for higher bid volumes</span></div>
       </div>
 
-      <div class="row2">
-        <div class="box bx-purple" id="b-gemini">
-          <div class="box-t">✨ Gemini 3.5 Flash <span class="exp">Experimental</span></div>
-          <div class="box-s">Verifier · Google Vertex AI<br/>region-pinned · DPA · no prompt logging</div>
-        </div>
-        <div class="box bx-purple" id="b-claude">
-          <div class="box-t">🌟 Claude Fable 5 <span class="exp">Experimental</span></div>
-          <div class="box-s">Verifier · Anthropic API enterprise<br/>≤30d retention · DPA · not for training<br/>Higher token usage — model can be adjusted based on cost &amp; accuracy</div>
-        </div>
-      </div>
-
-      <span class="note">Models never emit prices · all pricing = pure deterministic code · drawings in delimited data channel only<br/>* Verifier models are experimental — subject to change based on cost, accuracy, and availability</span>
+      <span class="note">Models never emit prices · all pricing = pure deterministic code · drawings in delimited data channel only</span>
     </div>
 
   </div><!-- /col-r -->
@@ -338,6 +349,7 @@ h1{
     <marker id="ah-orange" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#d97c1a"/></marker>
     <marker id="ah-purple" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#8050d0"/></marker>
     <marker id="ah-teal"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#29aaa0"/></marker>
+    <marker id="ah-cyan"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#0891b2"/></marker>
     <marker id="ah-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#888"/></marker>
   </defs>
 </svg>
@@ -346,7 +358,7 @@ h1{
 
 <script>
 const NS='http://www.w3.org/2000/svg';
-const COLS={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
+const COLS={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',cyan:'#0891b2',gray:'#888'};
 const FS=8.5; // label font-size px
 
 function rc(id){
@@ -460,15 +472,15 @@ function draw(){
   // pill to the LEFT of the vertical segment — stays inside diagram boundary
   pill(svg, rX-52, (wk.cy+zeus.cy)/2, 'extract', 'purple');
 
-  /* ── 10. Workers → Gemini (elbow, purple dashed) ─────────── */
+  /* ── 10. Workers → Gemini (elbow, cyan dashed) ─────────────── */
   const gFromX=wk.l+wk.w*0.28, gMidX=(gFromX+gem.cx)/2;
-  path(svg,`M${gFromX},${wk.b+14} L${gMidX},${wk.b+14} L${gMidX},${gem.t-6}`,'purple',true);
-  pill(svg, gMidX, (wk.b+14+gem.t)/2, 'verify', 'purple');
+  path(svg,`M${gFromX},${wk.b+14} L${gMidX},${wk.b+14} L${gMidX},${gem.t-6}`,'cyan',true);
+  pill(svg, gMidX, (wk.b+14+gem.t)/2, 'verify', 'cyan');
 
-  /* ── 11. Workers → Claude (elbow, purple dashed) ─────────── */
+  /* ── 11. Workers → Claude (elbow, cyan dashed) ──────────────── */
   const cFromX=wk.l+wk.w*0.72, cMidX=(cFromX+cla.cx)/2;
-  path(svg,`M${cFromX},${wk.b+14} L${cMidX},${wk.b+14} L${cMidX},${cla.t-6}`,'purple',true);
-  pill(svg, cMidX, (wk.b+14+cla.t)/2, 'verify', 'purple');
+  path(svg,`M${cFromX},${wk.b+14} L${cMidX},${wk.b+14} L${cMidX},${cla.t-6}`,'cyan',true);
+  pill(svg, cMidX, (wk.b+14+cla.t)/2, 'verify', 'cyan');
 
   /* ── 12. API → Blob  (elbow left, cross-column, blue dashed) */
   const blobMidX = api.l-(api.l-blob.r)*0.5;
