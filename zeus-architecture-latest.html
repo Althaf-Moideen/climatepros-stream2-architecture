@@ -1056,6 +1056,42 @@
     <tr><td>High</td><td>$1.45</td><td>500</td><td>$725</td><td>$1,510</td><td><strong>≈ $2,240</strong></td><td>$4.48</td></tr>
   </tbody></table></div>
   <div class="callout"><strong>Levers (in priority order):</strong> ① gate/skip the Fable 5 verifier by bid value (largest single lever — ~98% of model cost) · ② downscale extractor input images / tile only dense schedule regions · ③ cache extraction for unchanged re-submissions · ④ right-size worker autoscale floors · ⑤ reserved-capacity / savings-plan discounts on steady infra. <strong>Note:</strong> infra dominates at low volume (fixed HA baseline); model cost dominates as bid volume scales — the crossover sits near the Expected row.</div>
+
+  <h3>Value Perspective</h3>
+
+  <h4 style="margin:18px 0 10px;font-size:13px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Cost vs. Manual Estimation</h4>
+  <div class="table-wrapper"><table><thead><tr><th></th><th>Manual Estimator</th><th>ClimatePros (Expected — 200 bids/mo)</th></tr></thead><tbody>
+    <tr><td>Time per bid</td><td>2–3 days</td><td>Under 5 minutes</td></tr>
+    <tr><td>Monthly cost</td><td>$3,000–$5,000 (salary, one person)</td><td>~$940 total</td></tr>
+    <tr><td>Cost per bid</td><td>$15–$25+</td><td><strong>~$4.70</strong></td></tr>
+    <tr><td>Works 24/7</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Audit trail</td><td>Manual, inconsistent</td><td>100% automated, immutable</td></tr>
+    <tr><td>Cross-verification</td><td>Single person review</td><td>Three AI models independently</td></tr>
+  </tbody></table></div>
+
+  <h4 style="margin:18px 0 10px;font-size:13px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">What is included at zero extra cost</h4>
+  <div class="callout" style="border-left-color:#10b981;background:#f0fdf4">
+    Because ClimatePros is embedded within FieldJetX, the following infrastructure components are <strong>reused at no additional cost</strong> to ClimatePros — the client is already paying for them:
+    <ul style="margin-top:10px;padding-left:18px;line-height:2">
+      <li><strong>Front Door + WAF</strong> — existing FJX edge security, TLS certificate reused</li>
+      <li><strong>App Gateway</strong> — existing FJX traffic routing, no separate provisioning</li>
+      <li><strong>VNet + Private Endpoints</strong> — existing FJX private network (vnet-fjx-prod-mi)</li>
+      <li><strong>Blob Storage</strong> — existing FJX account (cpfjxbackups); only incremental storage added (~$20/mo)</li>
+      <li><strong>FJX Auth</strong> — existing session token system, no extra licensing</li>
+      <li><strong>Azure AD / Entra ID</strong> — existing FJX identity, no new tenant required</li>
+    </ul>
+    The $800/month infrastructure figure covers <strong>only new components</strong> provisioned specifically for ClimatePros.
+  </div>
+
+  <h4 style="margin:18px 0 10px;font-size:13px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Volume efficiency — cost per bid at different volumes</h4>
+  <div class="table-wrapper"><table><thead><tr><th>Bids / month</th><th>AI cost / mo</th><th>Infra cost / mo</th><th>Total / mo</th><th>Cost per bid</th><th>Efficiency</th></tr></thead><tbody>
+    <tr><td>20 bids/mo</td><td>$14</td><td>$800</td><td>~$814</td><td>~$40.70</td><td>Low — infra dominates</td></tr>
+    <tr><td>80 bids/mo</td><td>$57</td><td>$400</td><td>~$457</td><td>~$5.71</td><td>Acceptable</td></tr>
+    <tr style="background:var(--primary-light);font-weight:600"><td>200 bids/mo ★ Sweet spot</td><td>$142</td><td>$800</td><td>~$942</td><td>~$4.70</td><td>Optimal</td></tr>
+    <tr><td>500 bids/mo</td><td>$725</td><td>$1,510</td><td>~$2,235</td><td>~$4.47</td><td>High efficiency</td></tr>
+  </tbody></table></div>
+  <div class="callout">Infrastructure cost is largely <strong>fixed regardless of volume</strong> — the more bids processed, the lower the cost per bid. The system becomes strongly cost-efficient at <strong>50+ bids/month</strong> and optimal at <strong>200+ bids/month</strong>. At very low volumes (&lt;20 bids/month) the fixed infrastructure baseline dominates and the per-bid cost rises significantly.</div>
+
 </section>
 
 <section id="events">
