@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ClimatePros Stream 2 — Blocks Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:#fff;
+    color:#1a1a1a;
+    padding:48px 56px;
+    max-width:820px;
+    margin:0 auto;
+  }
+
+  /* header */
+  .header{
+    border-bottom:3px solid #1a1a1a;
+    padding-bottom:20px;
+    margin-bottom:32px;
+  }
+  .header h1{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-.3px;
+    margin-bottom:6px;
+  }
+  .header p{
+    font-size:12px;
+    color:#666;
+    letter-spacing:.04em;
+  }
+
+  /* section */
+  .section{
+    margin-bottom:28px;
+  }
+  .section-title{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    padding:5px 10px;
+    border-radius:5px;
+    margin-bottom:12px;
+    display:inline-block;
+  }
+
+  /* colour themes per section */
+  .s-clients      .section-title{ background:#eef5ff; color:#2a5fa8; border:1px solid #4a8fd4; }
+  .s-existing     .section-title{ background:#e5effc; color:#1b4a8a; border:1px solid #4a8fd4; }
+  .s-new          .section-title{ background:#fff7ee; color:#b05e0d; border:1px solid #d97c1a; }
+  .s-verifiers    .section-title{ background:#ecfeff; color:#0e7490; border:1px solid #0891b2; }
+  .s-onprem       .section-title{ background:#f5f0ff; color:#5e2dab; border:1px solid #8050d0; }
+  .s-obs          .section-title{ background:#edfaf8; color:#1a7a72; border:1px solid #29aaa0; }
+
+  /* table */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th{
+    text-align:left;
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#888;
+    padding:6px 12px;
+    border-bottom:1px solid #e5e7eb;
+  }
+  td{
+    padding:11px 12px;
+    vertical-align:top;
+    border-bottom:1px solid #f0f0f0;
+    line-height:1.55;
+  }
+  tr:last-child td{ border-bottom:none; }
+  td:first-child{
+    font-weight:600;
+    font-size:12.5px;
+    width:220px;
+    white-space:nowrap;
+    color:#1a1a1a;
+  }
+  td:last-child{
+    color:#444;
+    font-size:12.5px;
+  }
+
+  /* zebra stripe */
+  tbody tr:nth-child(even) td{ background:#fafafa; }
+
+  /* colour left border per section */
+  .s-clients  tbody tr td:first-child{ border-left:3px solid #4a8fd4; }
+  .s-existing tbody tr td:first-child{ border-left:3px solid #4a8fd4; }
+  .s-new      tbody tr td:first-child{ border-left:3px solid #d97c1a; }
+  .s-verifiers tbody tr td:first-child{ border-left:3px solid #0891b2; }
+  .s-onprem   tbody tr td:first-child{ border-left:3px solid #8050d0; }
+  .s-obs      tbody tr td:first-child{ border-left:3px solid #29aaa0; }
+
+  /* footer */
+  .footer{
+    margin-top:40px;
+    padding-top:16px;
+    border-top:1px solid #e5e7eb;
+    font-size:10.5px;
+    color:#999;
+    display:flex;
+    justify-content:space-between;
+  }
+
+  /* print */
+  @media print{
+    body{ padding:32px 40px; }
+    .section{ page-break-inside:avoid; }
+    @page{ margin:20mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ClimatePros Stream 2 — Architecture Blocks Reference</h1>
+  <p>TECHJAYS &nbsp;·&nbsp; CLIMATEPROS ENGAGEMENT &nbsp;·&nbsp; STREAM 2 POC &nbsp;·&nbsp; Quick reference — what each block does</p>
+</div>
+
+<!-- CLIENTS -->
+<div class="section s-clients">
+  <div class="section-title">Clients</div>
+  <table>
+    <thead><tr><th>Block</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>FieldJetX Web App</td>
+        <td>The screen the estimator uses to upload drawings and review results</td>
+      </tr>
+      <tr>
+        <td>Manager / Admin</td>
+        <td>Manager adds feedback on bids · Admin manages users and rate cards</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- EXISTING FJX -->
+<div class="section s-existing">
+  <div class="section-title">Existing · FieldJetX Platform &nbsp;(Azure · unchanged · reused)</div>
+  <table>
+    <thead><tr><th>Block</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Front Door + WAF</td>
+        <td>The main gate — blocks bad traffic, handles secure connection (TLS)</td>
+      </tr>
+      <tr>
+        <td>App Gateway</td>
+        <td>The traffic director — routes requests to the right service</td>
+      </tr>
+      <tr>
+        <td>FJX Auth · Session Tokens</td>
+        <td>The security guard — checks who you are and what you're allowed to do on every single request</td>
+      </tr>
+      <tr>
+        <td>Blob Storage</td>
+        <td>The file cabinet — stores all uploaded drawings, generated quotes and images</td>
+      </tr>
+      <tr>
+        <td>VNet + Private Endpoints</td>
+        <td>The private tunnel — keeps all data off the public internet</td>
+      </tr>
+      <tr>
+        <td>Key Vault</td>
+        <td>The safe — stores all passwords, API keys and secrets; nothing is hardcoded in code</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- NEW INFRA -->
+<div class="section s-new">
+  <div class="section-title">New Infrastructure · This Project &nbsp;(Azure · Container Apps)</div>
+  <table>
+    <thead><tr><th>Block</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>FastAPI + WebSocket API</td>
+        <td>The brain — receives all requests, coordinates processing, sends back results via WebSocket or HTTP polling</td>
+      </tr>
+      <tr>
+        <td>Azure Service Bus</td>
+        <td>The queue — holds analyze jobs and delivers them to workers reliably; retries on failure</td>
+      </tr>
+      <tr>
+        <td>KEDA Workers · Celery 5.6</td>
+        <td>The workforce — scales up automatically, processes all pages in parallel, calls AI models, merges results, runs pricing</td>
+      </tr>
+      <tr>
+        <td>PostgreSQL 16</td>
+        <td>The main database — stores bids, extracted items, pricing, audit trail and every AI call log</td>
+      </tr>
+      <tr>
+        <td>Redis Cache</td>
+        <td>The short-term memory — tracks live job progress and caches repeated results to avoid re-running models</td>
+      </tr>
+      <tr>
+        <td>Knowledge Graph DB</td>
+        <td>The learning system — remembers past corrections to make future extractions smarter over time</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CLOUD AI VERIFIERS -->
+<div class="section s-verifiers">
+  <div class="section-title">Cloud AI Verifiers &nbsp;(suggested for accuracy · models subject to change)</div>
+  <table>
+    <thead><tr><th>Block</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Gemini 3.5 Flash ⚗ Experimental</td>
+        <td>Google's AI — double-checks Zeus's extraction independently via cloud API (Google Vertex AI)</td>
+      </tr>
+      <tr>
+        <td>Claude Fable 5 ⚗ Experimental</td>
+        <td>Anthropic's AI — does the same independent check simultaneously via cloud API; higher token usage, can be swapped based on cost</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ON-PREM -->
+<div class="section s-onprem">
+  <div class="section-title">Private Model Infra · ClimatePros Client &nbsp;(on-prem · Mac Studio "Tundra")</div>
+  <table>
+    <thead><tr><th>Block</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Zeus — Primary Extractor</td>
+        <td>The main AI on the client's own machine — reads drawings and pulls out quantities, equipment and statuses. Runs Claude Sonnet 4.6, grounded in prior FieldJetX bid history</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- OBSERVABILITY -->
+<div class="section s-obs">
+  <div class="section-title">Observability &amp; Tracing</div>
+  <table>
+    <thead><tr><th>Block</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Monitor + App Insights</td>
+        <td>The CCTV and alarm system — records logs, traces and metrics from every block; fires alerts when something goes wrong or costs spike</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  <span>TechJays · ClimatePros Stream 2 POC</span>
+  <span>To save as PDF: File → Print → Save as PDF</span>
+</div>
+
+</body>
+</html>
