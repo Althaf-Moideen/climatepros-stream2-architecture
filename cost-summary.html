@@ -470,6 +470,93 @@
     </div>
   </div>
 
+  <!-- Model comparison -->
+  <div class="section-label">What if we use a different AI model for verification?</div>
+
+  <div class="block" style="margin-bottom:16px">
+    <h3><span class="icon">💡</span> Context — how models are used</h3>
+    <ul>
+      <li><strong>Zeus (Claude Sonnet 4.6)</strong> — runs on the client's own machine (on-prem). No cloud charge regardless of which verifier model we pick.</li>
+      <li><strong>Gemini 3.5 Flash</strong> — stays the same at ~$0.01/bid in all scenarios. Very low cost.</li>
+      <li><strong>Cloud Verifier (currently Fable 5)</strong> — this is the only model we can swap to reduce cost. It accounts for ~98% of all AI spend.</li>
+    </ul>
+  </div>
+
+  <div class="vol-table" style="margin-bottom:16px">
+    <table>
+      <thead>
+        <tr>
+          <th>Verifier Model</th>
+          <th>Cost / bid</th>
+          <th>AI cost / mo<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(200 bids)</span></th>
+          <th>Total / mo<br><span style="font-weight:400;text-transform:none;letter-spacing:0">(incl. infra)</span></th>
+          <th>Monthly saving<br><span style="font-weight:400;text-transform:none;letter-spacing:0">vs Fable 5</span></th>
+          <th>Quality</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Claude Fable 5 <span class="tag ok-tag">Current</span></td>
+          <td>~$0.70</td>
+          <td>~$142</td>
+          <td>~$942</td>
+          <td>—</td>
+          <td>★★★★★ Highest</td>
+        </tr>
+        <tr>
+          <td>Claude Opus 4.8</td>
+          <td>~$0.55</td>
+          <td>~$112</td>
+          <td>~$912</td>
+          <td>~$30 saved</td>
+          <td>★★★★★ Very High</td>
+        </tr>
+        <tr class="sweet">
+          <td>Claude Sonnet 4.6 ★ <span class="tag sweet-tag">Best value</span></td>
+          <td>~$0.12</td>
+          <td>~$26</td>
+          <td>~$826</td>
+          <td>~$116 saved</td>
+          <td>★★★★ Good</td>
+        </tr>
+        <tr>
+          <td>Claude Haiku 4.5</td>
+          <td>~$0.02</td>
+          <td>~$6</td>
+          <td>~$806</td>
+          <td>~$136 saved</td>
+          <td>★★★ Basic</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout" style="margin-bottom:16px">
+    <strong>Note:</strong> Gemini 3.5 Flash (~$0.01/bid) and infra (~$800/mo) stay the same in all scenarios. Zeus runs on the client's machine — no cloud charge applies regardless of model choice.
+  </div>
+
+  <div class="two-col" style="margin-bottom:16px">
+    <div class="block">
+      <h3><span class="icon">✅</span> Recommended — Sonnet 4.6</h3>
+      <ul>
+        <li>Saves ~$116/month in AI costs vs Fable 5</li>
+        <li>Same model family already used by Zeus — proven for this use case</li>
+        <li>Reduces total cost from ~$4.70 to ~$4.13 per bid</li>
+        <li>Can upgrade to Fable 5 / Opus for high-value bids only</li>
+        <li>Good starting point for POC — switch up if accuracy needs improving</li>
+      </ul>
+    </div>
+    <div class="block">
+      <h3><span class="icon">⚠️</span> Trade-off to consider</h3>
+      <ul>
+        <li>Fable 5 and Opus give better accuracy on complex or unclear drawings</li>
+        <li>Haiku is cheapest but may miss items on dense refrigeration schedules</li>
+        <li>The real question is: how many bids need premium verification?</li>
+        <li>Hybrid approach — Sonnet by default, Fable 5 for bids above $X value — gives best cost/quality balance</li>
+      </ul>
+    </div>
+  </div>
+
   <!-- Cost levers -->
   <div class="section-label">Ways to reduce cost if needed</div>
   <div class="block">
