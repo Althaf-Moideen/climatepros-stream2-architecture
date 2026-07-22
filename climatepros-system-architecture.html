@@ -475,12 +475,14 @@ function draw(){
   /* ── 10. Workers → Gemini (elbow, cyan dashed) ─────────────── */
   const gFromX=wk.l+wk.w*0.28, gMidX=(gFromX+gem.cx)/2;
   path(svg,`M${gFromX},${wk.b+14} L${gMidX},${wk.b+14} L${gMidX},${gem.t-6}`,'cyan',true);
-  pill(svg, gMidX, (wk.b+14+gem.t)/2, 'verify', 'cyan');
+  // pin pill just below the Knowledge Graph DB box, not at arrow midpoint
+  pill(svg, gMidX, neo4j.b+16, 'verify', 'cyan');
 
   /* ── 11. Workers → Claude (elbow, cyan dashed) ──────────────── */
   const cFromX=wk.l+wk.w*0.72, cMidX=(cFromX+cla.cx)/2;
   path(svg,`M${cFromX},${wk.b+14} L${cMidX},${wk.b+14} L${cMidX},${cla.t-6}`,'cyan',true);
-  pill(svg, cMidX, (wk.b+14+cla.t)/2, 'verify', 'cyan');
+  // pin pill just below the Knowledge Graph DB box, not at arrow midpoint
+  pill(svg, cMidX, neo4j.b+16, 'verify', 'cyan');
 
   /* ── 12. API → Blob  (elbow left, cross-column, blue dashed) */
   const blobMidX = api.l-(api.l-blob.r)*0.5;
