@@ -439,9 +439,10 @@ function draw(){
   pill(svg, neoX+70, (redis.b+neo4j.t)/2, 'query · upsert', 'orange');
 
   /* ── 9. Workers → Zeus  (right-side elbow, purple) ──────── */
-  const rX=wk.r+26;
+  const rX=wk.r+16;
   path(svg,`M${wk.r},${wk.cy} L${rX},${wk.cy} L${rX},${zeus.cy} L${zeus.r+6},${zeus.cy}`,'purple');
-  pill(svg, rX+42, (wk.cy+zeus.cy)/2, 'extract', 'purple');
+  // pill to the LEFT of the vertical segment — stays inside diagram boundary
+  pill(svg, rX-52, (wk.cy+zeus.cy)/2, 'extract', 'purple');
 
   /* ── 10. Workers → Gemini (elbow, purple dashed) ─────────── */
   const gFromX=wk.l+wk.w*0.28, gMidX=(gFromX+gem.cx)/2;
