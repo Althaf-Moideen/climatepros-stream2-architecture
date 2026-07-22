@@ -239,6 +239,60 @@ h1{
   line-height:1.5;
 }
 
+/* ── Glossary section ────────────────────────────────────────── */
+.glossary{
+  width:1320px;
+  margin:36px auto 0;
+  border-top:2px solid #e0e0e0;
+  padding-top:28px;
+}
+.glossary-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#444;
+  margin-bottom:20px;
+}
+.glossary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0 32px;
+}
+.glossary-group{
+  margin-bottom:20px;
+}
+.glossary-group-label{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#b05e0d;
+  border-bottom:1.5px solid #d97c1a;
+  padding-bottom:5px;
+  margin-bottom:10px;
+}
+.glossary-row{
+  display:flex;
+  gap:8px;
+  padding:7px 0;
+  border-bottom:1px solid #f2f2f2;
+  align-items:baseline;
+}
+.glossary-row:last-child{ border-bottom:none; }
+.glossary-term{
+  font-size:11px;
+  font-weight:700;
+  color:#1a1a1a;
+  min-width:160px;
+  flex-shrink:0;
+}
+.glossary-def{
+  font-size:11px;
+  color:#555;
+  line-height:1.5;
+}
+
 /* ── SVG arrow overlay ───────────────────────────────────────── */
 .arrow-svg{
   position:absolute;
@@ -529,6 +583,151 @@ h1{
 
   </div><!-- /legend-grid -->
 </div><!-- /legend -->
+
+<!-- ══════════════════ GLOSSARY ══════════════════ -->
+<div class="glossary">
+  <div class="glossary-title">Technical Terms — Simple Explanations</div>
+  <div class="glossary-grid">
+
+    <!-- Col 1 -->
+    <div>
+      <div class="glossary-group">
+        <div class="glossary-group-label">FastAPI + WebSocket API</div>
+        <div class="glossary-row">
+          <span class="glossary-term">REST API</span>
+          <span class="glossary-def">A standard way for the app and server to talk to each other over the internet — like a waiter taking your order and bringing back food</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">WebSocket</span>
+          <span class="glossary-def">A live open connection between browser and server — server can push updates instantly without the browser asking repeatedly</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">HTTP Polling</span>
+          <span class="glossary-def">The browser asks the server "is it done yet?" every few seconds until it gets a final answer — simpler alternative to WebSocket</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">RBAC</span>
+          <span class="glossary-def">Role-Based Access Control — each user can only do what their role allows. Estimator uploads, Manager comments, Admin configures</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Uvicorn</span>
+          <span class="glossary-def">The engine that runs the FastAPI server — handles many requests at the same time efficiently</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">Azure Service Bus</div>
+        <div class="glossary-row">
+          <span class="glossary-term">Async job queue</span>
+          <span class="glossary-def">A waiting line for jobs — tasks are placed in the queue and picked up by workers one by one, so the user doesn't have to wait</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Dead-letter queue</span>
+          <span class="glossary-def">A separate holding area for jobs that failed too many times — kept for investigation instead of being silently lost</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">max_delivery_count</span>
+          <span class="glossary-def">Maximum number of times a failed job is retried before moving to the dead-letter queue — set to 3</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">lock_timeout</span>
+          <span class="glossary-def">How long a worker has to finish a job before it's released back to the queue for another worker to pick up — set to 5 minutes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 2 -->
+    <div>
+      <div class="glossary-group">
+        <div class="glossary-group-label">KEDA Workers · Celery</div>
+        <div class="glossary-row">
+          <span class="glossary-term">KEDA</span>
+          <span class="glossary-def">Kubernetes Event-Driven Autoscaling — automatically starts more workers when the queue is busy and shuts them down when idle</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">group() fan-out</span>
+          <span class="glossary-def">Splits one job into many smaller tasks running at the same time — all 15 pages of a drawing are processed simultaneously, not one by one</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">asyncio.gather()</span>
+          <span class="glossary-def">Fires multiple AI calls at exactly the same time — Gemini and Claude both verify a page simultaneously instead of waiting for each other</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">chord() fan-in</span>
+          <span class="glossary-def">Waits for all parallel page tasks to finish, then triggers the next step (Reconciler) — like waiting for everyone to finish before moving on</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Reconciler</span>
+          <span class="glossary-def">Merges the outputs from Zeus, Gemini and Claude into one final result — flags disagreements as items needing human review</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Deterministic pricing</span>
+          <span class="glossary-def">Pricing calculated by fixed rules and rate cards — no AI involved, same input always gives exactly the same price</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">PostgreSQL 16</div>
+        <div class="glossary-row">
+          <span class="glossary-term">HA + PITR</span>
+          <span class="glossary-def">High Availability + Point-In-Time Recovery — system stays up even if a server fails, and can be restored to any exact moment in history if needed</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">SQLAlchemy 2.0 async</span>
+          <span class="glossary-def">The tool that lets the application talk to the database without waiting — other tasks continue while the database responds</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 3 -->
+    <div>
+      <div class="glossary-group">
+        <div class="glossary-group-label">Redis Cache</div>
+        <div class="glossary-row">
+          <span class="glossary-term">Cache-hit</span>
+          <span class="glossary-def">When the same drawing is submitted again, the result is found in cache and returned instantly — no AI models are called again</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Zero model cost</span>
+          <span class="glossary-def">If a result is served from cache, no AI API is called — meaning no token charges for that request</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">Knowledge Graph DB</div>
+        <div class="glossary-row">
+          <span class="glossary-term">SIMILAR_TO edges</span>
+          <span class="glossary-def">Links between items across different bids that look alike — helps the system learn that similar drawings usually have similar results</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Few-shot grounding</span>
+          <span class="glossary-def">Showing the AI a few real past examples before asking it to extract — like giving someone 3 solved examples before an exam</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">prompt_version</span>
+          <span class="glossary-def">A unique ID stamped on every AI instruction set — so every result can be traced back to the exact instructions the AI was given</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Golden set</span>
+          <span class="glossary-def">A collection of verified correct examples used to test AI accuracy — like an answer key used to grade the AI before it goes live</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">General</div>
+        <div class="glossary-row">
+          <span class="glossary-term">DPA</span>
+          <span class="glossary-def">Data Processing Agreement — a legal contract ensuring the AI provider handles data safely and doesn't use it for training their models</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Constrained JSON schema</span>
+          <span class="glossary-def">A strict template the AI must fill in — ensures output is always structured and predictable, never free-form text</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /glossary-grid -->
+</div><!-- /glossary -->
 
 <script>
 const NS='http://www.w3.org/2000/svg';
