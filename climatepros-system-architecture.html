@@ -35,7 +35,7 @@ h1{
 /* ── two-column flex ─────────────────────────────────────────── */
 .cols{
   display:flex;
-  gap:52px;
+  gap:72px;
   align-items:stretch;
 }
 .col-l{ width:560px; flex-shrink:0; display:flex; flex-direction:column; gap:20px; }
@@ -165,6 +165,17 @@ h1{
   width:100%; height:100%;
   pointer-events:none;
   overflow:visible;
+}
+
+/* White halo behind every arrow label so it's readable on any background */
+#arrow-svg text{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  font-size:9px;
+  font-weight:700;
+  paint-order:stroke fill;
+  stroke:#fff;
+  stroke-width:5px;
+  stroke-linejoin:round;
 }
 </style>
 </head>
@@ -323,250 +334,174 @@ h1{
 </div><!-- /diagram -->
 
 <script>
+const NS='http://www.w3.org/2000/svg';
+const COLS={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
+
 function rc(id){
   const el=document.getElementById(id);
   if(!el) return null;
   const d=document.getElementById('diagram').getBoundingClientRect();
   const r=el.getBoundingClientRect();
-  return {
-    t: r.top-d.top, b: r.bottom-d.top,
-    l: r.left-d.left, r: r.right-d.left,
-    cx: r.left-d.left+r.width/2,
-    cy: r.top-d.top+r.height/2,
-    w: r.width, h: r.height
-  };
+  return{t:r.top-d.top,b:r.bottom-d.top,l:r.left-d.left,r:r.right-d.left,
+    cx:r.left-d.left+r.width/2,cy:r.top-d.top+r.height/2,w:r.width,h:r.height};
 }
 
-function line(svg, x1,y1,x2,y2, col, lbl, dash){
-  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
-  const c=colors[col]||col;
-  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  // cubic bezier: control points mid-way
-  const cx=(x1+x2)/2;
-  p.setAttribute('d',`M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
-  p.setAttribute('fill','none');
-  p.setAttribute('stroke',c);
-  p.setAttribute('stroke-width','1.6');
-  p.setAttribute('marker-end',`url(#ah-${col})`);
-  if(dash) p.setAttribute('stroke-dasharray','5,3');
-  svg.appendChild(p);
-  if(lbl){
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',cx);
-    t.setAttribute('y',(y1+y2)/2-(y1===y2?-10:-5));
-    t.setAttribute('text-anchor','middle');
-    t.setAttribute('fill',c);
-    t.setAttribute('font-size','8.5');
-    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-    t.setAttribute('font-weight','600');
-    t.textContent=lbl;
-    svg.appendChild(t);
-  }
+/* add a labelled text node with white halo — position is x,y; anchor is start|middle|end */
+function addLabel(svg,x,y,txt,col,anchor){
+  const t=document.createElementNS(NS,'text');
+  t.setAttribute('x',x); t.setAttribute('y',y);
+  t.setAttribute('text-anchor',anchor||'start');
+  t.setAttribute('fill',COLS[col]||col);
+  t.textContent=txt;
+  svg.appendChild(t);
 }
 
+/* straight vertical line with optional label to the RIGHT of the line */
 function vline(svg,x,y1,y2,col,lbl,dash){
-  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
-  const c=colors[col]||col;
-  const p=document.createElementNS('http://www.w3.org/2000/svg','line');
-  p.setAttribute('x1',x); p.setAttribute('y1',y1);
-  p.setAttribute('x2',x); p.setAttribute('y2',y2-5);
-  p.setAttribute('stroke',c);
-  p.setAttribute('stroke-width','1.6');
-  p.setAttribute('marker-end',`url(#ah-${col})`);
-  if(dash) p.setAttribute('stroke-dasharray','5,3');
-  svg.appendChild(p);
-  if(lbl){
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',x+5);
-    t.setAttribute('y',(y1+y2)/2);
-    t.setAttribute('fill',c);
-    t.setAttribute('font-size','8.5');
-    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-    t.setAttribute('font-weight','600');
-    t.textContent=lbl;
-    svg.appendChild(t);
-  }
+  const c=COLS[col];
+  const ln=document.createElementNS(NS,'line');
+  ln.setAttribute('x1',x);ln.setAttribute('y1',y1);
+  ln.setAttribute('x2',x);ln.setAttribute('y2',y2-6);
+  ln.setAttribute('stroke',c);ln.setAttribute('stroke-width','1.6');
+  ln.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash)ln.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(ln);
+  if(lbl) addLabel(svg,x+7,(y1+y2)/2,lbl,col);
 }
 
+/* straight horizontal line with label ABOVE the line */
 function hline(svg,x1,x2,y,col,lbl,dash){
-  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
-  const c=colors[col]||col;
-  const p=document.createElementNS('http://www.w3.org/2000/svg','line');
-  p.setAttribute('x1',x1); p.setAttribute('y1',y);
-  p.setAttribute('x2',x2-5); p.setAttribute('y2',y);
-  p.setAttribute('stroke',c);
+  const c=COLS[col];
+  const ln=document.createElementNS(NS,'line');
+  ln.setAttribute('x1',x1);ln.setAttribute('y1',y);
+  ln.setAttribute('x2',x2-6);ln.setAttribute('y2',y);
+  ln.setAttribute('stroke',c);ln.setAttribute('stroke-width','1.6');
+  ln.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash)ln.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(ln);
+  if(lbl) addLabel(svg,(x1+x2)/2,y-7,lbl,col,'middle');
+}
+
+/* elbow: horizontal from (x1,y1) → midX, then vertical → (midX,y2), then horizontal → (x2,y2)
+   lbl placed at the START of the first horizontal, to the right of x1 and above y1 */
+function elbow(svg,x1,y1,x2,y2,col,lbl,dash,lblAnchor){
+  const c=COLS[col];
+  const midX=(x1+x2)/2;
+  const p=document.createElementNS(NS,'path');
+  p.setAttribute('d',`M${x1},${y1} L${midX},${y1} L${midX},${y2} L${x2-6},${y2}`);
+  p.setAttribute('fill','none');p.setAttribute('stroke',c);
   p.setAttribute('stroke-width','1.6');
   p.setAttribute('marker-end',`url(#ah-${col})`);
-  if(dash) p.setAttribute('stroke-dasharray','5,3');
+  if(dash)p.setAttribute('stroke-dasharray','5,3');
   svg.appendChild(p);
   if(lbl){
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',(x1+x2)/2);
-    t.setAttribute('y',y-6);
-    t.setAttribute('text-anchor','middle');
-    t.setAttribute('fill',c);
-    t.setAttribute('font-size','8.5');
-    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-    t.setAttribute('font-weight','600');
-    t.textContent=lbl;
-    svg.appendChild(t);
+    /* place label on the first horizontal segment, between x1 and midX */
+    const lx=(x1+midX)/2, ly=y1-8;
+    addLabel(svg,lx,ly,lbl,col,lblAnchor||'middle');
   }
 }
 
-// path: go right from x1,y1 then up/down then right to x2,y2
-function elbow(svg,x1,y1,x2,y2,col,lbl,dash){
-  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
-  const c=colors[col]||col;
+/* elbow going LEFT: from (x1,y1) → goes left to midX, down/up to y2, left to x2
+   label placed on first horizontal segment (inside right column) */
+function elbowLeft(svg,x1,y1,x2,y2,col,lbl,dash){
+  const c=COLS[col];
   const midX=(x1+x2)/2;
-  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d',`M${x1},${y1} L${midX},${y1} L${midX},${y2} L${x2-5},${y2}`);
-  p.setAttribute('fill','none');
-  p.setAttribute('stroke',c);
+  const p=document.createElementNS(NS,'path');
+  p.setAttribute('d',`M${x1},${y1} L${midX},${y1} L${midX},${y2} L${x2+6},${y2}`);
+  p.setAttribute('fill','none');p.setAttribute('stroke',c);
   p.setAttribute('stroke-width','1.6');
   p.setAttribute('marker-end',`url(#ah-${col})`);
-  if(dash) p.setAttribute('stroke-dasharray','5,3');
+  if(dash)p.setAttribute('stroke-dasharray','5,3');
   svg.appendChild(p);
   if(lbl){
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',midX+5);
-    t.setAttribute('y',(y1+y2)/2-4);
-    t.setAttribute('fill',c);
-    t.setAttribute('font-size','8.5');
-    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-    t.setAttribute('font-weight','600');
-    t.textContent=lbl;
-    svg.appendChild(t);
+    /* label on the horizontal entry segment inside the right column */
+    const lx=(x1+midX)/2, ly=y1-8;
+    addLabel(svg,lx,ly,lbl,col,'middle');
   }
 }
 
 function draw(){
   const svg=document.getElementById('arrow-svg');
-  // clear any previous
-  while(svg.children.length>1) svg.removeChild(svg.lastChild);
-
+  while(svg.children.length>1)svg.removeChild(svg.lastChild);
   const diag=document.getElementById('diagram');
-  svg.setAttribute('height', diag.getBoundingClientRect().height);
-  svg.setAttribute('width',  diag.getBoundingClientRect().width);
+  svg.setAttribute('height',diag.getBoundingClientRect().height);
+  svg.setAttribute('width', diag.getBoundingClientRect().width);
 
-  const est   = rc('b-est');
-  const mgr   = rc('b-mgr');
-  const fd    = rc('b-fd');
-  const ag    = rc('b-ag');
-  const auth  = rc('b-auth');
-  const blob  = rc('b-blob');
-  const kv    = rc('b-kv');
-  const obs   = rc('b-obs');
-  const api   = rc('b-api');
-  const sb    = rc('b-sb');
-  const wk    = rc('b-wk');
-  const pg    = rc('b-pg');
-  const redis = rc('b-redis');
-  const neo4j = rc('b-neo4j');
-  const zeus  = rc('b-zeus');
-  const gem   = rc('b-gemini');
-  const cla   = rc('b-claude');
+  const est  =rc('b-est'),  mgr =rc('b-mgr'),  fd  =rc('b-fd'),
+        ag   =rc('b-ag'),   auth=rc('b-auth'),  blob=rc('b-blob'),
+        obs  =rc('b-obs'),  api =rc('b-api'),   sb  =rc('b-sb'),
+        wk   =rc('b-wk'),   pg  =rc('b-pg'),    redis=rc('b-redis'),
+        neo4j=rc('b-neo4j'),zeus=rc('b-zeus'),  gem =rc('b-gemini'),
+        cla  =rc('b-claude');
 
-  if(!est||!api) return;
+  if(!est||!api)return;
 
-  // 1. Estimator → Front Door (down-left, requests)
-  vline(svg, est.cx, est.b, fd.t, 'blue', 'requests');
+  /* ── LEFT COLUMN vertical flows ─────────────────────────── */
+  // Estimator → Front Door
+  vline(svg, est.cx, est.b, fd.t, 'blue','requests');
+  // Manager → App Gateway
+  vline(svg, mgr.cx, mgr.b, ag.t, 'blue','requests');
 
-  // 2. Manager → App Gateway (down, requests)
-  vline(svg, mgr.cx, mgr.b, ag.t, 'blue', 'requests');
+  /* ── CROSS-COLUMN: auth → FastAPI (validated session) ────── */
+  // Route: auth.r → right along auth.cy → gap midpoint → up to api.cy → api.l
+  // Label sits on the first horizontal leg, above auth row — plenty of space inside left col
+  elbow(svg, auth.r, auth.cy, api.l, api.cy, 'blue','validated session →');
 
-  // 3. Front Door → App Gateway internal (already adjacent, skip or tiny)
-  // 4. Auth right → FastAPI left (cross-column, validated session)
-  elbow(svg, auth.r, auth.cy, api.l, api.cy, 'blue', 'validated session ▸');
+  /* ── RIGHT COLUMN vertical flows ────────────────────────── */
+  // API → Service Bus
+  vline(svg, api.cx, api.b, sb.t, 'orange','publish job');
+  // Service Bus → Workers
+  vline(svg, sb.cx, sb.b, wk.t, 'orange','consume · scale 0–N');
 
-  // 5. API → Service Bus (down, publish job)
-  vline(svg, api.cx, api.b, sb.t, 'orange', 'publish job');
+  // Workers → PostgreSQL (fan-out left)
+  elbow(svg, wk.l+wk.w*0.28, wk.b, pg.cx, pg.t, 'orange','reads / writes');
+  // Workers → Redis (fan-out right)
+  elbow(svg, wk.l+wk.w*0.72, wk.b, redis.cx, redis.t, 'orange','job state');
+  // Workers → Neo4j (straight down, through pg/redis gap)
+  vline(svg, wk.cx, redis.b, neo4j.t, 'orange','query · write corrections');
 
-  // 6. Service Bus → Workers (down, consume)
-  vline(svg, sb.cx, sb.b, wk.t, 'orange', 'consume · scale 0–N');
+  /* ── Workers right-side elbow → Zeus ───────────────────── */
+  const rX=wk.r+20;
+  const pZ=document.createElementNS(NS,'path');
+  pZ.setAttribute('d',`M${wk.r},${wk.cy} L${rX},${wk.cy} L${rX},${zeus.cy} L${zeus.r+6},${zeus.cy}`);
+  pZ.setAttribute('fill','none');pZ.setAttribute('stroke',COLS.purple);
+  pZ.setAttribute('stroke-width','1.6');pZ.setAttribute('marker-end','url(#ah-purple)');
+  svg.appendChild(pZ);
+  // label on the vertical segment to the right — rotated
+  const zmx=rX+4, zmy=(wk.cy+zeus.cy)/2;
+  const tz=document.createElementNS(NS,'text');
+  tz.setAttribute('x',zmx);tz.setAttribute('y',zmy);
+  tz.setAttribute('text-anchor','middle');tz.setAttribute('fill',COLS.purple);
+  tz.setAttribute('transform',`rotate(-90,${zmx},${zmy})`);
+  tz.textContent='extract';
+  svg.appendChild(tz);
 
-  // 7. Workers → PostgreSQL (down-left)
-  elbow(svg, wk.l+wk.w*0.3, wk.b, pg.cx, pg.t, 'orange', 'reads / writes');
+  // Workers → Gemini (dashed, verify)
+  elbow(svg, wk.l+wk.w*0.28, wk.b+18, gem.cx, gem.t, 'purple','verify',true);
+  // Workers → Claude (dashed, verify)
+  elbow(svg, wk.l+wk.w*0.72, wk.b+18, cla.cx, cla.t, 'purple','verify',true);
 
-  // 8. Workers → Redis (down, right side)
-  elbow(svg, wk.l+wk.w*0.7, wk.b, redis.cx, redis.t, 'orange', 'job state');
+  /* ── CROSS-COLUMN: API left → Blob (store drawings) ─────── */
+  // Route: api.l → left into gap → down to blob.cy → left to blob.r
+  // Label on first horizontal leg inside right column, above api.cy
+  elbowLeft(svg, api.l, api.cy, blob.r, blob.cy, 'blue','store drawings',true);
 
-  // 9. Workers → Neo4j (down)
-  vline(svg, wk.cx, redis.b, neo4j.t, 'orange', 'query · write corrections');
-
-  // 10. Workers right → Zeus (elbow right side, extract)
-  const rightX = wk.r+18;
-  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d',
-    `M${wk.r},${wk.cy} L${rightX},${wk.cy} L${rightX},${zeus.cy} L${zeus.r+5},${zeus.cy}`
-  );
-  p.setAttribute('fill','none');
-  p.setAttribute('stroke','#8050d0');
-  p.setAttribute('stroke-width','1.6');
-  p.setAttribute('marker-end','url(#ah-purple)');
-  svg.appendChild(p);
-  const tZeus=document.createElementNS('http://www.w3.org/2000/svg','text');
-  tZeus.setAttribute('x', rightX+4);
-  tZeus.setAttribute('y', (wk.cy+zeus.cy)/2-4);
-  tZeus.setAttribute('fill','#8050d0');
-  tZeus.setAttribute('font-size','8.5');
-  tZeus.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-  tZeus.setAttribute('font-weight','600');
-  tZeus.textContent='extract';
-  svg.appendChild(tZeus);
-
-  // 11. Workers → Gemini (down-left, dashed, verify)
-  elbow(svg, wk.l+wk.w*0.3, wk.b+20, gem.cx, gem.t, 'purple', 'verify', true);
-
-  // 12. Workers → Claude (down-right, dashed, verify)
-  elbow(svg, wk.l+wk.w*0.7, wk.b+20, cla.cx, cla.t, 'purple', 'verify', true);
-
-  // 13. API left → Blob right (cross-column, store drawings)
-  const midY2=(api.cy+blob.cy)/2;
-  const pBlob=document.createElementNS('http://www.w3.org/2000/svg','path');
-  pBlob.setAttribute('d',
-    `M${api.l},${api.cy} L${api.l-20},${api.cy} L${api.l-20},${blob.cy} L${blob.r+5},${blob.cy}`
-  );
-  pBlob.setAttribute('fill','none');
-  pBlob.setAttribute('stroke','#4a8fd4');
-  pBlob.setAttribute('stroke-width','1.6');
-  pBlob.setAttribute('stroke-dasharray','5,3');
-  pBlob.setAttribute('marker-end','url(#ah-blue)');
-  svg.appendChild(pBlob);
-  const tBlob=document.createElementNS('http://www.w3.org/2000/svg','text');
-  tBlob.setAttribute('x', api.l-16);
-  tBlob.setAttribute('y', (api.cy+blob.cy)/2-4);
-  tBlob.setAttribute('fill','#4a8fd4');
-  tBlob.setAttribute('font-size','8.5');
-  tBlob.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-  tBlob.setAttribute('font-weight','600');
-  tBlob.textContent='store drawings';
-  svg.appendChild(tBlob);
-
-  // 14. All → Observability (teal dashed from api)
-  const pObs=document.createElementNS('http://www.w3.org/2000/svg','path');
-  pObs.setAttribute('d',
-    `M${api.l},${api.b} L${api.l-32},${api.b} L${api.l-32},${obs.cy} L${obs.r+5},${obs.cy}`
-  );
-  pObs.setAttribute('fill','none');
-  pObs.setAttribute('stroke','#29aaa0');
-  pObs.setAttribute('stroke-width','1.6');
-  pObs.setAttribute('stroke-dasharray','5,3');
-  pObs.setAttribute('marker-end','url(#ah-teal)');
-  svg.appendChild(pObs);
-  const tObs=document.createElementNS('http://www.w3.org/2000/svg','text');
-  tObs.setAttribute('x', api.l-56);
-  tObs.setAttribute('y', (api.b+obs.cy)/2-4);
-  tObs.setAttribute('fill','#29aaa0');
-  tObs.setAttribute('font-size','8.5');
-  tObs.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-  tObs.setAttribute('font-weight','600');
-  tObs.textContent='telemetry';
-  svg.appendChild(tObs);
+  /* ── CROSS-COLUMN: API bottom → Observability (telemetry) ── */
+  // Route: api.l → go further left → down to obs.cy → obs.r
+  // Use a different midX so it doesn't overlap with blob arrow
+  const obsGapX = api.l - 38;
+  const pO=document.createElementNS(NS,'path');
+  pO.setAttribute('d',`M${api.l},${api.b} L${obsGapX},${api.b} L${obsGapX},${obs.cy} L${obs.r+6},${obs.cy}`);
+  pO.setAttribute('fill','none');pO.setAttribute('stroke',COLS.teal);
+  pO.setAttribute('stroke-width','1.6');pO.setAttribute('stroke-dasharray','5,3');
+  pO.setAttribute('marker-end','url(#ah-teal)');
+  svg.appendChild(pO);
+  // label on the first horizontal leg: between api.l and obsGapX, above api.b
+  addLabel(svg,(api.l+obsGapX)/2, api.b-8,'telemetry','teal','middle');
 }
 
-// draw after fonts and layout settle
-document.fonts.ready.then(()=>{ setTimeout(draw, 250); });
-window.addEventListener('resize', ()=>{ setTimeout(draw, 100); });
+document.fonts.ready.then(()=>{setTimeout(draw,300);});
+window.addEventListener('resize',()=>{setTimeout(draw,120);});
 </script>
 </body>
 </html>
