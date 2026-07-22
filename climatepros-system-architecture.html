@@ -1,606 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ClimatePros Stream 2 — System Architecture</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0;}
 
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: #f7f8fa;
-    padding: 40px;
-    min-height: 100vh;
-  }
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:#f5f6f8;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 24px 60px;
+}
 
-  h1 {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: #3d3d3d;
-    text-transform: uppercase;
-    margin-bottom: 32px;
-  }
+h1{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#3a3a3a;
+  margin-bottom:32px;
+  text-align:center;
+}
 
-  /* ── canvas ─────────────────────────────────────────────── */
-  .canvas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto;
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-  }
+/* ── outer canvas ────────────────────────────────────────────── */
+.diagram{
+  position:relative;
+  width:1100px;
+}
 
-  /* ── group containers ────────────────────────────────────── */
-  .group {
-    border-radius: 14px;
-    padding: 18px 18px 22px;
-    position: relative;
-  }
-  .group-title {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-  .group-subtitle {
-    font-size: 9px;
-    font-weight: 400;
-    letter-spacing: 0.06em;
-    opacity: 0.65;
-    margin-left: 4px;
-  }
+/* ── two-column flex ─────────────────────────────────────────── */
+.cols{
+  display:flex;
+  gap:36px;
+  align-items:stretch;
+}
+.col-l{ width:468px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+.col-r{ width:596px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
 
-  /* blue – clients */
-  .g-clients {
-    border: 2px dashed #4a90d9;
-    background: #f0f6ff;
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .g-clients .group-title { color: #2c6eb5; }
+/* ── group containers ────────────────────────────────────────── */
+.grp{
+  border-radius:14px;
+  padding:16px 16px 18px;
+  position:relative;
+}
+.grp-title{
+  font-size:9.5px;
+  font-weight:700;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.grp-sub{
+  font-weight:400;
+  font-size:8.5px;
+  letter-spacing:.05em;
+  opacity:.6;
+  margin-left:5px;
+}
 
-  /* blue – existing FJX platform */
-  .g-existing {
-    border: 2px solid #4a90d9;
-    background: #e8f0fb;
-    grid-column: 1;
-    grid-row: 2 / 4;
-  }
-  .g-existing .group-title { color: #1e4f96; }
+/* colour themes */
+.g-clients { border:2px dashed #4a8fd4; background:#eef5ff; }
+.g-clients .grp-title{ color:#2a5fa8; }
 
-  /* orange – new infra */
-  .g-new {
-    border: 2px dashed #e07b20;
-    background: #fff8f0;
-    grid-column: 2;
-    grid-row: 1 / 3;
-  }
-  .g-new .group-title { color: #c0620d; }
+.g-existing{ border:2px solid #4a8fd4; background:#e5effc; flex:1; }
+.g-existing .grp-title{ color:#1b4a8a; }
 
-  /* purple – private / on-prem */
-  .g-onprem {
-    border: 2px dashed #8b5cf6;
-    background: #f5f0ff;
-    grid-column: 2;
-    grid-row: 3;
-  }
-  .g-onprem .group-title { color: #6d28d9; }
+.g-obs{ border:2px dashed #29aaa0; background:#edfaf8; }
+.g-obs .grp-title{ color:#1a7a72; }
 
-  /* teal – observability */
-  .g-obs {
-    border: 2px dashed #2ab3a3;
-    background: #f0faf9;
-    grid-column: 1;
-    grid-row: 4;
-  }
-  .g-obs .group-title { color: #0d7a6e; }
+.g-new{ border:2px dashed #d97c1a; background:#fff7ee; flex:1; }
+.g-new .grp-title{ color:#b05e0d; }
 
-  /* push observability to bottom-left */
-  .g-obs-wrapper {
-    grid-column: 1;
-    grid-row: 4;
-  }
+.g-onprem{ border:2px dashed #8050d0; background:#f5f0ff; }
+.g-onprem .grp-title{ color:#5e2dab; }
 
-  /* ── component boxes ─────────────────────────────────────── */
-  .box {
-    background: #fff;
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    position: relative;
-  }
-  .box:last-child { margin-bottom: 0; }
+/* ── component boxes ─────────────────────────────────────────── */
+.box{
+  background:#fff;
+  border-radius:9px;
+  padding:10px 12px;
+  margin-bottom:9px;
+}
+.box:last-child{ margin-bottom:0; }
+.box-t{
+  font-size:11.5px;
+  font-weight:700;
+  color:#1a1a1a;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-bottom:3px;
+  flex-wrap:wrap;
+}
+.box-s{
+  font-size:9.5px;
+  color:#555;
+  line-height:1.5;
+}
+.box-s b{ color:#c76000; font-weight:600; }
 
-  .box-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #222;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 3px;
-  }
-  .box-sub {
-    font-size: 10px;
-    color: #666;
-    line-height: 1.45;
-  }
-  .box-sub strong {
-    color: #d96b00;
-    font-weight: 600;
-  }
+.bx-blue  { border:1.5px solid #4a8fd4; }
+.bx-orange{ border:1.5px solid #d97c1a; }
+.bx-purple{ border:1.5px solid #8050d0; }
+.bx-teal  { border:1.5px solid #29aaa0; }
+.bx-gray  { border:1.5px solid #c5ccd8; background:#f9fafc; }
 
-  /* variants */
-  .box-blue  { border: 1.5px solid #4a90d9; }
-  .box-orange{ border: 1.5px solid #e07b20; }
-  .box-purple{ border: 1.5px solid #8b5cf6; }
-  .box-teal  { border: 1.5px solid #2ab3a3; }
-  .box-gray  { border: 1.5px solid #ccc; background: #f9f9f9; }
+/* two-up row */
+.row2{ display:flex; gap:9px; margin-bottom:9px; }
+.row2 .box{ flex:1; margin-bottom:0; }
 
-  /* two-column layout inside a group */
-  .row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .row-2 .box { margin-bottom: 0; }
+/* inner sub-container (edge & auth) */
+.inner{
+  border:1.5px solid #4a8fd4;
+  border-radius:9px;
+  background:#d4e6f9;
+  padding:10px 10px 12px;
+  margin-bottom:9px;
+}
+.inner-title{
+  font-size:9px;
+  font-weight:700;
+  color:#1b4a8a;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
 
-  /* inner platform box (acts as sub-container) */
-  .inner-platform {
-    border: 1.5px solid #4a90d9;
-    border-radius: 10px;
-    background: #dceeff;
-    padding: 12px;
-    margin-bottom: 10px;
-  }
-  .inner-platform-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: #1e4f96;
-    margin-bottom: 10px;
-    letter-spacing: 0.04em;
-  }
+/* NEW badge */
+.new{
+  display:inline-flex;
+  align-items:center;
+  background:#d97c1a;
+  color:#fff;
+  font-size:7.5px;
+  font-weight:800;
+  letter-spacing:.1em;
+  padding:2px 5px;
+  border-radius:4px;
+  margin-left:4px;
+  flex-shrink:0;
+}
 
-  /* ── NEW badge ───────────────────────────────────────────── */
-  .badge-new {
-    display: inline-block;
-    background: #e07b20;
-    color: #fff;
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 2px 5px;
-    border-radius: 4px;
-    margin-left: 4px;
-    vertical-align: middle;
-  }
+/* warn text */
+.warn{ color:#c0392b !important; font-weight:600 !important; }
 
-  /* ── arrows (SVG overlay) ─────────────────────────────────── */
-  .arrow-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    overflow: visible;
-  }
+/* italic note */
+.note{
+  display:block;
+  font-size:8.5px;
+  color:#999;
+  font-style:italic;
+  margin-top:8px;
+  line-height:1.5;
+}
 
-  /* ── connector labels (absolute positioned) ───────────────── */
-  .lbl {
-    position: absolute;
-    font-size: 9px;
-    color: #555;
-    background: transparent;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  /* ── arrow wrapper (relative container) ──────────────────── */
-  .canvas-wrap {
-    position: relative;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  /* ── emoji icon ──────────────────────────────────────────── */
-  .ico { font-style: normal; }
-
-  /* ── italic note ─────────────────────────────────────────── */
-  .note {
-    font-size: 9px;
-    color: #888;
-    font-style: italic;
-    margin-top: 6px;
-    display: block;
-  }
-
-  /* ── connector arrows using CSS ──────────────────────────── */
-  .arrows-svg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: visible;
-    z-index: 10;
-  }
-
-  .arrow-label {
-    font-size: 9px;
-    fill: #555;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-  }
+/* ── SVG arrow overlay ───────────────────────────────────────── */
+.arrow-svg{
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  overflow:visible;
+}
 </style>
 </head>
 <body>
 
-<h1>ClimatePros Stream 2 · System Architecture · Azure</h1>
+<h1>ClimatePros Stream 2 &nbsp;·&nbsp; System Architecture &nbsp;·&nbsp; Azure</h1>
 
-<div class="canvas-wrap">
-<div class="canvas" id="canvas">
+<div class="diagram" id="diagram">
+<div class="cols">
 
-  <!-- ════════════════════════════════════════════
-       COL 1 ROW 1 · CLIENTS
-  ═════════════════════════════════════════════ -->
-  <div class="group g-clients" id="g-clients">
-    <div class="group-title">Clients</div>
-    <div class="row-2">
-      <div class="box box-blue" id="box-estimator">
-        <div class="box-title"><span class="ico">🖥️</span> FieldJetX Web App</div>
-        <div class="box-sub">Estimator · bid upload, review, finalise</div>
-      </div>
-      <div class="box box-blue" id="box-manager">
-        <div class="box-title"><span class="ico">👤</span> Manager / Admin</div>
-        <div class="box-sub">Manager feedback · Admin rate-card config</div>
-      </div>
-    </div>
-  </div>
+  <!-- ══════════════════ LEFT COLUMN ══════════════════ -->
+  <div class="col-l">
 
-  <!-- ════════════════════════════════════════════
-       COL 2 ROW 1–2 · NEW INFRASTRUCTURE
-  ═════════════════════════════════════════════ -->
-  <div class="group g-new" id="g-new">
-    <div class="group-title">
-      New Infrastructure · This Project
-      <span class="group-subtitle">Azure · Container Apps</span>
-    </div>
-
-    <!-- FastAPI -->
-    <div class="box box-orange" id="box-api">
-      <div class="box-title">
-        <span class="ico">⚡</span> FastAPI + WebSocket API
-        <span class="badge-new">NEW</span>
-      </div>
-      <div class="box-sub">
-        REST API + async WebSocket · RBAC per route<br/>
-        FJX session validation on every request · Uvicorn
-      </div>
-    </div>
-
-    <!-- Service Bus -->
-    <div class="box box-orange" id="box-sb">
-      <div class="box-title">
-        <span class="ico">📨</span> Azure Service Bus
-        <span class="badge-new">NEW</span>
-      </div>
-      <div class="box-sub">
-        Async job queue · dead-letter on exhaustion<br/>
-        max_delivery_count=3 · lock_timeout=5 min
-      </div>
-    </div>
-
-    <!-- Workers -->
-    <div class="box box-orange" id="box-workers">
-      <div class="box-title">
-        <span class="ico">⚙️</span> KEDA Workers · Celery 5.6
-        <span class="badge-new">NEW</span>
-      </div>
-      <div class="box-sub">
-        Scale 0–N on queue depth · <strong>group() fan-out per page</strong><br/>
-        asyncio.gather() — Gemini + Claude verify in parallel<br/>
-        chord() fan-in → Reconciler → Pricing engine
-      </div>
-    </div>
-
-    <!-- row: PostgreSQL + Redis -->
-    <div class="row-2">
-      <div class="box box-orange" id="box-pg">
-        <div class="box-title">
-          <span class="ico">🗄️</span> PostgreSQL 16
-          <span class="badge-new">NEW</span>
+    <!-- CLIENTS -->
+    <div class="grp g-clients" id="g-clients">
+      <div class="grp-title">Clients</div>
+      <div class="row2">
+        <div class="box bx-blue" id="b-est">
+          <div class="box-t">🖥️ FieldJetX Web App</div>
+          <div class="box-s">Estimator — bid upload, review &amp; finalise</div>
         </div>
-        <div class="box-sub">
-          HA + PITR · SQLAlchemy 2.0 async<br/>
-          bids · bid_items · audit_log · ai_calls
-        </div>
-      </div>
-      <div class="box box-orange" id="box-redis">
-        <div class="box-title">
-          <span class="ico">⚡</span> Cache for Redis
-          <span class="badge-new">NEW</span>
-        </div>
-        <div class="box-sub">
-          Job state · result cache<br/>
-          Cache-hit → zero model cost
+        <div class="box bx-blue" id="b-mgr">
+          <div class="box-t">👤 Manager / Admin</div>
+          <div class="box-s">Feedback &amp; rate-card config</div>
         </div>
       </div>
     </div>
 
-    <!-- Neo4j -->
-    <div class="box box-orange" id="box-neo4j">
-      <div class="box-title">
-        <span class="ico">🕸️</span> Neo4j Knowledge Graph
-        <span class="badge-new">NEW</span>
-      </div>
-      <div class="box-sub">
-        Feedback learning · BidItem → Correction → Equipment nodes<br/>
-        SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>
-        Weekly promo: corrections → golden set → new prompt_version
-      </div>
-    </div>
+    <!-- EXISTING FJX -->
+    <div class="grp g-existing" id="g-existing">
+      <div class="grp-title">Existing · FieldJetX Platform<span class="grp-sub">Azure · unchanged · reused</span></div>
 
-  </div>
-
-  <!-- ════════════════════════════════════════════
-       COL 1 ROW 2–3 · EXISTING FJX PLATFORM
-  ═════════════════════════════════════════════ -->
-  <div class="group g-existing" id="g-existing">
-    <div class="group-title">
-      Existing · FieldJetX Platform
-      <span class="group-subtitle">Azure · unchanged · reused</span>
-    </div>
-
-    <!-- Edge layer -->
-    <div class="inner-platform" id="inner-edge">
-      <div class="inner-platform-title">Edge &amp; Auth Layer</div>
-      <div class="row-2">
-        <div class="box box-gray" id="box-fd">
-          <div class="box-title"><span class="ico">🛡️</span> Front Door + WAF</div>
-          <div class="box-sub">FJX existing · TLS via FJX cert<br/>no separate provisioning</div>
+      <div class="inner" id="inner-edge">
+        <div class="inner-title">Edge &amp; Auth Layer</div>
+        <div class="row2">
+          <div class="box bx-gray" id="b-fd">
+            <div class="box-t">🛡️ Front Door + WAF</div>
+            <div class="box-s">FJX existing · TLS via FJX cert<br/>no separate provisioning</div>
+          </div>
+          <div class="box bx-gray" id="b-ag">
+            <div class="box-t">🔀 App Gateway</div>
+            <div class="box-s">FJX existing · routes to<br/>ClimatePros containers</div>
+          </div>
         </div>
-        <div class="box box-gray" id="box-ag">
-          <div class="box-title"><span class="ico">🔀</span> App Gateway</div>
-          <div class="box-sub">FJX existing · routes to<br/>ClimatePros API containers</div>
+        <div class="box bx-gray" id="b-auth">
+          <div class="box-t">🔑 FJX Auth · Session Tokens</div>
+          <div class="box-s">GUID session tokens · loginsessionid validated per request<br/>UserFeatureXref feature-gate · SecJobRoles (ADM / MGR / USR / LOA)</div>
         </div>
       </div>
-      <div class="box box-gray" id="box-auth">
-        <div class="box-title"><span class="ico">🔑</span> FJX Auth · Session Tokens</div>
-        <div class="box-sub">
-          GUID session tokens · usersessions table · loginsessionid validated per request<br/>
-          UserFeatureXref feature-gate · SecJobRoles (ADM / MGR / USR / LOA)
+
+      <div class="row2">
+        <div class="box bx-gray" id="b-blob">
+          <div class="box-t">📁 Blob Storage</div>
+          <div class="box-s">FJX existing · geo-redundant<br/>drawings · quotes · images</div>
+        </div>
+        <div class="box bx-gray" id="b-vnet">
+          <div class="box-t">🔒 VNet + Private Endpoints</div>
+          <div class="box-s">FJX existing<br/>data off public internet</div>
         </div>
       </div>
-    </div>
 
-    <!-- Storage + VNet -->
-    <div class="row-2">
-      <div class="box box-gray" id="box-blob">
-        <div class="box-title"><span class="ico">📁</span> Blob Storage</div>
-        <div class="box-sub">FJX existing · geo-redundant<br/>drawings · quotes · images</div>
-      </div>
-      <div class="box box-gray" id="box-vnet">
-        <div class="box-title"><span class="ico">🔒</span> VNet + Private Endpoints</div>
-        <div class="box-sub">FJX existing · data off<br/>public internet</div>
+      <div class="box bx-gray" id="b-kv">
+        <div class="box-t">🗝️ Key Vault</div>
+        <div class="box-s">API keys · FJX integration token · no secrets in config or images · managed keys</div>
       </div>
     </div>
 
-    <!-- Key Vault -->
-    <div class="box box-gray" id="box-kv">
-      <div class="box-title"><span class="ico">🗝️</span> Key Vault</div>
-      <div class="box-sub">API keys · FJX integration token · no secrets in config/images · managed keys</div>
+    <!-- OBSERVABILITY -->
+    <div class="grp g-obs" id="g-obs">
+      <div class="grp-title">Observability &amp; Tracing</div>
+      <div class="box bx-teal" id="b-obs">
+        <div class="box-t">📊 Monitor + App Insights</div>
+        <div class="box-s">Logs · traces · metrics · correlation IDs<br/>ai_calls: per-model tokens, latency, cost · SLO burn &amp; dead-letter alerts</div>
+      </div>
+      <span class="note">all services emit telemetry · prompt_version stamped on every bid + ai_calls record</span>
     </div>
 
-  </div>
+  </div><!-- /col-l -->
 
-  <!-- ════════════════════════════════════════════
-       COL 2 ROW 3 · PRIVATE MODEL INFRA (on-prem)
-  ═════════════════════════════════════════════ -->
-  <div class="group g-onprem" id="g-onprem">
-    <div class="group-title">
-      Private Model Infra · ClimatePros Client
-      <span class="group-subtitle">on-prem · Mac Studio "Tundra"</span>
-    </div>
+  <!-- ══════════════════ RIGHT COLUMN ══════════════════ -->
+  <div class="col-r">
 
-    <div class="box box-purple" id="box-zeus">
-      <div class="box-title"><span class="ico">🤖</span> Zeus — Primary Extractor</div>
-      <div class="box-sub">
-        Claude Sonnet 4.6 · client-operated · FieldJetX-linked<br/>
-        Grounded in prior FJX bids · constrained JSON schema output<br/>
-        <strong>⚠ CPU-bound single machine — hardware ceiling at volume</strong>
+    <!-- NEW INFRASTRUCTURE -->
+    <div class="grp g-new" id="g-new">
+      <div class="grp-title">New Infrastructure · This Project<span class="grp-sub">Azure · Container Apps</span></div>
+
+      <div class="box bx-orange" id="b-api">
+        <div class="box-t">⚡ FastAPI + WebSocket API <span class="new">NEW</span></div>
+        <div class="box-s">REST API + async WebSocket · RBAC per route · Uvicorn<br/>FJX session validation on every request · Swagger at /api/docs</div>
+      </div>
+
+      <div class="box bx-orange" id="b-sb">
+        <div class="box-t">📨 Azure Service Bus <span class="new">NEW</span></div>
+        <div class="box-s">Async job queue · dead-letter on failure exhaustion<br/>max_delivery_count=3 · lock_timeout=5 min</div>
+      </div>
+
+      <div class="box bx-orange" id="b-wk">
+        <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="new">NEW</span></div>
+        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — Gemini + Claude verify in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
+      </div>
+
+      <div class="row2">
+        <div class="box bx-orange" id="b-pg">
+          <div class="box-t">🗄️ PostgreSQL 16 <span class="new">NEW</span></div>
+          <div class="box-s">HA + PITR · SQLAlchemy 2.0 async<br/>bids · bid_items · audit_log · ai_calls</div>
+        </div>
+        <div class="box bx-orange" id="b-redis">
+          <div class="box-t">⚡ Redis Cache <span class="new">NEW</span></div>
+          <div class="box-s">Job state · result cache<br/>Cache-hit → zero model cost</div>
+        </div>
+      </div>
+
+      <div class="box bx-orange" id="b-neo4j">
+        <div class="box-t">🕸️ Neo4j Knowledge Graph <span class="new">NEW</span></div>
+        <div class="box-s">Feedback learning · BidItem → Correction → Equipment nodes<br/>SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>Weekly promo: corrections → golden set → new prompt_version</div>
       </div>
     </div>
 
-    <div class="row-2">
-      <div class="box box-purple" id="box-gemini">
-        <div class="box-title"><span class="ico">✨</span> Gemini 3.5 Flash</div>
-        <div class="box-sub">Verifier · Google Vertex AI<br/>region-pinned · no prompt logging · DPA</div>
+    <!-- PRIVATE MODEL INFRA -->
+    <div class="grp g-onprem" id="g-onprem">
+      <div class="grp-title">Private Model Infra · ClimatePros Client<span class="grp-sub">on-prem · Mac Studio "Tundra"</span></div>
+
+      <div class="box bx-purple" id="b-zeus">
+        <div class="box-t">🤖 Zeus — Primary Extractor</div>
+        <div class="box-s">Claude Sonnet 4.6 · client-operated · FieldJetX-linked<br/>Grounded in prior FJX bids · constrained JSON schema output<br/><span class="warn">⚠ CPU-bound single machine — hardware ceiling at volume</span></div>
       </div>
-      <div class="box box-purple" id="box-claude">
-        <div class="box-title"><span class="ico">🌟</span> Claude Fable 5</div>
-        <div class="box-sub">Verifier · Anthropic API enterprise<br/>≤30d retention · DPA · not for training</div>
+
+      <div class="row2">
+        <div class="box bx-purple" id="b-gemini">
+          <div class="box-t">✨ Gemini 3.5 Flash</div>
+          <div class="box-s">Verifier · Google Vertex AI<br/>region-pinned · DPA · no prompt logging</div>
+        </div>
+        <div class="box bx-purple" id="b-claude">
+          <div class="box-t">🌟 Claude Fable 5</div>
+          <div class="box-s">Verifier · Anthropic API enterprise<br/>≤30d retention · DPA · not for training</div>
+        </div>
       </div>
+
+      <span class="note">Models never emit prices · all pricing = pure deterministic code · drawings in delimited data channel only</span>
     </div>
 
-    <span class="note">Models never emit prices · all pricing = deterministic code · drawings in delimited data channel</span>
-  </div>
+  </div><!-- /col-r -->
+</div><!-- /cols -->
 
-  <!-- ════════════════════════════════════════════
-       COL 1 ROW 4 · OBSERVABILITY
-  ═════════════════════════════════════════════ -->
-  <div class="group g-obs" id="g-obs">
-    <div class="group-title">Observability &amp; Tracing</div>
-    <div class="box box-teal">
-      <div class="box-title"><span class="ico">📊</span> Monitor + App Insights</div>
-      <div class="box-sub">
-        Logs · traces · metrics · correlation IDs<br/>
-        ai_calls: per-model tokens, latency, cost · SLO burn alerts<br/>
-        Dead-letter alerts · Neo4j query latency tracked
-      </div>
-    </div>
-    <span class="note">all services emit telemetry · prompt_version stamped on every bid and ai_calls record</span>
-  </div>
-
-</div><!-- /canvas -->
-
-<!-- ════════════════════════════════════════════
-     SVG ARROWS OVERLAY
-═════════════════════════════════════════════ -->
-<svg class="arrows-svg" id="arrows-svg" xmlns="http://www.w3.org/2000/svg">
+<!-- SVG arrows drawn by JS after layout renders -->
+<svg class="arrow-svg" id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#4a90d9"/>
-    </marker>
-    <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#e07b20"/>
-    </marker>
-    <marker id="arr-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#8b5cf6"/>
-    </marker>
-    <marker id="arr-teal" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#2ab3a3"/>
-    </marker>
-    <marker id="arr-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#888"/>
-    </marker>
+    <marker id="ah-blue"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#4a8fd4"/></marker>
+    <marker id="ah-orange" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#d97c1a"/></marker>
+    <marker id="ah-purple" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#8050d0"/></marker>
+    <marker id="ah-teal"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#29aaa0"/></marker>
+    <marker id="ah-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#888"/></marker>
   </defs>
-  <!-- arrows drawn by JS below -->
 </svg>
 
-</div><!-- /canvas-wrap -->
+</div><!-- /diagram -->
 
 <script>
-// Draw arrows between boxes after layout settles
-function mid(el) {
-  const r = el.getBoundingClientRect();
-  const wr = document.getElementById('canvas-wrap') ?
-    document.getElementById('canvas-wrap').getBoundingClientRect() :
-    document.querySelector('.canvas-wrap').getBoundingClientRect();
+function rc(id){
+  const el=document.getElementById(id);
+  if(!el) return null;
+  const d=document.getElementById('diagram').getBoundingClientRect();
+  const r=el.getBoundingClientRect();
   return {
-    x: r.left - wr.left + r.width / 2,
-    y: r.top  - wr.top  + r.height / 2,
-    top:    r.top    - wr.top,
-    bottom: r.bottom - wr.top,
-    left:   r.left   - wr.left,
-    right:  r.right  - wr.left,
-    w: r.width,
-    h: r.height,
+    t: r.top-d.top, b: r.bottom-d.top,
+    l: r.left-d.left, r: r.right-d.left,
+    cx: r.left-d.left+r.width/2,
+    cy: r.top-d.top+r.height/2,
+    w: r.width, h: r.height
   };
 }
 
-function drawArrow(svg, x1, y1, x2, y2, color, label, marker, dashed) {
-  const markers = { blue:'arr-blue', orange:'arr-orange', purple:'arr-purple', teal:'arr-teal', gray:'arr-gray' };
-  const colors  = { blue:'#4a90d9', orange:'#e07b20', purple:'#8b5cf6', teal:'#2ab3a3', gray:'#888' };
-
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  // Simple curved path
-  const mx = (x1 + x2) / 2;
-  const d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
-  path.setAttribute('d', d);
-  path.setAttribute('fill', 'none');
-  path.setAttribute('stroke', colors[color] || color);
-  path.setAttribute('stroke-width', '1.5');
-  path.setAttribute('marker-end', `url(#${markers[color] || 'arr-gray'})`);
-  if (dashed) path.setAttribute('stroke-dasharray', '5,3');
-  svg.appendChild(path);
-
-  if (label) {
-    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    txt.setAttribute('x', mx);
-    txt.setAttribute('y', (y1 + y2) / 2 - 5);
-    txt.setAttribute('text-anchor', 'middle');
-    txt.setAttribute('class', 'arrow-label');
-    txt.setAttribute('fill', colors[color] || '#555');
-    txt.textContent = label;
-    svg.appendChild(txt);
+function line(svg, x1,y1,x2,y2, col, lbl, dash){
+  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
+  const c=colors[col]||col;
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  // cubic bezier: control points mid-way
+  const cx=(x1+x2)/2;
+  p.setAttribute('d',`M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+  p.setAttribute('fill','none');
+  p.setAttribute('stroke',c);
+  p.setAttribute('stroke-width','1.6');
+  p.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash) p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);
+  if(lbl){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',cx);
+    t.setAttribute('y',(y1+y2)/2-(y1===y2?-10:-5));
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill',c);
+    t.setAttribute('font-size','8.5');
+    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+    t.setAttribute('font-weight','600');
+    t.textContent=lbl;
+    svg.appendChild(t);
   }
 }
 
-window.addEventListener('load', () => {
-  const svg = document.getElementById('arrows-svg');
-  const wrap = document.querySelector('.canvas-wrap');
-  const wr = wrap.getBoundingClientRect();
-
-  function r(id) {
-    const el = document.getElementById(id);
-    if (!el) return null;
-    const rc = el.getBoundingClientRect();
-    return {
-      top:    rc.top    - wr.top,
-      bottom: rc.bottom - wr.top,
-      left:   rc.left   - wr.left,
-      right:  rc.right  - wr.left,
-      cx: rc.left - wr.left + rc.width  / 2,
-      cy: rc.top  - wr.top  + rc.height / 2,
-      w:  rc.width,
-      h:  rc.height,
-    };
+function vline(svg,x,y1,y2,col,lbl,dash){
+  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
+  const c=colors[col]||col;
+  const p=document.createElementNS('http://www.w3.org/2000/svg','line');
+  p.setAttribute('x1',x); p.setAttribute('y1',y1);
+  p.setAttribute('x2',x); p.setAttribute('y2',y2-5);
+  p.setAttribute('stroke',c);
+  p.setAttribute('stroke-width','1.6');
+  p.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash) p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);
+  if(lbl){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',x+5);
+    t.setAttribute('y',(y1+y2)/2);
+    t.setAttribute('fill',c);
+    t.setAttribute('font-size','8.5');
+    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+    t.setAttribute('font-weight','600');
+    t.textContent=lbl;
+    svg.appendChild(t);
   }
+}
 
-  // Set SVG height
-  svg.setAttribute('height', wrap.getBoundingClientRect().height);
-  svg.setAttribute('width',  wrap.getBoundingClientRect().width);
+function hline(svg,x1,x2,y,col,lbl,dash){
+  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
+  const c=colors[col]||col;
+  const p=document.createElementNS('http://www.w3.org/2000/svg','line');
+  p.setAttribute('x1',x1); p.setAttribute('y1',y);
+  p.setAttribute('x2',x2-5); p.setAttribute('y2',y);
+  p.setAttribute('stroke',c);
+  p.setAttribute('stroke-width','1.6');
+  p.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash) p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);
+  if(lbl){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',(x1+x2)/2);
+    t.setAttribute('y',y-6);
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill',c);
+    t.setAttribute('font-size','8.5');
+    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+    t.setAttribute('font-weight','600');
+    t.textContent=lbl;
+    svg.appendChild(t);
+  }
+}
 
-  const arrows = [
-    // Clients → FJX Auth (requests flow down through edge)
-    { from: 'box-estimator', to: 'box-auth',    fx:'right', fy:'cy', tx:'top',  ty:'cx', color:'blue',   label:'requests' },
-    // FJX Auth → FastAPI (session validated, route through)
-    { from: 'box-auth',    to: 'box-api',      fx:'right', fy:'cy', tx:'left', ty:'cy', color:'blue',   label:'validated session' },
-    // FastAPI → Service Bus (dispatch analyze job)
-    { from: 'box-api',     to: 'box-sb',       fx:'cx',    fy:'bottom', tx:'cx', ty:'top', color:'orange', label:'publish job' },
-    // Service Bus → Workers (consume)
-    { from: 'box-sb',      to: 'box-workers',  fx:'cx',    fy:'bottom', tx:'cx', ty:'top', color:'orange', label:'consume · scale 0–N' },
-    // Workers → Zeus (extract)
-    { from: 'box-workers', to: 'box-zeus',     fx:'right', fy:'cy', tx:'left', ty:'cy', color:'purple', label:'extract' },
-    // Workers → Gemini
-    { from: 'box-workers', to: 'box-gemini',   fx:'right', fy:'bottom', tx:'left', ty:'cy', color:'purple', label:'verify', dashed:true },
-    // Workers → Claude Fable
-    { from: 'box-workers', to: 'box-claude',   fx:'right', fy:'bottom', tx:'left', ty:'cy', color:'purple', label:'verify', dashed:true },
-    // Workers → PostgreSQL (write bid_items)
-    { from: 'box-workers', to: 'box-pg',       fx:'cx',    fy:'bottom', tx:'cx', ty:'top', color:'orange', label:'reads / writes' },
-    // Workers ↔ Redis (job state + cache)
-    { from: 'box-workers', to: 'box-redis',    fx:'right', fy:'top', tx:'right', ty:'top', color:'orange', label:'job state · cache', dashed:true },
-    // Workers ↔ Neo4j (few-shot query + write corrections)
-    { from: 'box-workers', to: 'box-neo4j',    fx:'cx',    fy:'bottom', tx:'cx', ty:'top', color:'orange', label:'query few-shot · write corrections' },
-    // API → Blob (upload drawings)
-    { from: 'box-api',     to: 'box-blob',     fx:'left',  fy:'cy', tx:'right', ty:'cy', color:'blue',   label:'store drawings' },
-    // API → Key Vault
-    { from: 'box-api',     to: 'box-kv',       fx:'left',  fy:'bottom', tx:'right', ty:'top', color:'gray', label:'fetch secrets', dashed:true },
-    // All → Observability
-    { from: 'box-api',     to: 'g-obs',        fx:'left',  fy:'bottom', tx:'right', ty:'top', color:'teal', label:'telemetry', dashed:true },
-  ];
+// path: go right from x1,y1 then up/down then right to x2,y2
+function elbow(svg,x1,y1,x2,y2,col,lbl,dash){
+  const colors={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',gray:'#888'};
+  const c=colors[col]||col;
+  const midX=(x1+x2)/2;
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',`M${x1},${y1} L${midX},${y1} L${midX},${y2} L${x2-5},${y2}`);
+  p.setAttribute('fill','none');
+  p.setAttribute('stroke',c);
+  p.setAttribute('stroke-width','1.6');
+  p.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash) p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);
+  if(lbl){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',midX+5);
+    t.setAttribute('y',(y1+y2)/2-4);
+    t.setAttribute('fill',c);
+    t.setAttribute('font-size','8.5');
+    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+    t.setAttribute('font-weight','600');
+    t.textContent=lbl;
+    svg.appendChild(t);
+  }
+}
 
-  arrows.forEach(a => {
-    const from = r(a.from);
-    const to   = r(a.to);
-    if (!from || !to) return;
+function draw(){
+  const svg=document.getElementById('arrow-svg');
+  // clear any previous
+  while(svg.children.length>1) svg.removeChild(svg.lastChild);
 
-    let x1, y1, x2, y2;
+  const diag=document.getElementById('diagram');
+  svg.setAttribute('height', diag.getBoundingClientRect().height);
+  svg.setAttribute('width',  diag.getBoundingClientRect().width);
 
-    const edgeX = (box, side) => side === 'left' ? box.left : side === 'right' ? box.right : box.cx;
-    const edgeY = (box, side) => side === 'top'  ? box.top  : side === 'bottom' ? box.bottom : box.cy;
+  const est   = rc('b-est');
+  const mgr   = rc('b-mgr');
+  const fd    = rc('b-fd');
+  const ag    = rc('b-ag');
+  const auth  = rc('b-auth');
+  const blob  = rc('b-blob');
+  const kv    = rc('b-kv');
+  const obs   = rc('b-obs');
+  const api   = rc('b-api');
+  const sb    = rc('b-sb');
+  const wk    = rc('b-wk');
+  const pg    = rc('b-pg');
+  const redis = rc('b-redis');
+  const neo4j = rc('b-neo4j');
+  const zeus  = rc('b-zeus');
+  const gem   = rc('b-gemini');
+  const cla   = rc('b-claude');
 
-    x1 = edgeX(from, a.fx); y1 = edgeY(from, a.fy);
-    x2 = edgeX(to,   a.tx); y2 = edgeY(to,   a.ty);
+  if(!est||!api) return;
 
-    // nudge endpoints off the box edge
-    if (a.fx === 'right')  x1 += 2;
-    if (a.fx === 'left')   x1 -= 2;
-    if (a.fy === 'bottom') y1 += 2;
-    if (a.fy === 'top')    y1 -= 2;
-    if (a.tx === 'left')   x2 -= 6;
-    if (a.tx === 'right')  x2 += 6;
-    if (a.ty === 'top')    y2 -= 6;
-    if (a.ty === 'bottom') y2 += 6;
+  // 1. Estimator → Front Door (down-left, requests)
+  vline(svg, est.cx, est.b, fd.t, 'blue', 'requests');
 
-    drawArrow(svg, x1, y1, x2, y2, a.color, a.label, null, a.dashed);
-  });
-});
+  // 2. Manager → App Gateway (down, requests)
+  vline(svg, mgr.cx, mgr.b, ag.t, 'blue', 'requests');
+
+  // 3. Front Door → App Gateway internal (already adjacent, skip or tiny)
+  // 4. Auth right → FastAPI left (cross-column, validated session)
+  elbow(svg, auth.r, auth.cy, api.l, api.cy, 'blue', 'validated session ▸');
+
+  // 5. API → Service Bus (down, publish job)
+  vline(svg, api.cx, api.b, sb.t, 'orange', 'publish job');
+
+  // 6. Service Bus → Workers (down, consume)
+  vline(svg, sb.cx, sb.b, wk.t, 'orange', 'consume · scale 0–N');
+
+  // 7. Workers → PostgreSQL (down-left)
+  elbow(svg, wk.l+wk.w*0.3, wk.b, pg.cx, pg.t, 'orange', 'reads / writes');
+
+  // 8. Workers → Redis (down, right side)
+  elbow(svg, wk.l+wk.w*0.7, wk.b, redis.cx, redis.t, 'orange', 'job state');
+
+  // 9. Workers → Neo4j (down)
+  vline(svg, wk.cx, redis.b, neo4j.t, 'orange', 'query · write corrections');
+
+  // 10. Workers right → Zeus (elbow right side, extract)
+  const rightX = wk.r+18;
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',
+    `M${wk.r},${wk.cy} L${rightX},${wk.cy} L${rightX},${zeus.cy} L${zeus.r+5},${zeus.cy}`
+  );
+  p.setAttribute('fill','none');
+  p.setAttribute('stroke','#8050d0');
+  p.setAttribute('stroke-width','1.6');
+  p.setAttribute('marker-end','url(#ah-purple)');
+  svg.appendChild(p);
+  const tZeus=document.createElementNS('http://www.w3.org/2000/svg','text');
+  tZeus.setAttribute('x', rightX+4);
+  tZeus.setAttribute('y', (wk.cy+zeus.cy)/2-4);
+  tZeus.setAttribute('fill','#8050d0');
+  tZeus.setAttribute('font-size','8.5');
+  tZeus.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+  tZeus.setAttribute('font-weight','600');
+  tZeus.textContent='extract';
+  svg.appendChild(tZeus);
+
+  // 11. Workers → Gemini (down-left, dashed, verify)
+  elbow(svg, wk.l+wk.w*0.3, wk.b+20, gem.cx, gem.t, 'purple', 'verify', true);
+
+  // 12. Workers → Claude (down-right, dashed, verify)
+  elbow(svg, wk.l+wk.w*0.7, wk.b+20, cla.cx, cla.t, 'purple', 'verify', true);
+
+  // 13. API left → Blob right (cross-column, store drawings)
+  const midY2=(api.cy+blob.cy)/2;
+  const pBlob=document.createElementNS('http://www.w3.org/2000/svg','path');
+  pBlob.setAttribute('d',
+    `M${api.l},${api.cy} L${api.l-20},${api.cy} L${api.l-20},${blob.cy} L${blob.r+5},${blob.cy}`
+  );
+  pBlob.setAttribute('fill','none');
+  pBlob.setAttribute('stroke','#4a8fd4');
+  pBlob.setAttribute('stroke-width','1.6');
+  pBlob.setAttribute('stroke-dasharray','5,3');
+  pBlob.setAttribute('marker-end','url(#ah-blue)');
+  svg.appendChild(pBlob);
+  const tBlob=document.createElementNS('http://www.w3.org/2000/svg','text');
+  tBlob.setAttribute('x', api.l-16);
+  tBlob.setAttribute('y', (api.cy+blob.cy)/2-4);
+  tBlob.setAttribute('fill','#4a8fd4');
+  tBlob.setAttribute('font-size','8.5');
+  tBlob.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+  tBlob.setAttribute('font-weight','600');
+  tBlob.textContent='store drawings';
+  svg.appendChild(tBlob);
+
+  // 14. All → Observability (teal dashed from api)
+  const pObs=document.createElementNS('http://www.w3.org/2000/svg','path');
+  pObs.setAttribute('d',
+    `M${api.l},${api.b} L${api.l-32},${api.b} L${api.l-32},${obs.cy} L${obs.r+5},${obs.cy}`
+  );
+  pObs.setAttribute('fill','none');
+  pObs.setAttribute('stroke','#29aaa0');
+  pObs.setAttribute('stroke-width','1.6');
+  pObs.setAttribute('stroke-dasharray','5,3');
+  pObs.setAttribute('marker-end','url(#ah-teal)');
+  svg.appendChild(pObs);
+  const tObs=document.createElementNS('http://www.w3.org/2000/svg','text');
+  tObs.setAttribute('x', api.l-56);
+  tObs.setAttribute('y', (api.b+obs.cy)/2-4);
+  tObs.setAttribute('fill','#29aaa0');
+  tObs.setAttribute('font-size','8.5');
+  tObs.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+  tObs.setAttribute('font-weight','600');
+  tObs.textContent='telemetry';
+  svg.appendChild(tObs);
+}
+
+// draw after fonts and layout settle
+document.fonts.ready.then(()=>{ setTimeout(draw, 250); });
+window.addEventListener('resize', ()=>{ setTimeout(draw, 100); });
 </script>
 </body>
 </html>
