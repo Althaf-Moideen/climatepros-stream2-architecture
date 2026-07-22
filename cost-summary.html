@@ -361,11 +361,14 @@
     <div class="block">
       <h3><span class="icon">☁️</span> Cloud Infrastructure — ~$800/mo</h3>
       <ul>
-        <li><strong>Azure Container Apps</strong> — runs the API, workers, and background jobs</li>
-        <li><strong>Azure Service Bus</strong> — queues bid jobs reliably</li>
-        <li><strong>PostgreSQL 16</strong> — stores all bids, results, and audit logs</li>
-        <li><strong>Redis Cache</strong> — tracks live job status, avoids re-running models</li>
-        <li><strong>Knowledge Graph DB</strong> — learns from past corrections over time</li>
+        <li><strong>Azure Container Apps</strong> <span style="color:#d97c1a;font-weight:700">~$200/mo</span> — runs the API, workers, and background jobs</li>
+        <li><strong>PostgreSQL 16</strong> <span style="color:#d97c1a;font-weight:700">~$250/mo</span> — stores all bids, results, and audit logs (HA + daily backups)</li>
+        <li><strong>Knowledge Graph DB</strong> <span style="color:#d97c1a;font-weight:700">~$150/mo</span> — learns from past corrections over time</li>
+        <li><strong>Redis Cache</strong> <span style="color:#d97c1a;font-weight:700">~$80/mo</span> — tracks live job status, avoids re-running models</li>
+        <li><strong>Azure Service Bus</strong> <span style="color:#d97c1a;font-weight:700">~$25/mo</span> — queues bid jobs reliably, retries on failure</li>
+        <li><strong>Blob Storage (incremental)</strong> <span style="color:#d97c1a;font-weight:700">~$20/mo</span> — extra storage for drawings and results only</li>
+        <li><strong>Monitor + App Insights</strong> <span style="color:#d97c1a;font-weight:700">~$30/mo</span> — logs, alerts, and performance tracking</li>
+        <li><strong>Networking / misc</strong> <span style="color:#d97c1a;font-weight:700">~$45/mo</span> — data transfer, private endpoints, DNS</li>
       </ul>
     </div>
   </div>
