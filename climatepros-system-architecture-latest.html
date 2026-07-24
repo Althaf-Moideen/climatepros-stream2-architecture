@@ -240,13 +240,13 @@ h1{
 }
 
 /* ── Glossary section ────────────────────────────────────────── */
-.glossary{
+.block-ref{
   width:1320px;
   margin:36px auto 0;
   border-top:2px solid #e0e0e0;
   padding-top:28px;
 }
-.glossary-title{
+.block-ref-title{
   font-size:11px;
   font-weight:700;
   letter-spacing:.14em;
@@ -254,44 +254,121 @@ h1{
   color:#444;
   margin-bottom:20px;
 }
-.glossary-grid{
+.block-ref-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:0 32px;
 }
-.glossary-group{
+.br-section{
   margin-bottom:20px;
 }
-.glossary-group-label{
+.br-section-label{
   font-size:9px;
   font-weight:700;
   letter-spacing:.12em;
   text-transform:uppercase;
-  color:#b05e0d;
-  border-bottom:1.5px solid #d97c1a;
-  padding-bottom:5px;
+  padding:4px 8px;
+  border-radius:4px;
   margin-bottom:10px;
+  display:inline-block;
 }
-.glossary-row{
+.br-clients   .br-section-label{ background:#eef5ff; color:#2a5fa8; border:1px solid #4a8fd4; }
+.br-existing  .br-section-label{ background:#e5effc; color:#1b4a8a; border:1px solid #4a8fd4; }
+.br-new       .br-section-label{ background:#fff7ee; color:#b05e0d; border:1px solid #d97c1a; }
+.br-verifiers .br-section-label{ background:#ecfeff; color:#0e7490; border:1px solid #0891b2; }
+.br-onprem    .br-section-label{ background:#f5f0ff; color:#5e2dab; border:1px solid #8050d0; }
+.br-obs       .br-section-label{ background:#edfaf8; color:#1a7a72; border:1px solid #29aaa0; }
+.br-row{
   display:flex;
   gap:8px;
   padding:7px 0;
   border-bottom:1px solid #f2f2f2;
   align-items:baseline;
 }
-.glossary-row:last-child{ border-bottom:none; }
-.glossary-term{
+.br-row:last-child{ border-bottom:none; }
+.br-block{
   font-size:11px;
   font-weight:700;
   color:#1a1a1a;
   min-width:160px;
   flex-shrink:0;
 }
-.glossary-def{
+.br-clients  .br-block{ border-left:3px solid #4a8fd4; padding-left:6px; }
+.br-existing .br-block{ border-left:3px solid #4a8fd4; padding-left:6px; }
+.br-new      .br-block{ border-left:3px solid #d97c1a; padding-left:6px; }
+.br-verifiers .br-block{ border-left:3px solid #0891b2; padding-left:6px; }
+.br-onprem   .br-block{ border-left:3px solid #8050d0; padding-left:6px; }
+.br-obs      .br-block{ border-left:3px solid #29aaa0; padding-left:6px; }
+.br-desc{
   font-size:11px;
   color:#555;
   line-height:1.5;
 }
+
+/* ── Stack benefits ─────────────────────────────────────────── */
+.stack-benefits{
+  width:1320px;
+  margin:36px auto 0;
+  border-top:2px solid #e0e0e0;
+  padding-top:28px;
+}
+.stack-benefits-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#444;
+  margin-bottom:20px;
+}
+.benefits-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px 32px;
+}
+.benefit-card{
+  background:#fafafa;
+  border:1px solid #e8e8e8;
+  border-radius:10px;
+  padding:14px 16px;
+}
+.benefit-card-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.benefit-card-name{
+  font-size:13px;
+  font-weight:700;
+  color:#1a1a1a;
+  margin-bottom:8px;
+}
+.benefit-card ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+.benefit-card ul li{
+  font-size:11.5px;
+  color:#444;
+  line-height:1.55;
+  padding:3px 0 3px 14px;
+  position:relative;
+  border-bottom:1px solid #f0f0f0;
+}
+.benefit-card ul li:last-child{ border-bottom:none; }
+.benefit-card ul li::before{
+  content:'→';
+  position:absolute;
+  left:0;
+  color:#aaa;
+  font-size:10px;
+  top:5px;
+}
+.bc-new      { border-top:3px solid #d97c1a; } .bc-new      .benefit-card-label{ color:#b05e0d; }
+.bc-verifier { border-top:3px solid #0891b2; } .bc-verifier .benefit-card-label{ color:#0e7490; }
+.bc-onprem   { border-top:3px solid #8050d0; } .bc-onprem   .benefit-card-label{ color:#5e2dab; }
 
 /* ── SVG arrow overlay ───────────────────────────────────────── */
 .arrow-svg{
@@ -575,149 +652,189 @@ h1{
 </div><!-- /legend -->
 
 <!-- ══════════════════ GLOSSARY ══════════════════ -->
-<div class="glossary">
-  <div class="glossary-title">Technical Terms — Simple Explanations</div>
-  <div class="glossary-grid">
+<div class="block-ref">
+  <div class="block-ref-title">Block Reference — What each block does</div>
+  <div class="block-ref-grid">
 
-    <!-- Col 1 -->
+    <!-- Col 1: Clients + Existing FJX -->
     <div>
-      <div class="glossary-group">
-        <div class="glossary-group-label">FastAPI + WebSocket API</div>
-        <div class="glossary-row">
-          <span class="glossary-term">REST API</span>
-          <span class="glossary-def">A standard way for the app and server to talk to each other over the internet — like a waiter taking your order and bringing back food</span>
+      <div class="br-section br-clients">
+        <div class="br-section-label">Clients</div>
+        <div class="br-row">
+          <span class="br-block">FieldJetX Web App</span>
+          <span class="br-desc">The screen the estimator uses to upload drawings and review extracted results</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">WebSocket</span>
-          <span class="glossary-def">A live open connection between browser and server — server can push updates instantly without the browser asking repeatedly</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">HTTP Polling</span>
-          <span class="glossary-def">The browser asks the server "is it done yet?" every few seconds until it gets a final answer — simpler alternative to WebSocket</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">RBAC</span>
-          <span class="glossary-def">Role-Based Access Control — each user can only do what their role allows. Estimator uploads, Manager comments, Admin configures</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Uvicorn</span>
-          <span class="glossary-def">The engine that runs the FastAPI server — handles many requests at the same time efficiently</span>
+        <div class="br-row">
+          <span class="br-block">Manager / Admin</span>
+          <span class="br-desc">Manager adds feedback on bids · Admin manages users and rate cards</span>
         </div>
       </div>
 
-      <div class="glossary-group">
-        <div class="glossary-group-label">Azure Service Bus</div>
-        <div class="glossary-row">
-          <span class="glossary-term">Async job queue</span>
-          <span class="glossary-def">A waiting line for jobs — tasks are placed in the queue and picked up by workers one by one, so the user doesn't have to wait</span>
+      <div class="br-section br-existing" style="margin-top:16px">
+        <div class="br-section-label">Existing · FieldJetX Platform</div>
+        <div class="br-row">
+          <span class="br-block">Front Door + WAF</span>
+          <span class="br-desc">The main gate — blocks bad traffic and handles secure connections (TLS)</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Dead-letter queue</span>
-          <span class="glossary-def">A separate holding area for jobs that failed too many times — kept for investigation instead of being silently lost</span>
+        <div class="br-row">
+          <span class="br-block">App Gateway</span>
+          <span class="br-desc">The traffic director — routes requests to the right service</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">max_delivery_count</span>
-          <span class="glossary-def">Maximum number of times a failed job is retried before moving to the dead-letter queue — set to 3</span>
+        <div class="br-row">
+          <span class="br-block">FJX Auth · Session Tokens</span>
+          <span class="br-desc">The security guard — checks who you are and what you're allowed to do on every request</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">lock_timeout</span>
-          <span class="glossary-def">How long a worker has to finish a job before it's released back to the queue for another worker to pick up — set to 5 minutes</span>
+        <div class="br-row">
+          <span class="br-block">Blob Storage</span>
+          <span class="br-desc">The file cabinet — stores all uploaded drawings, generated quotes and images</span>
+        </div>
+        <div class="br-row">
+          <span class="br-block">VNet + Private Endpoints</span>
+          <span class="br-desc">The private tunnel — keeps all data off the public internet</span>
+        </div>
+        <div class="br-row">
+          <span class="br-block">Key Vault</span>
+          <span class="br-desc">The safe — stores all passwords, API keys and secrets; nothing hardcoded in code</span>
         </div>
       </div>
     </div>
 
-    <!-- Col 2 -->
+    <!-- Col 2: New Infrastructure -->
     <div>
-      <div class="glossary-group">
-        <div class="glossary-group-label">KEDA Workers · Celery</div>
-        <div class="glossary-row">
-          <span class="glossary-term">KEDA</span>
-          <span class="glossary-def">Kubernetes Event-Driven Autoscaling — automatically starts more workers when the queue is busy and shuts them down when idle</span>
+      <div class="br-section br-new">
+        <div class="br-section-label">New Infrastructure · This Project</div>
+        <div class="br-row">
+          <span class="br-block">FastAPI + WebSocket API</span>
+          <span class="br-desc">The brain — receives all requests, coordinates processing, sends back results via WebSocket or HTTP polling</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">group() fan-out</span>
-          <span class="glossary-def">Splits one job into many smaller tasks running at the same time — all 15 pages of a drawing are processed simultaneously, not one by one</span>
+        <div class="br-row">
+          <span class="br-block">Azure Service Bus</span>
+          <span class="br-desc">The queue — holds analyse jobs and delivers them to workers reliably; retries on failure, dead-letters after 3 attempts</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">asyncio.gather()</span>
-          <span class="glossary-def">Fires multiple AI calls at exactly the same time — Gemini verifies a page simultaneously with Zeus instead of waiting for each other</span>
+        <div class="br-row">
+          <span class="br-block">KEDA Workers · Celery 5.6</span>
+          <span class="br-desc">The workforce — scales up automatically, processes all pages in parallel, calls AI models, merges results and runs pricing</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">chord() fan-in</span>
-          <span class="glossary-def">Waits for all parallel page tasks to finish, then triggers the next step (Reconciler) — like waiting for everyone to finish before moving on</span>
+        <div class="br-row">
+          <span class="br-block">Azure SQL Database</span>
+          <span class="br-desc">The main database — stores bids, extracted items, pricing, audit trail and every AI call log · same SQL Server technology as FieldJetX</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Reconciler</span>
-          <span class="glossary-def">Merges the outputs from Zeus and Gemini into one final result — flags disagreements as items needing human review</span>
+        <div class="br-row">
+          <span class="br-block">Azure Cache for Redis</span>
+          <span class="br-desc">The short-term memory — tracks live job progress and caches repeated results so the same drawing is never re-processed</span>
         </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Deterministic pricing</span>
-          <span class="glossary-def">Pricing calculated by fixed rules and rate cards — no AI involved, same input always gives exactly the same price</span>
-        </div>
-      </div>
-
-      <div class="glossary-group">
-        <div class="glossary-group-label">Azure SQL Database</div>
-        <div class="glossary-row">
-          <span class="glossary-term">HA + PITR</span>
-          <span class="glossary-def">High Availability + Point-In-Time Recovery — system stays up even if a server fails, and can be restored to any exact moment in history if needed</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">SQLAlchemy 2.0 async</span>
-          <span class="glossary-def">The tool that lets the application talk to the database without waiting — other tasks continue while the database responds</span>
+        <div class="br-row">
+          <span class="br-block">Knowledge Graph DB</span>
+          <span class="br-desc">The learning system — remembers past corrections to make future extractions smarter over time via dynamic few-shot grounding</span>
         </div>
       </div>
     </div>
 
-    <!-- Col 3 -->
+    <!-- Col 3: Verifier + On-prem + Observability -->
     <div>
-      <div class="glossary-group">
-        <div class="glossary-group-label">Azure Cache for Redis</div>
-        <div class="glossary-row">
-          <span class="glossary-term">Cache-hit</span>
-          <span class="glossary-def">When the same drawing is submitted again, the result is found in cache and returned instantly — no AI models are called again</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Zero model cost</span>
-          <span class="glossary-def">If a result is served from cache, no AI API is called — meaning no token charges for that request</span>
+      <div class="br-section br-verifiers">
+        <div class="br-section-label">Cloud AI Verifier</div>
+        <div class="br-row">
+          <span class="br-block">Gemini 2.5 Flash ⚗</span>
+          <span class="br-desc">Google's AI — cross-checks Zeus's extraction independently via Google Vertex AI cloud API · called in parallel with Zeus for accuracy</span>
         </div>
       </div>
 
-      <div class="glossary-group">
-        <div class="glossary-group-label">Knowledge Graph DB</div>
-        <div class="glossary-row">
-          <span class="glossary-term">SIMILAR_TO edges</span>
-          <span class="glossary-def">Links between items across different bids that look alike — helps the system learn that similar drawings usually have similar results</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Few-shot grounding</span>
-          <span class="glossary-def">Showing the AI a few real past examples before asking it to extract — like giving someone 3 solved examples before an exam</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">prompt_version</span>
-          <span class="glossary-def">A unique ID stamped on every AI instruction set — so every result can be traced back to the exact instructions the AI was given</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Golden set</span>
-          <span class="glossary-def">A collection of verified correct examples used to test AI accuracy — like an answer key used to grade the AI before it goes live</span>
+      <div class="br-section br-onprem" style="margin-top:16px">
+        <div class="br-section-label">Private Model Infra · On-prem</div>
+        <div class="br-row">
+          <span class="br-block">Zeus — Primary Extractor</span>
+          <span class="br-desc">The main AI on the client's own machine — reads drawings and pulls out quantities, equipment and statuses using Claude Sonnet 4.6, grounded in prior FieldJetX bid history</span>
         </div>
       </div>
 
-      <div class="glossary-group">
-        <div class="glossary-group-label">General</div>
-        <div class="glossary-row">
-          <span class="glossary-term">DPA</span>
-          <span class="glossary-def">Data Processing Agreement — a legal contract ensuring the AI provider handles data safely and doesn't use it for training their models</span>
-        </div>
-        <div class="glossary-row">
-          <span class="glossary-term">Constrained JSON schema</span>
-          <span class="glossary-def">A strict template the AI must fill in — ensures output is always structured and predictable, never free-form text</span>
+      <div class="br-section br-obs" style="margin-top:16px">
+        <div class="br-section-label">Observability &amp; Tracing</div>
+        <div class="br-row">
+          <span class="br-block">Monitor + App Insights</span>
+          <span class="br-desc">The CCTV and alarm system — records logs, traces and metrics from every block; fires alerts when something goes wrong or costs spike</span>
         </div>
       </div>
     </div>
 
-  </div><!-- /glossary-grid -->
-</div><!-- /glossary -->
+  </div><!-- /block-ref-grid -->
+</div><!-- /block-ref -->
+
+<!-- ══════════════ STACK BENEFITS ══════════════ -->
+<div class="stack-benefits">
+  <div class="stack-benefits-title">Why this stack — benefits of newly introduced components</div>
+  <div class="benefits-grid">
+
+    <div class="benefit-card bc-new">
+      <div class="benefit-card-label">New · Database</div>
+      <div class="benefit-card-name">Azure SQL Database</div>
+      <ul>
+        <li>Same SQL Server engine as FieldJetX — one DB technology for the client to operate and support</li>
+        <li>Client DBA team already knows SQL Server; no extra skill or tooling needed</li>
+        <li>Data lives on Azure alongside the rest of the stack — no cross-cloud hops</li>
+        <li>HA + PITR built in — system stays up if a server fails and can be restored to any point in time</li>
+        <li>Can share or sit alongside the same Azure SQL MI as FieldJetX when the POC moves to production</li>
+      </ul>
+    </div>
+
+    <div class="benefit-card bc-new">
+      <div class="benefit-card-label">New · Cache</div>
+      <div class="benefit-card-name">Azure Cache for Redis</div>
+      <ul>
+        <li>Fully managed on Azure — no Redis infrastructure to provision, patch or monitor</li>
+        <li>Tracks live job state so the UI can show real-time progress without polling the database</li>
+        <li>Cache-hit on repeat drawings = zero AI API calls = zero token cost for that request</li>
+        <li>Scales automatically with demand; SLA-backed availability</li>
+      </ul>
+    </div>
+
+    <div class="benefit-card bc-new">
+      <div class="benefit-card-label">New · Queue + Workers</div>
+      <div class="benefit-card-name">Azure Service Bus + KEDA Workers</div>
+      <ul>
+        <li>Worker count scales to zero when idle — no compute cost between jobs</li>
+        <li>All pages of a drawing processed in parallel (fan-out), not one by one — faster turnaround</li>
+        <li>Dead-letter queue captures failed jobs for investigation; nothing is silently lost</li>
+        <li>Azure-native queue — no extra broker to manage outside the existing Azure environment</li>
+      </ul>
+    </div>
+
+    <div class="benefit-card bc-verifier">
+      <div class="benefit-card-label">Cloud AI Verifier</div>
+      <div class="benefit-card-name">Gemini 2.5 Flash</div>
+      <ul>
+        <li>Independent second opinion on Zeus extraction — catches errors a single model would miss</li>
+        <li>Runs in parallel with Zeus via asyncio.gather() — adds accuracy with no extra latency</li>
+        <li>Single frontier model keeps architecture simple and cost predictable</li>
+        <li>Google Vertex AI: region-pinned, DPA-covered, no prompt logging — meets data privacy requirements</li>
+        <li>Can be swapped or skipped per job type as cost and performance data accumulates</li>
+      </ul>
+    </div>
+
+    <div class="benefit-card bc-new">
+      <div class="benefit-card-label">New · Learning</div>
+      <div class="benefit-card-name">Knowledge Graph DB</div>
+      <ul>
+        <li>Remembers every estimator correction — system gets smarter with each bid reviewed</li>
+        <li>SIMILAR_TO edges link past bid items to new drawings for dynamic few-shot grounding</li>
+        <li>Weekly promo: corrections → golden set → new prompt_version stamped on every AI call</li>
+        <li>Accuracy improves continuously without retraining or manual prompt engineering</li>
+      </ul>
+    </div>
+
+    <div class="benefit-card bc-onprem">
+      <div class="benefit-card-label">Private Model Infra</div>
+      <div class="benefit-card-name">Zeus — On-prem Extractor</div>
+      <ul>
+        <li>Runs on the client's own Mac Studio "Tundra" — drawing data never leaves the client's machine</li>
+        <li>Grounded in prior FieldJetX bid history — output is contextualised to ClimatePros jobs, not generic</li>
+        <li>Constrained JSON schema output — results are always structured and machine-readable, never free-form</li>
+        <li>Models never emit prices — all pricing is pure deterministic code, fully auditable</li>
+      </ul>
+    </div>
+
+  </div><!-- /benefits-grid -->
+</div><!-- /stack-benefits -->
 
 <script>
 const NS='http://www.w3.org/2000/svg';
