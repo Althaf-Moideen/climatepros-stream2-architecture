@@ -20,11 +20,12 @@ body{
   background:var(--bg);
   color:var(--text);
   line-height:1.6;
+  overflow-x:hidden;
 }
 .main{
-  max-width:1400px;
+  max-width:1440px;
   margin:0 auto;
-  padding:40px 40px 80px;
+  padding:32px 20px 80px;
 }
 
 /* ── Hero ────────────────────────────────────────────────────── */
@@ -65,7 +66,7 @@ h2{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:14px;
-  padding:28px 24px 24px;
+  padding:20px 12px 16px;
 }
 
 /* ── Diagram internals ───────────────────────────────────────── */
@@ -151,7 +152,7 @@ h2{
 .count .l{font-size:12px;color:var(--text-muted);margin-top:5px;}
 
 /* ── Benefits (changelog-style cards) ───────────────────────── */
-.chg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.chg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media(max-width:860px){.chg-grid{grid-template-columns:1fr;}}
 .chg{border:1.5px solid var(--border);border-left:4px solid var(--amber);border-radius:12px;background:var(--surface);padding:15px 17px;}
 .chg.cyan-accent{border-left-color:var(--cyan);}
@@ -345,15 +346,15 @@ h2{
     <div class="cap">Existing &middot; reused as-is</div>
     <h3>🏗️ FieldJetX Platform</h3>
     <ul>
-      <li><b>FieldJetX Web App</b> — estimator bid upload, review &amp; finalise <span class="pill azure">Azure</span></li>
-      <li><b>Manager / Admin</b> — feedback on bids · rate-card configuration <span class="pill azure">Azure</span></li>
-      <li><b>Front Door + WAF</b> — main gate, TLS termination, bad-traffic blocking <span class="pill azure">Azure</span></li>
-      <li><b>App Gateway</b> — routes requests to the right service <span class="pill azure">Azure</span></li>
-      <li><b>FJX Auth · Session Tokens</b> — identity check on every request via loginsessionid + SecJobRoles <span class="pill azure">Azure</span></li>
-      <li><b>Blob Storage</b> — geo-redundant store for drawings, quotes and images <span class="pill azure">Azure</span></li>
-      <li><b>VNet + Private Endpoints</b> — keeps all data off the public internet <span class="pill azure">Azure</span></li>
-      <li><b>Key Vault</b> — managed secrets; nothing hardcoded in config or images <span class="pill azure">Azure</span></li>
-      <li><b>Azure SQL Database</b> — existing FieldJetX SQL Server instance; new tables added here, no separate DB provisioned <span class="pill reuse">Reusing FJX DB</span></li>
+      <li><div class="inv-body"><b>FieldJetX Web App</b> — estimator bid upload, review &amp; finalise</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Manager / Admin</b> — feedback on bids · rate-card configuration</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Front Door + WAF</b> — main gate, TLS termination, bad-traffic blocking</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>App Gateway</b> — routes requests to the right service</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>FJX Auth · Session Tokens</b> — identity and permission check on every request via loginsessionid + SecJobRoles</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Blob Storage</b> — geo-redundant store for drawings, quotes and images</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>VNet + Private Endpoints</b> — keeps all data off the public internet</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Key Vault</b> — managed secrets; nothing hardcoded in config or images</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Azure SQL Database</b> — existing FieldJetX SQL Server instance; new tables (bids, bid_items, audit_log, ai_calls) added here, no separate DB provisioned</div><span class="pill reuse">Reusing FJX DB</span></li>
     </ul>
   </div>
 
@@ -361,39 +362,14 @@ h2{
     <div class="cap">New &middot; introduced by this project</div>
     <h3>⚡ AI Extraction + Estimation Tier</h3>
     <ul>
-      <li>
-        <div class="inv-body">
-          <b>FastAPI + WebSocket API</b> — central backend; RBAC per route, FJX session validation on every request. Job status via WebSocket <code>/ws/jobs/{id}</code> or HTTP polling fallback.
-        </div>
-        <span class="pill azure">Azure Container Apps</span>
-      </li>
-      <li><b>Azure Service Bus</b> — durable async job queue; dead-letters after 3 attempts, 5-min lock timeout <span class="pill azure">Azure</span></li>
-      <li>
-        <div class="inv-body">
-          <b>KEDA Workers · Celery 5.6</b> — scales 0–N on queue depth; fan-out per page, parallel AI calls via asyncio.gather(), fan-in Reconciler → deterministic pricing engine
-        </div>
-        <span class="pill azure">Azure Container Apps</span>
-      </li>
-      <li><b>Azure Cache for Redis</b> — live job state + result cache; cache-hit = zero model cost <span class="pill azure">Azure</span></li>
-      <li>
-        <div class="inv-body">
-          <b>Knowledge Graph DB</b> — feedback learning store; BidItem → Correction → Equipment nodes, SIMILAR_TO edges for few-shot grounding. Weekly promo: corrections → golden set → new prompt_version.
-        </div>
-        <span class="pill azure">Azure</span>
-      </li>
-      <li>
-        <div class="inv-body">
-          <b>Gemini 2.5 Flash</b> — cloud AI verifier; cross-checks Zeus extraction independently in parallel. Google Vertex AI, region-pinned, DPA-covered, no prompt logging. Experimental — can be swapped or skipped.
-        </div>
-        <span class="pill external">Vertex AI</span>
-      </li>
-      <li>
-        <div class="inv-body">
-          <b>Zeus — Primary Extractor</b> — on-prem AI on Mac Studio "Tundra"; reads drawings, outputs constrained JSON. Claude Sonnet 4.6, grounded in prior FJX bid history. Models never emit prices.
-        </div>
-        <span class="pill onprem">On-prem</span>
-      </li>
-      <li><b>Monitor + App Insights</b> — logs, traces, metrics; per-model token + cost tracking, SLO burn alerts <span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>FastAPI + WebSocket API</b> — central backend; RBAC per route, FJX session validation on every request. Job status via WebSocket <code>/ws/jobs/{id}</code> or HTTP polling fallback.</div><span class="pill azure">Container Apps</span></li>
+      <li><div class="inv-body"><b>Azure Service Bus</b> — durable async job queue; dead-letters after 3 attempts, 5-min lock timeout</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>KEDA Workers · Celery 5.6</b> — scales 0–N on queue depth; fan-out per page, parallel AI calls via asyncio.gather(), fan-in Reconciler → deterministic pricing engine</div><span class="pill azure">Container Apps</span></li>
+      <li><div class="inv-body"><b>Azure Cache for Redis</b> — live job state + result cache; cache-hit = zero model cost</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Knowledge Graph DB</b> — feedback learning; BidItem → Correction → Equipment nodes, SIMILAR_TO edges for few-shot grounding, weekly golden set promo</div><span class="pill azure">Azure</span></li>
+      <li><div class="inv-body"><b>Gemini 2.5 Flash</b> — cloud AI verifier; cross-checks Zeus extraction independently in parallel. Google Vertex AI, region-pinned, DPA-covered, no prompt logging. Experimental.</div><span class="pill external">Vertex AI</span></li>
+      <li><div class="inv-body"><b>Zeus — Primary Extractor</b> — on-prem AI on Mac Studio "Tundra"; reads drawings, outputs constrained JSON via Claude Sonnet 4.6 grounded in prior FJX bid history. Models never emit prices.</div><span class="pill onprem">On-prem</span></li>
+      <li><div class="inv-body"><b>Monitor + App Insights</b> — logs, traces, metrics; per-model token + cost tracking, SLO burn alerts</div><span class="pill azure">Azure</span></li>
     </ul>
   </div>
 
