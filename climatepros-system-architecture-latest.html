@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ClimatePros Stream 2 — System Architecture</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:#f5f6f8;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 24px 60px;
+}
+
+h1{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#3a3a3a;
+  margin-bottom:32px;
+  text-align:center;
+}
+
+/* ── outer canvas ────────────────────────────────────────────── */
+.diagram{
+  position:relative;
+  width:1320px;
+}
+
+/* ── two-column flex ─────────────────────────────────────────── */
+.cols{
+  display:flex;
+  gap:72px;
+  align-items:stretch;
+}
+.col-l{ width:560px; flex-shrink:0; display:flex; flex-direction:column; gap:20px; }
+.col-r{ width:708px; flex-shrink:0; display:flex; flex-direction:column; gap:20px; }
+
+/* ── group containers ────────────────────────────────────────── */
+.grp{
+  border-radius:16px;
+  padding:22px 22px 26px;
+  position:relative;
+}
+.grp-title{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+.grp-sub{
+  font-weight:400;
+  font-size:9px;
+  letter-spacing:.05em;
+  opacity:.6;
+  margin-left:6px;
+}
+
+/* colour themes */
+.g-clients { border:2px dashed #4a8fd4; background:#eef5ff; }
+.g-clients .grp-title{ color:#2a5fa8; }
+
+.g-existing{ border:2px solid #4a8fd4; background:#e5effc; flex:1; }
+.g-existing .grp-title{ color:#1b4a8a; }
+
+.g-obs{ border:2px dashed #29aaa0; background:#edfaf8; }
+.g-obs .grp-title{ color:#1a7a72; }
+
+.g-new{ border:2px dashed #d97c1a; background:#fff7ee; flex:1; }
+.g-new .grp-title{ color:#b05e0d; }
+
+.g-onprem{ border:2px dashed #8050d0; background:#f5f0ff; }
+.g-onprem .grp-title{ color:#5e2dab; }
+
+.g-verifiers{ border:2px dashed #0891b2; background:#ecfeff; }
+.g-verifiers .grp-title{ color:#0e7490; }
+.bx-cyan{ border:1.5px solid #0891b2; }
+
+/* ── component boxes ─────────────────────────────────────────── */
+.box{
+  background:#fff;
+  border-radius:10px;
+  padding:13px 15px;
+  margin-bottom:12px;
+}
+.box:last-child{ margin-bottom:0; }
+.box-t{
+  font-size:12px;
+  font-weight:700;
+  color:#1a1a1a;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:5px;
+  flex-wrap:wrap;
+}
+.box-s{
+  font-size:10px;
+  color:#555;
+  line-height:1.6;
+}
+.box-s b{ color:#c76000; font-weight:600; }
+
+.bx-blue  { border:1.5px solid #4a8fd4; }
+.bx-orange{ border:1.5px solid #d97c1a; }
+.bx-purple{ border:1.5px solid #8050d0; }
+.bx-teal  { border:1.5px solid #29aaa0; }
+.bx-gray  { border:1.5px solid #c5ccd8; background:#f9fafc; }
+
+/* two-up row */
+.row2{ display:flex; gap:12px; margin-bottom:12px; }
+.row2 .box{ flex:1; margin-bottom:0; }
+
+/* inner sub-container (edge & auth) */
+.inner{
+  border:1.5px solid #4a8fd4;
+  border-radius:12px;
+  background:#d4e6f9;
+  padding:14px 14px 16px;
+  margin-bottom:12px;
+}
+.inner-title{
+  font-size:9.5px;
+  font-weight:700;
+  color:#1b4a8a;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+/* EXPERIMENTAL badge */
+.exp{
+  display:inline-flex;
+  align-items:center;
+  background:#7c3aed;
+  color:#fff;
+  font-size:7.5px;
+  font-weight:800;
+  letter-spacing:.08em;
+  padding:2px 6px;
+  border-radius:4px;
+  margin-left:4px;
+  flex-shrink:0;
+  opacity:.9;
+}
+
+/* NEW badge */
+.new{
+  display:inline-flex;
+  align-items:center;
+  background:#d97c1a;
+  color:#fff;
+  font-size:7.5px;
+  font-weight:800;
+  letter-spacing:.1em;
+  padding:2px 6px;
+  border-radius:4px;
+  margin-left:4px;
+  flex-shrink:0;
+}
+
+/* warn text */
+.warn{ color:#c0392b !important; font-weight:600 !important; }
+
+/* italic note */
+.note{
+  display:block;
+  font-size:9px;
+  color:#999;
+  font-style:italic;
+  margin-top:10px;
+  line-height:1.6;
+}
+
+/* ── Block reference legend ──────────────────────────────────── */
+.legend{
+  width:1320px;
+  margin:48px auto 0;
+  border-top:2px solid #e0e0e0;
+  padding-top:28px;
+}
+.legend-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#444;
+  margin-bottom:20px;
+}
+.legend-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+}
+.legend-section{
+  padding:0 24px 20px 0;
+}
+.legend-section-label{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:4px;
+  margin-bottom:10px;
+  display:inline-block;
+}
+.ls-clients   .legend-section-label{ background:#eef5ff; color:#2a5fa8; border:1px solid #4a8fd4; }
+.ls-existing  .legend-section-label{ background:#e5effc; color:#1b4a8a; border:1px solid #4a8fd4; }
+.ls-new       .legend-section-label{ background:#fff7ee; color:#b05e0d; border:1px solid #d97c1a; }
+.ls-verifiers .legend-section-label{ background:#ecfeff; color:#0e7490; border:1px solid #0891b2; }
+.ls-onprem    .legend-section-label{ background:#f5f0ff; color:#5e2dab; border:1px solid #8050d0; }
+.ls-obs       .legend-section-label{ background:#edfaf8; color:#1a7a72; border:1px solid #29aaa0; }
+
+.legend-row{
+  display:flex;
+  gap:8px;
+  padding:7px 0;
+  border-bottom:1px solid #f2f2f2;
+  align-items:baseline;
+}
+.legend-row:last-child{ border-bottom:none; }
+.legend-block{
+  font-size:11px;
+  font-weight:600;
+  color:#1a1a1a;
+  min-width:180px;
+  flex-shrink:0;
+}
+.legend-desc{
+  font-size:11px;
+  color:#555;
+  line-height:1.5;
+}
+
+/* ── Glossary section ────────────────────────────────────────── */
+.glossary{
+  width:1320px;
+  margin:36px auto 0;
+  border-top:2px solid #e0e0e0;
+  padding-top:28px;
+}
+.glossary-title{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#444;
+  margin-bottom:20px;
+}
+.glossary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0 32px;
+}
+.glossary-group{
+  margin-bottom:20px;
+}
+.glossary-group-label{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#b05e0d;
+  border-bottom:1.5px solid #d97c1a;
+  padding-bottom:5px;
+  margin-bottom:10px;
+}
+.glossary-row{
+  display:flex;
+  gap:8px;
+  padding:7px 0;
+  border-bottom:1px solid #f2f2f2;
+  align-items:baseline;
+}
+.glossary-row:last-child{ border-bottom:none; }
+.glossary-term{
+  font-size:11px;
+  font-weight:700;
+  color:#1a1a1a;
+  min-width:160px;
+  flex-shrink:0;
+}
+.glossary-def{
+  font-size:11px;
+  color:#555;
+  line-height:1.5;
+}
+
+/* ── SVG arrow overlay ───────────────────────────────────────── */
+.arrow-svg{
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  overflow:visible;
+}
+
+/* SVG filter for subtle pill shadow */
+#arrow-svg{filter:none;}
+</style>
+</head>
+<body>
+
+<h1>ClimatePros Stream 2 &nbsp;·&nbsp; System Architecture &nbsp;·&nbsp; Azure</h1>
+
+<div class="diagram" id="diagram">
+<div class="cols">
+
+  <!-- ══════════════════ LEFT COLUMN ══════════════════ -->
+  <div class="col-l">
+
+    <!-- CLIENTS -->
+    <div class="grp g-clients" id="g-clients">
+      <div class="grp-title">Clients</div>
+      <div class="row2">
+        <div class="box bx-blue" id="b-est">
+          <div class="box-t">🖥️ FieldJetX Web App</div>
+          <div class="box-s">Estimator — bid upload, review &amp; finalise</div>
+        </div>
+        <div class="box bx-blue" id="b-mgr">
+          <div class="box-t">👤 Manager / Admin</div>
+          <div class="box-s">Feedback &amp; rate-card config</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXISTING FJX -->
+    <div class="grp g-existing" id="g-existing">
+      <div class="grp-title">Existing · FieldJetX Platform<span class="grp-sub">Azure · unchanged · reused</span></div>
+
+      <div class="inner" id="inner-edge">
+        <div class="inner-title">Edge &amp; Auth Layer</div>
+        <div class="row2">
+          <div class="box bx-gray" id="b-fd">
+            <div class="box-t">🛡️ Front Door + WAF</div>
+            <div class="box-s">FJX existing · TLS via FJX cert<br/>no separate provisioning</div>
+          </div>
+          <div class="box bx-gray" id="b-ag">
+            <div class="box-t">🔀 App Gateway</div>
+            <div class="box-s">FJX existing · routes to<br/>ClimatePros containers</div>
+          </div>
+        </div>
+        <div class="box bx-gray" id="b-auth">
+          <div class="box-t">🔑 FJX Auth · Session Tokens</div>
+          <div class="box-s">GUID session tokens · loginsessionid validated per request<br/>UserFeatureXref feature-gate · SecJobRoles (ADM / MGR / USR / LOA)</div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="box bx-gray" id="b-blob">
+          <div class="box-t">📁 Blob Storage</div>
+          <div class="box-s">FJX existing · geo-redundant<br/>drawings · quotes · images</div>
+        </div>
+        <div class="box bx-gray" id="b-vnet">
+          <div class="box-t">🔒 VNet + Private Endpoints</div>
+          <div class="box-s">FJX existing<br/>data off public internet</div>
+        </div>
+      </div>
+
+      <div class="box bx-gray" id="b-kv">
+        <div class="box-t">🗝️ Key Vault</div>
+        <div class="box-s">API keys · FJX integration token · no secrets in config or images · managed keys</div>
+      </div>
+    </div>
+
+    <!-- OBSERVABILITY -->
+    <div class="grp g-obs" id="g-obs">
+      <div class="grp-title">Observability &amp; Tracing</div>
+      <div class="box bx-teal" id="b-obs">
+        <div class="box-t">📊 Monitor + App Insights</div>
+        <div class="box-s">Logs · traces · metrics · correlation IDs<br/>ai_calls: per-model tokens, latency, cost · SLO burn &amp; dead-letter alerts</div>
+      </div>
+      <span class="note">all services emit telemetry · prompt_version stamped on every bid + ai_calls record</span>
+    </div>
+
+  </div><!-- /col-l -->
+
+  <!-- ══════════════════ RIGHT COLUMN ══════════════════ -->
+  <div class="col-r">
+
+    <!-- NEW INFRASTRUCTURE -->
+    <div class="grp g-new" id="g-new">
+      <div class="grp-title">New Infrastructure · This Project<span class="grp-sub">Azure · Container Apps</span></div>
+
+      <div class="box bx-orange" id="b-api">
+        <div class="box-t">⚡ FastAPI + WebSocket API <span class="new">NEW</span></div>
+        <div class="box-s">REST API · RBAC per route · Uvicorn · Swagger at /api/docs<br/>FJX session validation on every request<br/>
+          <b>Job status (either):</b> WebSocket <code>/ws/jobs/{job_id}</code> for real-time push
+          &nbsp;·&nbsp; HTTP polling <code>GET /api/jobs/{job_id}</code> as fallback or alternative
+        </div>
+      </div>
+
+      <div class="box bx-orange" id="b-sb">
+        <div class="box-t">📨 Azure Service Bus <span class="new">NEW</span></div>
+        <div class="box-s">Async job queue · dead-letter on failure exhaustion<br/>max_delivery_count=3 · lock_timeout=5 min</div>
+      </div>
+
+      <div class="box bx-orange" id="b-wk">
+        <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="new">NEW</span></div>
+        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — Gemini + Claude verify in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
+      </div>
+
+      <div class="row2">
+        <div class="box bx-orange" id="b-pg">
+          <div class="box-t">🗄️ PostgreSQL 16 <span class="new">NEW</span></div>
+          <div class="box-s">HA + PITR · SQLAlchemy 2.0 async<br/>bids · bid_items · audit_log · ai_calls</div>
+        </div>
+        <div class="box bx-orange" id="b-redis">
+          <div class="box-t">⚡ Redis Cache <span class="new">NEW</span></div>
+          <div class="box-s">Job state · result cache<br/>Cache-hit → zero model cost</div>
+        </div>
+      </div>
+
+      <div class="box bx-orange" id="b-neo4j">
+        <div class="box-t">🕸️ Knowledge Graph DB <span class="new">NEW</span></div>
+        <div class="box-s">Feedback learning · BidItem → Correction → Equipment nodes<br/>SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>Weekly promo: corrections → golden set → new prompt_version</div>
+      </div>
+    </div>
+
+    <!-- CLOUD AI VERIFIERS -->
+    <div class="grp g-verifiers" id="g-verifiers">
+      <div class="grp-title">Cloud AI Verifiers<span class="grp-sub">suggested for accuracy · models subject to change based on cost &amp; performance</span></div>
+
+      <div class="row2">
+        <div class="box bx-cyan" id="b-gemini">
+          <div class="box-t">✨ Gemini 3.5 Flash <span class="exp">Experimental</span></div>
+          <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
+        </div>
+        <div class="box bx-cyan" id="b-claude">
+          <div class="box-t">🌟 Claude Fable 5 <span class="exp">Experimental</span></div>
+          <div class="box-s">Anthropic API enterprise · cloud API<br/>≤30d retention · DPA · not for training<br/>Higher token usage — can be swapped based on cost &amp; accuracy</div>
+        </div>
+      </div>
+
+      <span class="note">Not on-prem · called via cloud APIs to cross-verify on-prem Zeus extraction for higher accuracy · either model can be replaced or skipped</span>
+    </div>
+
+    <!-- PRIVATE MODEL INFRA (on-prem, Zeus only) -->
+    <div class="grp g-onprem" id="g-onprem">
+      <div class="grp-title">Private Model Infra · ClimatePros Client<span class="grp-sub">on-prem · Mac Studio "Tundra"</span></div>
+
+      <div class="box bx-purple" id="b-zeus">
+        <div class="box-t">🤖 Zeus — Primary Extractor</div>
+        <div class="box-s">Claude Sonnet 4.6 · client-operated · FieldJetX-linked<br/>Grounded in prior FJX bids · constrained JSON schema output<br/><span class="warn">💡 Scaling path available for higher bid volumes</span></div>
+      </div>
+
+      <span class="note">Models never emit prices · all pricing = pure deterministic code · drawings in delimited data channel only</span>
+    </div>
+
+  </div><!-- /col-r -->
+</div><!-- /cols -->
+
+<!-- SVG arrows drawn by JS after layout renders -->
+<svg class="arrow-svg" id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ah-blue"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#4a8fd4"/></marker>
+    <marker id="ah-orange" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#d97c1a"/></marker>
+    <marker id="ah-purple" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#8050d0"/></marker>
+    <marker id="ah-teal"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#29aaa0"/></marker>
+    <marker id="ah-cyan"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#0891b2"/></marker>
+    <marker id="ah-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#888"/></marker>
+  </defs>
+</svg>
+
+</div><!-- /diagram -->
+
+<!-- ══════════════════ BLOCK REFERENCE LEGEND ══════════════════ -->
+<div class="legend">
+  <div class="legend-title">Block Reference — What each block does</div>
+  <div class="legend-grid">
+
+    <!-- Col 1: Clients + Existing FJX -->
+    <div>
+      <div class="legend-section ls-clients">
+        <div class="legend-section-label">Clients</div>
+        <div class="legend-row">
+          <span class="legend-block">FieldJetX Web App</span>
+          <span class="legend-desc">The screen the estimator uses to upload drawings and review results</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Manager / Admin</span>
+          <span class="legend-desc">Manager adds feedback on bids · Admin manages users and rate cards</span>
+        </div>
+      </div>
+
+      <div class="legend-section ls-existing" style="margin-top:16px">
+        <div class="legend-section-label">Existing · FieldJetX Platform</div>
+        <div class="legend-row">
+          <span class="legend-block">Front Door + WAF</span>
+          <span class="legend-desc">The main gate — blocks bad traffic and handles secure connection</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">App Gateway</span>
+          <span class="legend-desc">The traffic director — routes requests to the right service</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">FJX Auth · Session Tokens</span>
+          <span class="legend-desc">The security guard — checks identity and permissions on every request</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Blob Storage</span>
+          <span class="legend-desc">The file cabinet — stores all uploaded drawings and generated files</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">VNet + Private Endpoints</span>
+          <span class="legend-desc">The private tunnel — keeps all data off the public internet</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Key Vault</span>
+          <span class="legend-desc">The safe — stores all passwords, API keys and secrets securely</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 2: New Infrastructure -->
+    <div>
+      <div class="legend-section ls-new">
+        <div class="legend-section-label">New Infrastructure · This Project</div>
+        <div class="legend-row">
+          <span class="legend-block">FastAPI + WebSocket API</span>
+          <span class="legend-desc">The brain — receives requests, coordinates everything, returns results via WebSocket or HTTP polling</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Azure Service Bus</span>
+          <span class="legend-desc">The queue — holds analyze jobs and delivers them to workers reliably; retries on failure</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">KEDA Workers · Celery 5.6</span>
+          <span class="legend-desc">The workforce — scales automatically, processes pages in parallel, calls AI models, merges results and runs pricing</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">PostgreSQL 16</span>
+          <span class="legend-desc">The main database — stores bids, extracted items, pricing, audit trail and every AI call log · Using PostgreSQL as a separate DB while FieldJetX completes its active migration to Azure SQL MI · Can be moved to Azure SQL MI later with no architecture changes</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Redis Cache</span>
+          <span class="legend-desc">The short-term memory — tracks live job progress and caches repeated results to avoid re-running models</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Knowledge Graph DB</span>
+          <span class="legend-desc">The learning system — remembers past corrections to make future extractions smarter over time</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 3: Verifiers + On-prem + Observability -->
+    <div>
+      <div class="legend-section ls-verifiers">
+        <div class="legend-section-label">Cloud AI Verifiers</div>
+        <div class="legend-row">
+          <span class="legend-block">Gemini 3.5 Flash ⚗</span>
+          <span class="legend-desc">Google's AI — double-checks Zeus's extraction independently via cloud API (experimental model)</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-block">Claude Fable 5 ⚗</span>
+          <span class="legend-desc">Anthropic's AI — same independent check simultaneously; higher token usage, can be swapped based on cost (experimental model)</span>
+        </div>
+      </div>
+
+      <div class="legend-section ls-onprem" style="margin-top:16px">
+        <div class="legend-section-label">Private Model Infra · On-prem</div>
+        <div class="legend-row">
+          <span class="legend-block">Zeus — Primary Extractor</span>
+          <span class="legend-desc">The main AI on the client's own machine — reads drawings and pulls out quantities, equipment and statuses using Claude Sonnet 4.6</span>
+        </div>
+      </div>
+
+      <div class="legend-section ls-obs" style="margin-top:16px">
+        <div class="legend-section-label">Observability &amp; Tracing</div>
+        <div class="legend-row">
+          <span class="legend-block">Monitor + App Insights</span>
+          <span class="legend-desc">The CCTV and alarm system — records logs, traces and metrics from every block; fires alerts when something goes wrong or costs spike</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /legend-grid -->
+</div><!-- /legend -->
+
+<!-- ══════════════════ GLOSSARY ══════════════════ -->
+<div class="glossary">
+  <div class="glossary-title">Technical Terms — Simple Explanations</div>
+  <div class="glossary-grid">
+
+    <!-- Col 1 -->
+    <div>
+      <div class="glossary-group">
+        <div class="glossary-group-label">FastAPI + WebSocket API</div>
+        <div class="glossary-row">
+          <span class="glossary-term">REST API</span>
+          <span class="glossary-def">A standard way for the app and server to talk to each other over the internet — like a waiter taking your order and bringing back food</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">WebSocket</span>
+          <span class="glossary-def">A live open connection between browser and server — server can push updates instantly without the browser asking repeatedly</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">HTTP Polling</span>
+          <span class="glossary-def">The browser asks the server "is it done yet?" every few seconds until it gets a final answer — simpler alternative to WebSocket</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">RBAC</span>
+          <span class="glossary-def">Role-Based Access Control — each user can only do what their role allows. Estimator uploads, Manager comments, Admin configures</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Uvicorn</span>
+          <span class="glossary-def">The engine that runs the FastAPI server — handles many requests at the same time efficiently</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">Azure Service Bus</div>
+        <div class="glossary-row">
+          <span class="glossary-term">Async job queue</span>
+          <span class="glossary-def">A waiting line for jobs — tasks are placed in the queue and picked up by workers one by one, so the user doesn't have to wait</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Dead-letter queue</span>
+          <span class="glossary-def">A separate holding area for jobs that failed too many times — kept for investigation instead of being silently lost</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">max_delivery_count</span>
+          <span class="glossary-def">Maximum number of times a failed job is retried before moving to the dead-letter queue — set to 3</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">lock_timeout</span>
+          <span class="glossary-def">How long a worker has to finish a job before it's released back to the queue for another worker to pick up — set to 5 minutes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 2 -->
+    <div>
+      <div class="glossary-group">
+        <div class="glossary-group-label">KEDA Workers · Celery</div>
+        <div class="glossary-row">
+          <span class="glossary-term">KEDA</span>
+          <span class="glossary-def">Kubernetes Event-Driven Autoscaling — automatically starts more workers when the queue is busy and shuts them down when idle</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">group() fan-out</span>
+          <span class="glossary-def">Splits one job into many smaller tasks running at the same time — all 15 pages of a drawing are processed simultaneously, not one by one</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">asyncio.gather()</span>
+          <span class="glossary-def">Fires multiple AI calls at exactly the same time — Gemini and Claude both verify a page simultaneously instead of waiting for each other</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">chord() fan-in</span>
+          <span class="glossary-def">Waits for all parallel page tasks to finish, then triggers the next step (Reconciler) — like waiting for everyone to finish before moving on</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Reconciler</span>
+          <span class="glossary-def">Merges the outputs from Zeus, Gemini and Claude into one final result — flags disagreements as items needing human review</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Deterministic pricing</span>
+          <span class="glossary-def">Pricing calculated by fixed rules and rate cards — no AI involved, same input always gives exactly the same price</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">PostgreSQL 16</div>
+        <div class="glossary-row">
+          <span class="glossary-term">HA + PITR</span>
+          <span class="glossary-def">High Availability + Point-In-Time Recovery — system stays up even if a server fails, and can be restored to any exact moment in history if needed</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">SQLAlchemy 2.0 async</span>
+          <span class="glossary-def">The tool that lets the application talk to the database without waiting — other tasks continue while the database responds</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 3 -->
+    <div>
+      <div class="glossary-group">
+        <div class="glossary-group-label">Redis Cache</div>
+        <div class="glossary-row">
+          <span class="glossary-term">Cache-hit</span>
+          <span class="glossary-def">When the same drawing is submitted again, the result is found in cache and returned instantly — no AI models are called again</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Zero model cost</span>
+          <span class="glossary-def">If a result is served from cache, no AI API is called — meaning no token charges for that request</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">Knowledge Graph DB</div>
+        <div class="glossary-row">
+          <span class="glossary-term">SIMILAR_TO edges</span>
+          <span class="glossary-def">Links between items across different bids that look alike — helps the system learn that similar drawings usually have similar results</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Few-shot grounding</span>
+          <span class="glossary-def">Showing the AI a few real past examples before asking it to extract — like giving someone 3 solved examples before an exam</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">prompt_version</span>
+          <span class="glossary-def">A unique ID stamped on every AI instruction set — so every result can be traced back to the exact instructions the AI was given</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Golden set</span>
+          <span class="glossary-def">A collection of verified correct examples used to test AI accuracy — like an answer key used to grade the AI before it goes live</span>
+        </div>
+      </div>
+
+      <div class="glossary-group">
+        <div class="glossary-group-label">General</div>
+        <div class="glossary-row">
+          <span class="glossary-term">DPA</span>
+          <span class="glossary-def">Data Processing Agreement — a legal contract ensuring the AI provider handles data safely and doesn't use it for training their models</span>
+        </div>
+        <div class="glossary-row">
+          <span class="glossary-term">Constrained JSON schema</span>
+          <span class="glossary-def">A strict template the AI must fill in — ensures output is always structured and predictable, never free-form text</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /glossary-grid -->
+</div><!-- /glossary -->
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const COLS={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',cyan:'#0891b2',gray:'#888'};
+const FS=8.5; // label font-size px
+
+function rc(id){
+  const el=document.getElementById(id);
+  if(!el)return null;
+  const d=document.getElementById('diagram').getBoundingClientRect();
+  const r=el.getBoundingClientRect();
+  return{t:r.top-d.top,b:r.bottom-d.top,l:r.left-d.left,r:r.right-d.left,
+    cx:r.left-d.left+r.width/2,cy:r.top-d.top+r.height/2,w:r.width,h:r.height};
+}
+
+/* Pill badge: white rounded rect + coloured text, centered at (cx,cy) */
+function pill(svg,cx,cy,txt,col){
+  const c=COLS[col]||col;
+  const tw=txt.length*FS*0.56;   // estimated text width
+  const ph=9,pv=4;
+  const bw=tw+ph*2, bh=FS+pv*2;
+  const g=document.createElementNS(NS,'g');
+  const rct=document.createElementNS(NS,'rect');
+  rct.setAttribute('x',cx-bw/2); rct.setAttribute('y',cy-bh/2);
+  rct.setAttribute('width',bw);  rct.setAttribute('height',bh);
+  rct.setAttribute('rx',bh/2);   rct.setAttribute('fill','#fff');
+  rct.setAttribute('stroke',c);  rct.setAttribute('stroke-width','1.1');
+  g.appendChild(rct);
+  const t=document.createElementNS(NS,'text');
+  t.setAttribute('x',cx); t.setAttribute('y',cy+FS*0.36);
+  t.setAttribute('text-anchor','middle');
+  t.setAttribute('fill',c);
+  t.setAttribute('font-size',FS);
+  t.setAttribute('font-weight','700');
+  t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+  t.textContent=txt;
+  g.appendChild(t);
+  svg.appendChild(g);
+}
+
+/* Draw an SVG path and return it */
+function path(svg,d,col,dash){
+  const c=COLS[col]||col;
+  const p=document.createElementNS(NS,'path');
+  p.setAttribute('d',d); p.setAttribute('fill','none');
+  p.setAttribute('stroke',c); p.setAttribute('stroke-width','1.7');
+  p.setAttribute('marker-end',`url(#ah-${col})`);
+  if(dash)p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);
+  return p;
+}
+
+function draw(){
+  const svg=document.getElementById('arrow-svg');
+  while(svg.children.length>1)svg.removeChild(svg.lastChild);
+  const diag=document.getElementById('diagram');
+  svg.setAttribute('height',diag.getBoundingClientRect().height);
+  svg.setAttribute('width', diag.getBoundingClientRect().width);
+
+  const E=id=>rc(id);
+  const est=E('b-est'),mgr=E('b-mgr'),fd=E('b-fd'),ag=E('b-ag'),
+        auth=E('b-auth'),blob=E('b-blob'),obs=E('b-obs'),
+        api=E('b-api'),sb=E('b-sb'),wk=E('b-wk'),
+        pg=E('b-pg'),redis=E('b-redis'),neo4j=E('b-neo4j'),
+        zeus=E('b-zeus'),gem=E('b-gemini'),cla=E('b-claude');
+  if(!est||!api)return;
+
+  /* ── 1. Estimator → Front Door (vertical down, blue) ─────── */
+  path(svg,`M${est.cx},${est.b} L${est.cx},${fd.t-6}`,'blue');
+  pill(svg, est.cx+46, (est.b+fd.t)/2, 'requests', 'blue');
+
+  /* ── 2. Manager → App Gateway (vertical down, blue) ─────── */
+  path(svg,`M${mgr.cx},${mgr.b} L${mgr.cx},${ag.t-6}`,'blue');
+  pill(svg, mgr.cx+46, (mgr.b+ag.t)/2, 'requests', 'blue');
+
+  /* ── 3. Auth → FastAPI  (elbow right, cross-column) ─────── */
+  // Horizontal from auth.r → gap midpoint → vertical → api.l
+  const authMidX = auth.r + (api.l - auth.r)*0.5;
+  path(svg,`M${auth.r},${auth.cy} L${authMidX},${auth.cy} L${authMidX},${api.cy} L${api.l-6},${api.cy}`,'blue');
+  // pill sits on the vertical segment in the gap, centred
+  pill(svg, authMidX, (auth.cy+api.cy)/2, 'validated session', 'blue');
+
+  /* ── 4. API → Service Bus (vertical, orange) ─────────────── */
+  path(svg,`M${api.cx},${api.b} L${api.cx},${sb.t-6}`,'orange');
+  pill(svg, api.cx+55, (api.b+sb.t)/2, 'publish job', 'orange');
+
+  /* ── 5. Service Bus → Workers (vertical, orange) ─────────── */
+  path(svg,`M${sb.cx},${sb.b} L${sb.cx},${wk.t-6}`,'orange');
+  pill(svg, sb.cx+70, (sb.b+wk.t)/2, 'consume · scale 0–N', 'orange');
+
+  /* ── 6. Workers → PostgreSQL (elbow down-left, orange) ───── */
+  const pgFromX=wk.l+wk.w*0.28;
+  const pgMidX=(pgFromX+pg.cx)/2;
+  path(svg,`M${pgFromX},${wk.b} L${pgFromX},${pgMidX<pgFromX?wk.b:wk.b+18} L${pgMidX},${wk.b+18} L${pgMidX},${pg.t-6} L${pg.cx-6},${pg.t-6}`,'orange');
+  // Simpler route: straight elbow
+  path(svg,`M${pgFromX},${wk.b} L${pgMidX},${wk.b} L${pgMidX},${pg.t-6}`,'orange');
+  // pill beside the vertical segment, to the LEFT
+  pill(svg, pgMidX-52, (wk.b+pg.t)/2, 'reads / writes', 'orange');
+
+  /* ── 7. Workers → Redis (elbow down-right, orange) ──────── */
+  const rdFromX=wk.l+wk.w*0.72;
+  const rdMidX=(rdFromX+redis.cx)/2;
+  path(svg,`M${rdFromX},${wk.b} L${rdMidX},${wk.b} L${rdMidX},${redis.t-6}`,'orange');
+  pill(svg, rdMidX+48, (wk.b+redis.t)/2, 'job state', 'orange');
+
+  /* ── 8. Workers → Neo4j (vertical, orange) ──────────────── */
+  // goes through the gap between pg and redis columns
+  const neoX=wk.cx;
+  path(svg,`M${neoX},${redis.b} L${neoX},${neo4j.t-6}`,'orange');
+  pill(svg, neoX+70, (redis.b+neo4j.t)/2, 'query · upsert', 'orange');
+
+  /* ── 9. Workers → Zeus  (right-side elbow, purple) ──────── */
+  const rX=wk.r+16;
+  path(svg,`M${wk.r},${wk.cy} L${rX},${wk.cy} L${rX},${zeus.cy} L${zeus.r+6},${zeus.cy}`,'purple');
+  // pill to the LEFT of the vertical segment — stays inside diagram boundary
+  pill(svg, rX-52, (wk.cy+zeus.cy)/2, 'extract', 'purple');
+
+  /* ── 10. Workers → Gemini (elbow, cyan dashed) ─────────────── */
+  const gFromX=wk.l+wk.w*0.28, gMidX=(gFromX+gem.cx)/2;
+  path(svg,`M${gFromX},${wk.b+14} L${gMidX},${wk.b+14} L${gMidX},${gem.t-6}`,'cyan',true);
+  // pin pill just below the Knowledge Graph DB box, not at arrow midpoint
+  pill(svg, gMidX, neo4j.b+16, 'verify', 'cyan');
+
+  /* ── 11. Workers → Claude (elbow, cyan dashed) ──────────────── */
+  const cFromX=wk.l+wk.w*0.72, cMidX=(cFromX+cla.cx)/2;
+  path(svg,`M${cFromX},${wk.b+14} L${cMidX},${wk.b+14} L${cMidX},${cla.t-6}`,'cyan',true);
+  // pin pill just below the Knowledge Graph DB box, not at arrow midpoint
+  pill(svg, cMidX, neo4j.b+16, 'verify', 'cyan');
+
+  /* ── 12. API → Blob  (elbow left, cross-column, blue dashed) */
+  const blobMidX = api.l-(api.l-blob.r)*0.5;
+  path(svg,`M${api.l},${api.cy} L${blobMidX},${api.cy} L${blobMidX},${blob.cy} L${blob.r+6},${blob.cy}`,'blue',true);
+  pill(svg, blobMidX, (api.cy+blob.cy)/2, 'store drawings', 'blue');
+
+  /* ── 13. API → Observability  (elbow left, teal dashed) ──── */
+  const obsMidX = api.l-(api.l-obs.r)*0.5 - 18; // offset left of blob arrow
+  path(svg,`M${api.l},${api.b} L${obsMidX},${api.b} L${obsMidX},${obs.cy} L${obs.r+6},${obs.cy}`,'teal',true);
+  pill(svg, obsMidX, (api.b+obs.cy)/2, 'telemetry', 'teal');
+}
+
+document.fonts.ready.then(()=>{setTimeout(draw,350);});
+window.addEventListener('resize',()=>{setTimeout(draw,150);});
+</script>
+</body>
+</html>
