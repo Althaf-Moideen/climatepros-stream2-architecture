@@ -5,125 +5,74 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ClimatePros Stream 2 — System Architecture</title>
 <style>
-/* ── Design tokens (matching unified-hld reference) ─────────── */
 :root{
   --primary:#1a56db; --primary-light:#e8effc; --primary-dark:#0f3a8e;
   --bg:#f8fafc; --surface:#ffffff; --border:#e2e8f0;
   --text:#1e293b; --text-muted:#64748b;
   --amber:#d97706; --amber-dark:#b45309; --amber-bg:#fffaf3;
-  --blue:#2563eb; --green:#059669; --purple:#7c3aed; --purple-dark:#5b21b6;
+  --blue:#2563eb; --purple:#7c3aed; --purple-dark:#5b21b6;
   --cyan:#0891b2; --cyan-dark:#0e7490; --teal:#29aaa0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.6;
-  overflow-x:hidden;
-}
-.main{
-  max-width:1440px;
-  margin:0 auto;
-  padding:32px 20px 80px;
-}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+
+/* ── Page containers ─────────────────────────────────────────── */
+/* Narrow main — matches reference page exactly */
+.main{max-width:1220px;margin:0 auto;padding:40px 40px 0;}
+.main-bottom{max-width:1220px;margin:0 auto;padding:0 40px 80px;}
+
+/* Wide band — diagram only */
+.diagram-band{max-width:1460px;margin:0 auto;padding:0 40px 44px;}
 
 /* ── Hero ────────────────────────────────────────────────────── */
-.hero{
-  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
-  color:#fff;
-  padding:34px 42px;
-  border-radius:16px;
-  margin-bottom:34px;
-}
+.hero{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;padding:34px 42px;border-radius:16px;margin-bottom:34px;}
 .hero h1{font-size:29px;font-weight:800;margin-bottom:6px;}
 .hero .subtitle{font-size:15px;opacity:.9;}
 
-/* ── Sections ────────────────────────────────────────────────── */
+/* ── Section headings ────────────────────────────────────────── */
 section{margin-bottom:44px;}
-h2{
-  font-size:22px;
-  font-weight:700;
-  color:var(--primary-dark);
-  margin-bottom:16px;
-  padding-bottom:9px;
-  border-bottom:2px solid var(--primary-light);
-}
-.sec-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:16px;
-  border-bottom:2px solid var(--primary-light);
-  padding-bottom:9px;
-}
+h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;padding-bottom:9px;border-bottom:2px solid var(--primary-light);}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:16px;border-bottom:2px solid var(--primary-light);padding-bottom:9px;}
 .sec-head h2{margin:0;padding:0;border:none;}
 
-/* ── Diagram container ───────────────────────────────────────── */
-.diagram-wrap{
-  overflow-x:auto;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:20px 12px 16px;
-}
+/* ── Diagram wrap ────────────────────────────────────────────── */
+.diagram-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 12px 16px;}
 
 /* ── Diagram internals ───────────────────────────────────────── */
-.diagram{
-  position:relative;
-  width:1320px;
-}
+.diagram{position:relative;width:1320px;}
 .cols{display:flex;gap:72px;align-items:stretch;}
 .col-l{width:560px;flex-shrink:0;display:flex;flex-direction:column;gap:20px;}
 .col-r{width:708px;flex-shrink:0;display:flex;flex-direction:column;gap:20px;}
-
 .grp{border-radius:16px;padding:22px 22px 26px;position:relative;}
 .grp-title{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:16px;}
 .grp-sub{font-weight:400;font-size:9px;letter-spacing:.05em;opacity:.6;margin-left:6px;}
-
-.g-clients {border:2px dashed #4a8fd4;background:#eef5ff;}
-.g-clients .grp-title{color:#2a5fa8;}
-.g-existing{border:2px solid #4a8fd4;background:#e5effc;flex:1;}
-.g-existing .grp-title{color:#1b4a8a;}
-.g-obs{border:2px dashed #29aaa0;background:#edfaf8;}
-.g-obs .grp-title{color:#1a7a72;}
-.g-new{border:2px dashed #d97c1a;background:#fff7ee;flex:1;}
-.g-new .grp-title{color:#b05e0d;}
-.g-onprem{border:2px dashed #8050d0;background:#f5f0ff;}
-.g-onprem .grp-title{color:#5e2dab;}
-.g-verifiers{border:2px dashed #0891b2;background:#ecfeff;}
-.g-verifiers .grp-title{color:#0e7490;}
-
+.g-clients{border:2px dashed #4a8fd4;background:#eef5ff;} .g-clients .grp-title{color:#2a5fa8;}
+.g-existing{border:2px solid #4a8fd4;background:#e5effc;flex:1;} .g-existing .grp-title{color:#1b4a8a;}
+.g-obs{border:2px dashed #29aaa0;background:#edfaf8;} .g-obs .grp-title{color:#1a7a72;}
+.g-new{border:2px dashed #d97c1a;background:#fff7ee;flex:1;} .g-new .grp-title{color:#b05e0d;}
+.g-onprem{border:2px dashed #8050d0;background:#f5f0ff;} .g-onprem .grp-title{color:#5e2dab;}
+.g-verifiers{border:2px dashed #0891b2;background:#ecfeff;} .g-verifiers .grp-title{color:#0e7490;}
 .box{background:#fff;border-radius:10px;padding:13px 15px;margin-bottom:12px;}
 .box:last-child{margin-bottom:0;}
 .box-t{font-size:12px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;}
 .box-s{font-size:10px;color:#555;line-height:1.6;}
 .box-s b{color:#c76000;font-weight:600;}
-
-.bx-blue  {border:1.5px solid #4a8fd4;}
-.bx-orange{border:1.5px solid #d97c1a;}
-.bx-purple{border:1.5px solid #8050d0;}
-.bx-teal  {border:1.5px solid #29aaa0;}
-.bx-cyan  {border:1.5px solid #0891b2;}
-.bx-gray  {border:1.5px solid #c5ccd8;background:#f9fafc;}
-
-.row2{display:flex;gap:12px;margin-bottom:12px;}
-.row2 .box{flex:1;margin-bottom:0;}
-
+.bx-blue{border:1.5px solid #4a8fd4;} .bx-orange{border:1.5px solid #d97c1a;}
+.bx-purple{border:1.5px solid #8050d0;} .bx-teal{border:1.5px solid #29aaa0;}
+.bx-cyan{border:1.5px solid #0891b2;} .bx-gray{border:1.5px solid #c5ccd8;background:#f9fafc;}
+.row2{display:flex;gap:12px;margin-bottom:12px;} .row2 .box{flex:1;margin-bottom:0;}
 .inner{border:1.5px solid #4a8fd4;border-radius:12px;background:#d4e6f9;padding:14px 14px 16px;margin-bottom:12px;}
 .inner-title{font-size:9.5px;font-weight:700;color:#1b4a8a;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
-
 .exp{display:inline-flex;align-items:center;background:#7c3aed;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;opacity:.9;}
 .new{display:inline-flex;align-items:center;background:#d97c1a;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
 .existing{display:inline-flex;align-items:center;background:#4a8fd4;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
 .warn{color:#c0392b !important;font-weight:600 !important;}
 .note{display:block;font-size:9px;color:#999;font-style:italic;margin-top:10px;line-height:1.6;}
 
-/* ── Inventory (existing vs new) ─────────────────────────────── */
+/* ── Inventory ───────────────────────────────────────────────── */
 .inv{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
 @media(max-width:860px){.inv{grid-template-columns:1fr;}}
-.inv-card{border-radius:14px;padding:20px 22px;border:1.5px solid var(--border);background:var(--surface);}
+.inv-card{border-radius:14px;padding:20px 22px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);}
 .inv-card.exist{border-color:var(--blue);background:#f5f9ff;}
 .inv-card.new{border-color:var(--amber);background:var(--amber-bg);border-style:dashed;}
 .inv-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
@@ -131,67 +80,80 @@ h2{
 .inv-card.new h3{color:var(--amber-dark);}
 .inv-card .cap{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
 .inv-card ul{list-style:none;}
-.inv-card li{font-size:13px;padding:7px 0;border-top:1px solid var(--border);display:flex;gap:9px;align-items:flex-start;}
+.inv-card li{
+  font-size:13px;
+  color:var(--text);
+  padding:8px 0;
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
 .inv-card li:first-of-type{border-top:none;}
-.inv-card li b{font-weight:700;}
-.inv-card .inv-body{flex:1;min-width:0;}
-.inv-card .inv-sub{list-style:none;margin:5px 0 1px;}
-.inv-card .inv-sub li{display:block;border-top:none;padding:3px 0 3px 13px;position:relative;font-size:12.5px;line-height:1.5;color:var(--text-muted);}
-.inv-card .inv-sub li::before{content:"";position:absolute;left:2px;top:10px;width:4px;height:4px;border-radius:50%;background:var(--amber);}
-.inv-card .inv-sub b{color:var(--amber-dark);font-weight:700;}
-.pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:auto;white-space:nowrap;flex-shrink:0;}
+.inv-card li .inv-body{flex:1;min-width:0;color:var(--text);}
+.inv-card li .inv-body b{font-weight:700;color:var(--text);}
+.inv-card.new li .inv-body b{color:var(--amber-dark);}
+.pill{
+  display:inline-block;
+  font-size:10px;
+  font-weight:800;
+  padding:2px 8px;
+  border-radius:999px;
+  white-space:nowrap;
+  flex-shrink:0;
+  margin-left:auto;
+}
 .pill.azure{background:var(--primary-light);color:var(--primary-dark);}
 .pill.onprem{background:#f3e8ff;color:var(--purple-dark);}
 .pill.external{background:#ecfeff;color:var(--cyan-dark);}
 .pill.reuse{background:#e5effc;color:#1b4a8a;}
 
-/* ── Summary counts ──────────────────────────────────────────── */
+/* ── Counts ──────────────────────────────────────────────────── */
 .counts{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;}
 .count{flex:1;min-width:150px;background:var(--surface);border:1.5px dashed var(--amber);border-radius:12px;padding:14px 16px;}
 .count .n{font-size:26px;font-weight:800;color:var(--amber-dark);line-height:1;}
 .count .l{font-size:12px;color:var(--text-muted);margin-top:5px;}
 
-/* ── Benefits (changelog-style cards) ───────────────────────── */
+/* ── Benefits ────────────────────────────────────────────────── */
 .chg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media(max-width:860px){.chg-grid{grid-template-columns:1fr;}}
 .chg{border:1.5px solid var(--border);border-left:4px solid var(--amber);border-radius:12px;background:var(--surface);padding:15px 17px;}
-.chg.cyan-accent{border-left-color:var(--cyan);}
-.chg.purple-accent{border-left-color:var(--purple);}
-.chg h4{font-size:14px;font-weight:700;color:var(--amber-dark);margin-bottom:7px;}
-.chg.cyan-accent h4{color:var(--cyan-dark);}
-.chg.purple-accent h4{color:var(--purple-dark);}
+.chg.cyan-l{border-left-color:var(--cyan);}
+.chg.purple-l{border-left-color:var(--purple);}
 .chg .cap{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px;}
+.chg h4{font-size:14px;font-weight:700;color:var(--amber-dark);margin-bottom:8px;}
+.chg.cyan-l h4{color:var(--cyan-dark);}
+.chg.purple-l h4{color:var(--purple-dark);}
 .chg ul{list-style:none;padding:0;margin:0;}
 .chg ul li{font-size:12.5px;color:var(--text);line-height:1.55;padding:5px 0 5px 14px;position:relative;border-top:1px dashed var(--border);}
-.chg ul li:first-of-type{border-top:none;}
+.chg ul li:first-of-type{border-top:none;padding-top:0;}
 .chg ul li::before{content:'→';position:absolute;left:0;color:#bbb;font-size:10px;top:7px;}
+.chg ul li:first-of-type::before{top:2px;}
 
-/* ── SVG arrow overlay ───────────────────────────────────────── */
+/* ── SVG arrows ──────────────────────────────────────────────── */
 .arrow-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
-#arrow-svg{filter:none;}
 </style>
 </head>
 <body>
-<div class="main">
 
 <!-- HERO -->
+<div class="main">
 <div class="hero">
   <h1>ClimatePros Stream 2 &middot; System Architecture</h1>
   <div class="subtitle">What exists today &middot; what this project introduces &middot; how the new AI extraction and estimation tier plugs into the existing FieldJetX platform &middot; Azure</div>
 </div>
-
-<!-- ══════════════════ DIAGRAM ══════════════════ -->
-<section id="diagram-section">
-<div class="sec-head">
-  <h2>System Diagram</h2>
 </div>
+
+<!-- DIAGRAM SECTION — wider band so 1320px diagram fits cleanly -->
+<div class="main">
+  <div class="sec-head"><h2>System Diagram</h2></div>
+</div>
+<div class="diagram-band">
 <div class="diagram-wrap">
 <div class="diagram" id="diagram">
 <div class="cols">
 
-  <!-- LEFT COLUMN -->
   <div class="col-l">
-
     <div class="grp g-clients" id="g-clients">
       <div class="grp-title">Clients</div>
       <div class="row2">
@@ -208,7 +170,6 @@ h2{
 
     <div class="grp g-existing" id="g-existing">
       <div class="grp-title">Existing · FieldJetX Platform<span class="grp-sub">Azure · unchanged · reused</span></div>
-
       <div class="inner" id="inner-edge">
         <div class="inner-title">Edge &amp; Auth Layer</div>
         <div class="row2">
@@ -226,7 +187,6 @@ h2{
           <div class="box-s">GUID session tokens · loginsessionid validated per request<br/>UserFeatureXref feature-gate · SecJobRoles (ADM / MGR / USR / LOA)</div>
         </div>
       </div>
-
       <div class="row2">
         <div class="box bx-gray" id="b-blob">
           <div class="box-t">📁 Blob Storage</div>
@@ -237,7 +197,6 @@ h2{
           <div class="box-s">FJX existing<br/>data off public internet</div>
         </div>
       </div>
-
       <div class="box bx-gray" id="b-kv">
         <div class="box-t">🗝️ Key Vault</div>
         <div class="box-s">API keys · FJX integration token · no secrets in config or images · managed keys</div>
@@ -252,33 +211,26 @@ h2{
       </div>
       <span class="note">all services emit telemetry · prompt_version stamped on every bid + ai_calls record</span>
     </div>
+  </div>
 
-  </div><!-- /col-l -->
-
-  <!-- RIGHT COLUMN -->
   <div class="col-r">
-
     <div class="grp g-new" id="g-new">
       <div class="grp-title">New Infrastructure · This Project<span class="grp-sub">Azure · Container Apps</span></div>
-
       <div class="box bx-orange" id="b-api">
         <div class="box-t">⚡ FastAPI + WebSocket API <span class="new">NEW</span></div>
         <div class="box-s">REST API · RBAC per route · Uvicorn · Swagger at /api/docs<br/>FJX session validation on every request<br/>
           <b>Job status (either):</b> WebSocket <code>/ws/jobs/{job_id}</code> for real-time push
-          &nbsp;·&nbsp; HTTP polling <code>GET /api/jobs/{job_id}</code> as fallback or alternative
+          &nbsp;·&nbsp; HTTP polling <code>GET /api/jobs/{job_id}</code> as fallback
         </div>
       </div>
-
       <div class="box bx-orange" id="b-sb">
         <div class="box-t">📨 Azure Service Bus <span class="new">NEW</span></div>
         <div class="box-s">Async job queue · dead-letter on failure exhaustion<br/>max_delivery_count=3 · lock_timeout=5 min</div>
       </div>
-
       <div class="box bx-orange" id="b-wk">
         <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="new">NEW</span></div>
         <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — Gemini verifies in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
       </div>
-
       <div class="row2">
         <div class="box bx-orange" id="b-pg">
           <div class="box-t">🗄️ Azure SQL Database <span class="existing">Reusing FJX DB</span></div>
@@ -289,7 +241,6 @@ h2{
           <div class="box-s">Job state · result cache<br/>Cache-hit → zero model cost</div>
         </div>
       </div>
-
       <div class="box bx-orange" id="b-neo4j">
         <div class="box-t">🕸️ Knowledge Graph DB <span class="new">NEW</span></div>
         <div class="box-s">Feedback learning · BidItem → Correction → Equipment nodes<br/>SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>Weekly promo: corrections → golden set → new prompt_version</div>
@@ -297,31 +248,26 @@ h2{
     </div>
 
     <div class="grp g-verifiers" id="g-verifiers">
-      <div class="grp-title">Cloud AI Verifier<span class="grp-sub">cross-checks Zeus extraction · model subject to change based on cost &amp; performance</span></div>
-
+      <div class="grp-title">Cloud AI Verifier<span class="grp-sub">cross-checks Zeus extraction · subject to change based on cost &amp; performance</span></div>
       <div class="box bx-cyan" id="b-gemini">
         <div class="box-t">✨ Gemini 2.5 Flash <span class="exp">Experimental</span></div>
         <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
       </div>
-
-      <span class="note">Not on-prem · called via cloud API to cross-verify on-prem Zeus extraction for higher accuracy · can be replaced or skipped</span>
+      <span class="note">Not on-prem · called via cloud API to cross-verify on-prem Zeus extraction · can be replaced or skipped</span>
     </div>
 
     <div class="grp g-onprem" id="g-onprem">
       <div class="grp-title">Private Model Infra · ClimatePros Client<span class="grp-sub">on-prem · Mac Studio "Tundra"</span></div>
-
       <div class="box bx-purple" id="b-zeus">
         <div class="box-t">🤖 Zeus — Primary Extractor</div>
         <div class="box-s">Claude Sonnet 4.6 · client-operated · FieldJetX-linked<br/>Grounded in prior FJX bids · constrained JSON schema output<br/><span class="warn">💡 Scaling path available for higher bid volumes</span></div>
       </div>
-
       <span class="note">Models never emit prices · all pricing = pure deterministic code · drawings in delimited data channel only</span>
     </div>
+  </div>
 
-  </div><!-- /col-r -->
 </div><!-- /cols -->
 
-<!-- SVG arrows drawn by JS after layout renders -->
 <svg class="arrow-svg" id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <marker id="ah-blue"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#4a8fd4"/></marker>
@@ -332,12 +278,13 @@ h2{
     <marker id="ah-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#888"/></marker>
   </defs>
 </svg>
-
 </div><!-- /diagram -->
 </div><!-- /diagram-wrap -->
-</section>
+</div><!-- /diagram-band -->
 
-<!-- ══════════════════ INVENTORY ══════════════════ -->
+<!-- INVENTORY + BENEFITS — narrow main, matching reference padding -->
+<div class="main-bottom">
+
 <section id="inventory-section">
 <h2>What We Have vs What We Introduce</h2>
 <div class="inv">
@@ -346,15 +293,42 @@ h2{
     <div class="cap">Existing &middot; reused as-is</div>
     <h3>🏗️ FieldJetX Platform</h3>
     <ul>
-      <li><div class="inv-body"><b>FieldJetX Web App</b> — estimator bid upload, review &amp; finalise</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Manager / Admin</b> — feedback on bids · rate-card configuration</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Front Door + WAF</b> — main gate, TLS termination, bad-traffic blocking</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>App Gateway</b> — routes requests to the right service</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>FJX Auth · Session Tokens</b> — identity and permission check on every request via loginsessionid + SecJobRoles</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Blob Storage</b> — geo-redundant store for drawings, quotes and images</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>VNet + Private Endpoints</b> — keeps all data off the public internet</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Key Vault</b> — managed secrets; nothing hardcoded in config or images</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Azure SQL Database</b> — existing FieldJetX SQL Server instance; new tables (bids, bid_items, audit_log, ai_calls) added here, no separate DB provisioned</div><span class="pill reuse">Reusing FJX DB</span></li>
+      <li>
+        <div class="inv-body"><b>FieldJetX Web App</b> — estimator bid upload, review &amp; finalise</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Manager / Admin</b> — feedback on bids · rate-card configuration</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Front Door + WAF</b> — main gate, TLS termination, bad-traffic blocking</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>App Gateway</b> — routes requests to the right service</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>FJX Auth · Session Tokens</b> — identity and permission check on every request via loginsessionid + SecJobRoles</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Blob Storage</b> — geo-redundant store for drawings, quotes and images</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>VNet + Private Endpoints</b> — keeps all data off the public internet</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Key Vault</b> — managed secrets; nothing hardcoded in config or images</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Azure SQL Database</b> — existing FieldJetX SQL Server instance; new tables (bids, bid_items, audit_log, ai_calls) added here, no separate DB provisioned</div>
+        <span class="pill reuse">Reusing FJX DB</span>
+      </li>
     </ul>
   </div>
 
@@ -362,28 +336,51 @@ h2{
     <div class="cap">New &middot; introduced by this project</div>
     <h3>⚡ AI Extraction + Estimation Tier</h3>
     <ul>
-      <li><div class="inv-body"><b>FastAPI + WebSocket API</b> — central backend; RBAC per route, FJX session validation on every request. Job status via WebSocket <code>/ws/jobs/{id}</code> or HTTP polling fallback.</div><span class="pill azure">Container Apps</span></li>
-      <li><div class="inv-body"><b>Azure Service Bus</b> — durable async job queue; dead-letters after 3 attempts, 5-min lock timeout</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>KEDA Workers · Celery 5.6</b> — scales 0–N on queue depth; fan-out per page, parallel AI calls via asyncio.gather(), fan-in Reconciler → deterministic pricing engine</div><span class="pill azure">Container Apps</span></li>
-      <li><div class="inv-body"><b>Azure Cache for Redis</b> — live job state + result cache; cache-hit = zero model cost</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Knowledge Graph DB</b> — feedback learning; BidItem → Correction → Equipment nodes, SIMILAR_TO edges for few-shot grounding, weekly golden set promo</div><span class="pill azure">Azure</span></li>
-      <li><div class="inv-body"><b>Gemini 2.5 Flash</b> — cloud AI verifier; cross-checks Zeus extraction independently in parallel. Google Vertex AI, region-pinned, DPA-covered, no prompt logging. Experimental.</div><span class="pill external">Vertex AI</span></li>
-      <li><div class="inv-body"><b>Zeus — Primary Extractor</b> — on-prem AI on Mac Studio "Tundra"; reads drawings, outputs constrained JSON via Claude Sonnet 4.6 grounded in prior FJX bid history. Models never emit prices.</div><span class="pill onprem">On-prem</span></li>
-      <li><div class="inv-body"><b>Monitor + App Insights</b> — logs, traces, metrics; per-model token + cost tracking, SLO burn alerts</div><span class="pill azure">Azure</span></li>
+      <li>
+        <div class="inv-body"><b>FastAPI + WebSocket API</b> — central backend; RBAC per route, FJX session validation on every request. Job status via WebSocket or HTTP polling fallback.</div>
+        <span class="pill azure">Container Apps</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Azure Service Bus</b> — durable async job queue; dead-letters after 3 attempts, 5-min lock timeout</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>KEDA Workers · Celery 5.6</b> — scales 0–N on queue depth; fan-out per page, parallel AI calls, Reconciler fan-in → deterministic pricing engine</div>
+        <span class="pill azure">Container Apps</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Azure Cache for Redis</b> — live job state + result cache; cache-hit = zero model cost</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Knowledge Graph DB</b> — feedback learning; BidItem → Correction → Equipment nodes, SIMILAR_TO edges for few-shot grounding, weekly golden set promo</div>
+        <span class="pill azure">Azure</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Gemini 2.5 Flash</b> — cloud AI verifier; cross-checks Zeus extraction independently in parallel. Google Vertex AI, region-pinned, DPA-covered. Experimental — can be swapped or skipped.</div>
+        <span class="pill external">Vertex AI</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Zeus — Primary Extractor</b> — on-prem AI on Mac Studio "Tundra"; reads drawings, outputs constrained JSON via Claude Sonnet 4.6, grounded in prior FJX bid history. Models never emit prices.</div>
+        <span class="pill onprem">On-prem</span>
+      </li>
+      <li>
+        <div class="inv-body"><b>Monitor + App Insights</b> — logs, traces, metrics; per-model token + cost tracking, SLO burn alerts</div>
+        <span class="pill azure">Azure</span>
+      </li>
     </ul>
   </div>
 
 </div>
 
 <div class="counts">
-  <div class="count"><div class="n">5</div><div class="l">new Azure services<br/>FastAPI · Service Bus · KEDA Workers · Redis Cache · Knowledge Graph</div></div>
+  <div class="count"><div class="n">5</div><div class="l">new Azure services<br/>FastAPI · Service Bus · KEDA · Redis · Knowledge Graph</div></div>
   <div class="count"><div class="n">1</div><div class="l">reused database<br/>Azure SQL — new tables in existing FieldJetX instance</div></div>
   <div class="count"><div class="n">1</div><div class="l">cloud AI verifier<br/>Gemini 2.5 Flash · Google Vertex AI</div></div>
   <div class="count"><div class="n">1</div><div class="l">on-prem private model<br/>Zeus · Claude Sonnet 4.6 · Mac Studio "Tundra"</div></div>
 </div>
 </section>
 
-<!-- ══════════════════ BENEFITS ══════════════════ -->
 <section id="benefits-section">
 <h2>Why this stack — benefits of newly introduced components</h2>
 <div class="chg-grid">
@@ -393,9 +390,9 @@ h2{
     <h4>Azure SQL Database · reusing FieldJetX DB</h4>
     <ul>
       <li>Reusing the existing FieldJetX Azure SQL instance — no new database provisioned, no extra infrastructure cost</li>
-      <li>New tables (bids, bid_items, audit_log, ai_calls) added to the same SQL Server the client already operates</li>
+      <li>New tables added to the same SQL Server the client already operates</li>
       <li>Client DBA team already knows SQL Server; no extra skill or tooling needed</li>
-      <li>HA + PITR built in — system stays up if a server fails and can be restored to any point in time</li>
+      <li>HA + PITR built in — stays up if a server fails, restorable to any point in time</li>
       <li>Single DB technology across FieldJetX and the new system — simpler to support and audit</li>
     </ul>
   </div>
@@ -416,20 +413,20 @@ h2{
     <h4>Azure Service Bus + KEDA Workers</h4>
     <ul>
       <li>Worker count scales to zero when idle — no compute cost between jobs</li>
-      <li>All pages of a drawing processed in parallel (fan-out), not one by one — faster turnaround</li>
+      <li>All pages processed in parallel (fan-out), not one by one — faster turnaround</li>
       <li>Dead-letter queue captures failed jobs for investigation; nothing is silently lost</li>
-      <li>Azure-native queue — no extra broker to manage outside the existing Azure environment</li>
+      <li>Azure-native queue — no extra broker outside the existing Azure environment</li>
     </ul>
   </div>
 
-  <div class="chg cyan-accent">
+  <div class="chg cyan-l">
     <div class="cap">Cloud AI Verifier</div>
     <h4>Gemini 2.5 Flash</h4>
     <ul>
       <li>Independent second opinion on Zeus extraction — catches errors a single model would miss</li>
-      <li>Runs in parallel with Zeus via asyncio.gather() — adds accuracy with no extra latency</li>
+      <li>Runs in parallel via asyncio.gather() — adds accuracy with no extra latency</li>
       <li>Single frontier model keeps architecture simple and cost predictable</li>
-      <li>Google Vertex AI: region-pinned, DPA-covered, no prompt logging — meets data privacy requirements</li>
+      <li>Google Vertex AI: region-pinned, DPA-covered, no prompt logging</li>
       <li>Can be swapped or skipped per job type as cost and performance data accumulates</li>
     </ul>
   </div>
@@ -445,13 +442,13 @@ h2{
     </ul>
   </div>
 
-  <div class="chg purple-accent">
+  <div class="chg purple-l">
     <div class="cap">Private Model Infra · On-prem</div>
     <h4>Zeus — Primary Extractor</h4>
     <ul>
       <li>Runs on the client's own Mac Studio "Tundra" — drawing data never leaves the client's machine</li>
-      <li>Grounded in prior FieldJetX bid history — output is contextualised to ClimatePros jobs, not generic</li>
-      <li>Constrained JSON schema output — results are always structured and machine-readable, never free-form</li>
+      <li>Grounded in prior FieldJetX bid history — output contextualised to ClimatePros jobs</li>
+      <li>Constrained JSON schema output — results always structured and machine-readable</li>
       <li>Models never emit prices — all pricing is pure deterministic code, fully auditable</li>
     </ul>
   </div>
@@ -459,7 +456,7 @@ h2{
 </div>
 </section>
 
-</div><!-- /main -->
+</div><!-- /main-bottom -->
 
 <script>
 const NS='http://www.w3.org/2000/svg';
@@ -474,49 +471,31 @@ function rc(id){
   return{t:r.top-d.top,b:r.bottom-d.top,l:r.left-d.left,r:r.right-d.left,
     cx:r.left-d.left+r.width/2,cy:r.top-d.top+r.height/2,w:r.width,h:r.height};
 }
-
 function pill(svg,cx,cy,txt,col){
-  const c=COLS[col]||col;
-  const tw=txt.length*FS*0.56;
-  const ph=9,pv=4;
-  const bw=tw+ph*2, bh=FS+pv*2;
+  const c=COLS[col]||col,tw=txt.length*FS*0.56,ph=9,pv=4,bw=tw+ph*2,bh=FS+pv*2;
   const g=document.createElementNS(NS,'g');
   const rct=document.createElementNS(NS,'rect');
-  rct.setAttribute('x',cx-bw/2); rct.setAttribute('y',cy-bh/2);
-  rct.setAttribute('width',bw);  rct.setAttribute('height',bh);
-  rct.setAttribute('rx',bh/2);   rct.setAttribute('fill','#fff');
-  rct.setAttribute('stroke',c);  rct.setAttribute('stroke-width','1.1');
+  rct.setAttribute('x',cx-bw/2);rct.setAttribute('y',cy-bh/2);rct.setAttribute('width',bw);rct.setAttribute('height',bh);
+  rct.setAttribute('rx',bh/2);rct.setAttribute('fill','#fff');rct.setAttribute('stroke',c);rct.setAttribute('stroke-width','1.1');
   g.appendChild(rct);
   const t=document.createElementNS(NS,'text');
-  t.setAttribute('x',cx); t.setAttribute('y',cy+FS*0.36);
-  t.setAttribute('text-anchor','middle');
-  t.setAttribute('fill',c);
-  t.setAttribute('font-size',FS);
-  t.setAttribute('font-weight','700');
-  t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-  t.textContent=txt;
-  g.appendChild(t);
-  svg.appendChild(g);
+  t.setAttribute('x',cx);t.setAttribute('y',cy+FS*0.36);t.setAttribute('text-anchor','middle');
+  t.setAttribute('fill',c);t.setAttribute('font-size',FS);t.setAttribute('font-weight','700');
+  t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');t.textContent=txt;
+  g.appendChild(t);svg.appendChild(g);
 }
-
 function path(svg,d,col,dash){
-  const c=COLS[col]||col;
-  const p=document.createElementNS(NS,'path');
-  p.setAttribute('d',d); p.setAttribute('fill','none');
-  p.setAttribute('stroke',c); p.setAttribute('stroke-width','1.7');
-  p.setAttribute('marker-end',`url(#ah-${col})`);
-  if(dash)p.setAttribute('stroke-dasharray','5,3');
-  svg.appendChild(p);
-  return p;
+  const c=COLS[col]||col,p=document.createElementNS(NS,'path');
+  p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke',c);p.setAttribute('stroke-width','1.7');
+  p.setAttribute('marker-end',`url(#ah-${col})`);if(dash)p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);return p;
 }
-
 function draw(){
   const svg=document.getElementById('arrow-svg');
   while(svg.children.length>1)svg.removeChild(svg.lastChild);
   const diag=document.getElementById('diagram');
   svg.setAttribute('height',diag.getBoundingClientRect().height);
-  svg.setAttribute('width', diag.getBoundingClientRect().width);
-
+  svg.setAttribute('width',diag.getBoundingClientRect().width);
   const E=id=>rc(id);
   const est=E('b-est'),mgr=E('b-mgr'),fd=E('b-fd'),ag=E('b-ag'),
         auth=E('b-auth'),blob=E('b-blob'),obs=E('b-obs'),
@@ -524,56 +503,41 @@ function draw(){
         pg=E('b-pg'),redis=E('b-redis'),neo4j=E('b-neo4j'),
         zeus=E('b-zeus'),gem=E('b-gemini');
   if(!est||!api)return;
-
   path(svg,`M${est.cx},${est.b} L${est.cx},${fd.t-6}`,'blue');
-  pill(svg, est.cx+46, (est.b+fd.t)/2, 'requests', 'blue');
-
+  pill(svg,est.cx+46,(est.b+fd.t)/2,'requests','blue');
   path(svg,`M${mgr.cx},${mgr.b} L${mgr.cx},${ag.t-6}`,'blue');
-  pill(svg, mgr.cx+46, (mgr.b+ag.t)/2, 'requests', 'blue');
-
-  const authMidX = auth.r + (api.l - auth.r)*0.5;
+  pill(svg,mgr.cx+46,(mgr.b+ag.t)/2,'requests','blue');
+  const authMidX=auth.r+(api.l-auth.r)*0.5;
   path(svg,`M${auth.r},${auth.cy} L${authMidX},${auth.cy} L${authMidX},${api.cy} L${api.l-6},${api.cy}`,'blue');
-  pill(svg, authMidX, (auth.cy+api.cy)/2, 'validated session', 'blue');
-
+  pill(svg,authMidX,(auth.cy+api.cy)/2,'validated session','blue');
   path(svg,`M${api.cx},${api.b} L${api.cx},${sb.t-6}`,'orange');
-  pill(svg, api.cx+55, (api.b+sb.t)/2, 'publish job', 'orange');
-
+  pill(svg,api.cx+55,(api.b+sb.t)/2,'publish job','orange');
   path(svg,`M${sb.cx},${sb.b} L${sb.cx},${wk.t-6}`,'orange');
-  pill(svg, sb.cx+70, (sb.b+wk.t)/2, 'consume · scale 0–N', 'orange');
-
-  const pgFromX=wk.l+wk.w*0.28;
-  const pgMidX=(pgFromX+pg.cx)/2;
+  pill(svg,sb.cx+70,(sb.b+wk.t)/2,'consume · scale 0–N','orange');
+  const pgFromX=wk.l+wk.w*0.28,pgMidX=(pgFromX+pg.cx)/2;
   path(svg,`M${pgFromX},${wk.b} L${pgMidX},${wk.b} L${pgMidX},${pg.t-6}`,'orange');
-  pill(svg, pgMidX-52, (wk.b+pg.t)/2, 'reads / writes', 'orange');
-
-  const rdFromX=wk.l+wk.w*0.72;
-  const rdMidX=(rdFromX+redis.cx)/2;
+  pill(svg,pgMidX-52,(wk.b+pg.t)/2,'reads / writes','orange');
+  const rdFromX=wk.l+wk.w*0.72,rdMidX=(rdFromX+redis.cx)/2;
   path(svg,`M${rdFromX},${wk.b} L${rdMidX},${wk.b} L${rdMidX},${redis.t-6}`,'orange');
-  pill(svg, rdMidX+48, (wk.b+redis.t)/2, 'job state', 'orange');
-
+  pill(svg,rdMidX+48,(wk.b+redis.t)/2,'job state','orange');
   const neoX=wk.cx;
   path(svg,`M${neoX},${redis.b} L${neoX},${neo4j.t-6}`,'orange');
-  pill(svg, neoX+70, (redis.b+neo4j.t)/2, 'query · upsert', 'orange');
-
+  pill(svg,neoX+70,(redis.b+neo4j.t)/2,'query · upsert','orange');
   const rX=wk.r+16;
   path(svg,`M${wk.r},${wk.cy} L${rX},${wk.cy} L${rX},${zeus.cy} L${zeus.r+6},${zeus.cy}`,'purple');
-  pill(svg, rX-52, (wk.cy+zeus.cy)/2, 'extract', 'purple');
-
+  pill(svg,rX-52,(wk.cy+zeus.cy)/2,'extract','purple');
   if(gem){
-    const gFromX=wk.l+wk.w*0.28, gMidX=(gFromX+gem.cx)/2;
+    const gFromX=wk.l+wk.w*0.28,gMidX=(gFromX+gem.cx)/2;
     path(svg,`M${gFromX},${wk.b+14} L${gMidX},${wk.b+14} L${gMidX},${gem.t-6}`,'cyan',true);
-    pill(svg, gMidX, neo4j.b+16, 'verify', 'cyan');
+    pill(svg,gMidX,neo4j.b+16,'verify','cyan');
   }
-
-  const blobMidX = api.l-(api.l-blob.r)*0.5;
+  const blobMidX=api.l-(api.l-blob.r)*0.5;
   path(svg,`M${api.l},${api.cy} L${blobMidX},${api.cy} L${blobMidX},${blob.cy} L${blob.r+6},${blob.cy}`,'blue',true);
-  pill(svg, blobMidX, (api.cy+blob.cy)/2, 'store drawings', 'blue');
-
-  const obsMidX = api.l-(api.l-obs.r)*0.5 - 18;
+  pill(svg,blobMidX,(api.cy+blob.cy)/2,'store drawings','blue');
+  const obsMidX=api.l-(api.l-obs.r)*0.5-18;
   path(svg,`M${api.l},${api.b} L${obsMidX},${api.b} L${obsMidX},${obs.cy} L${obs.r+6},${obs.cy}`,'teal',true);
-  pill(svg, obsMidX, (api.b+obs.cy)/2, 'telemetry', 'teal');
+  pill(svg,obsMidX,(api.b+obs.cy)/2,'telemetry','teal');
 }
-
 document.fonts.ready.then(()=>{setTimeout(draw,350);});
 window.addEventListener('resize',()=>{setTimeout(draw,150);});
 </script>
