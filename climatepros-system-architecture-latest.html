@@ -126,7 +126,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 .chg ul li:first-of-type::before{top:2px;}
 
 /* ── SVG arrows ──────────────────────────────────────────────── */
-.arrow-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+.arrow-svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;}
 </style>
 </head>
 <body>
@@ -526,8 +526,19 @@ function draw(){
   path(svg,`M${api.l},${api.b} L${obsMidX},${api.b} L${obsMidX},${obs.cy} L${obs.r+6},${obs.cy}`,'teal',true);
   pill(svg,obsMidX,(api.b+obs.cy)/2,'telemetry','teal');
 }
-document.fonts.ready.then(()=>{setTimeout(draw,350);});
-window.addEventListener('resize',()=>{setTimeout(draw,150);});
+function fitDiagram(){
+  const wrap=document.querySelector('.diagram-wrap');
+  const diag=document.getElementById('diagram');
+  if(!wrap||!diag)return;
+  const NATURAL_W=1320;
+  // available inner width = wrap width minus its horizontal padding (12px each side)
+  const available=wrap.getBoundingClientRect().width-24;
+  const scale=Math.min(1,available/NATURAL_W);
+  diag.style.zoom=scale;
+}
+function refresh(){fitDiagram();draw();}
+document.fonts.ready.then(()=>{setTimeout(refresh,350);});
+window.addEventListener('resize',()=>{setTimeout(refresh,150);});
 </script>
 </body>
 </html>
