@@ -16,14 +16,8 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
 
-/* ── Page containers ─────────────────────────────────────────── */
-/* Narrow main — matches reference page exactly */
-.main{max-width:1220px;margin:0 auto;padding:40px 40px 0;}
-.main-bottom{max-width:1220px;margin:0 auto;padding:0 40px 80px;}
-
-/* Wide band — diagram only */
-.diagram-band{max-width:1460px;margin:0 auto;padding:0 40px 44px;}
-.diagram-band .sec-head{max-width:1220px;margin-left:auto;margin-right:auto;}
+/* ── Page container ──────────────────────────────────────────── */
+.main{max-width:1220px;margin:0 auto;padding:40px 40px 80px;}
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;padding:34px 42px;border-radius:16px;margin-bottom:34px;}
@@ -143,11 +137,9 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
   <h1>ClimatePros Stream 2 &middot; System Architecture</h1>
   <div class="subtitle">What exists today &middot; what this project introduces &middot; how the new AI extraction and estimation tier plugs into the existing FieldJetX platform &middot; Azure</div>
 </div>
-</div>
 
-<!-- DIAGRAM SECTION — wider band so 1320px diagram fits cleanly -->
-<div class="diagram-band">
-<div class="sec-head" style="margin-bottom:16px;border-bottom:2px solid var(--primary-light);padding-bottom:9px;"><h2 style="font-size:22px;font-weight:700;color:var(--primary-dark);margin:0;padding:0;border:none;">System Diagram</h2></div>
+<section>
+<h2>System Diagram</h2>
 <div class="diagram-wrap">
 <div class="diagram" id="diagram">
 <div class="cols">
@@ -279,10 +271,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 </svg>
 </div><!-- /diagram -->
 </div><!-- /diagram-wrap -->
-</div><!-- /diagram-band -->
-
-<!-- INVENTORY + BENEFITS — narrow main, matching reference padding -->
-<div class="main-bottom">
+</section>
 
 <section id="inventory-section">
 <h2>What We Have vs What We Introduce</h2>
@@ -455,7 +444,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 </div>
 </section>
 
-</div><!-- /main-bottom -->
+</div><!-- /main -->
 
 <script>
 const NS='http://www.w3.org/2000/svg';
