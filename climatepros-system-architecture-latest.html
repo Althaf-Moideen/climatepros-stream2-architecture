@@ -396,10 +396,10 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
     <div class="cap">New · Cache</div>
     <h4>Azure Cache for Redis</h4>
     <ul>
-      <li>Fully managed on Azure — no Redis infrastructure to provision, patch or monitor</li>
-      <li>Tracks live job state so the UI can show real-time progress without polling the database</li>
-      <li>Cache-hit on repeat drawings = zero AI API calls = zero token cost for that request</li>
-      <li>Scales automatically with demand; SLA-backed availability</li>
+      <li>Celery's chord() fan-in requires a result backend — Redis is it. Without it, parallel page workers have no reliable way to signal completion to the Reconciler, breaking the entire fan-in step</li>
+      <li>N parallel workers updating the same job record simultaneously would cause SQL lock contention and slowdowns — Redis atomic operations handle this at microsecond speed with zero contention</li>
+      <li>FastAPI scales to multiple replicas; a WebSocket on replica A can't receive a worker update from replica B without Redis pub/sub — real-time job status breaks without it</li>
+      <li>ClimatePros serves national chains (Walmart, Kroger, Target) that reuse standard store layouts — Redis caches extraction results by drawing hash, repeat drawings return instantly at zero AI cost</li>
     </ul>
   </div>
 
