@@ -78,9 +78,6 @@ h1{
 .g-onprem{ border:2px dashed #8050d0; background:#f5f0ff; }
 .g-onprem .grp-title{ color:#5e2dab; }
 
-.g-verifiers{ border:2px dashed #0891b2; background:#ecfeff; }
-.g-verifiers .grp-title{ color:#0e7490; }
-.bx-cyan{ border:1.5px solid #0891b2; }
 
 /* ── component boxes ─────────────────────────────────────────── */
 .box{
@@ -214,7 +211,6 @@ h1{
 .ls-clients   .legend-section-label{ background:#eef5ff; color:#2a5fa8; border:1px solid #4a8fd4; }
 .ls-existing  .legend-section-label{ background:#e5effc; color:#1b4a8a; border:1px solid #4a8fd4; }
 .ls-new       .legend-section-label{ background:#fff7ee; color:#b05e0d; border:1px solid #d97c1a; }
-.ls-verifiers .legend-section-label{ background:#ecfeff; color:#0e7490; border:1px solid #0891b2; }
 .ls-onprem    .legend-section-label{ background:#f5f0ff; color:#5e2dab; border:1px solid #8050d0; }
 .ls-obs       .legend-section-label{ background:#edfaf8; color:#1a7a72; border:1px solid #29aaa0; }
 
@@ -404,7 +400,7 @@ h1{
 
       <div class="box bx-orange" id="b-wk">
         <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="new">NEW</span></div>
-        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — Gemini + Claude verify in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
+        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
       </div>
 
       <div class="row2">
@@ -422,24 +418,6 @@ h1{
         <div class="box-t">🕸️ Knowledge Graph DB <span class="new">NEW</span></div>
         <div class="box-s">Feedback learning · BidItem → Correction → Equipment nodes<br/>SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>Weekly promo: corrections → golden set → new prompt_version</div>
       </div>
-    </div>
-
-    <!-- CLOUD AI VERIFIERS -->
-    <div class="grp g-verifiers" id="g-verifiers">
-      <div class="grp-title">Cloud AI Verifiers<span class="grp-sub">suggested for accuracy · models subject to change based on cost &amp; performance</span></div>
-
-      <div class="row2">
-        <div class="box bx-cyan" id="b-gemini">
-          <div class="box-t">✨ Gemini 3.5 Flash <span class="exp">Experimental</span></div>
-          <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
-        </div>
-        <div class="box bx-cyan" id="b-claude">
-          <div class="box-t">🌟 Claude Fable 5 <span class="exp">Experimental</span></div>
-          <div class="box-s">Anthropic API enterprise · cloud API<br/>≤30d retention · DPA · not for training<br/>Higher token usage — can be swapped based on cost &amp; accuracy</div>
-        </div>
-      </div>
-
-      <span class="note">Not on-prem · called via cloud APIs to cross-verify on-prem Zeus extraction for higher accuracy · either model can be replaced or skipped</span>
     </div>
 
     <!-- PRIVATE MODEL INFRA (on-prem, Zeus only) -->
@@ -550,21 +528,9 @@ h1{
       </div>
     </div>
 
-    <!-- Col 3: Verifiers + On-prem + Observability -->
+    <!-- Col 3: On-prem + Observability -->
     <div>
-      <div class="legend-section ls-verifiers">
-        <div class="legend-section-label">Cloud AI Verifiers</div>
-        <div class="legend-row">
-          <span class="legend-block">Gemini 3.5 Flash ⚗</span>
-          <span class="legend-desc">Google's AI — double-checks Zeus's extraction independently via cloud API (experimental model)</span>
-        </div>
-        <div class="legend-row">
-          <span class="legend-block">Claude Fable 5 ⚗</span>
-          <span class="legend-desc">Anthropic's AI — same independent check simultaneously; higher token usage, can be swapped based on cost (experimental model)</span>
-        </div>
-      </div>
-
-      <div class="legend-section ls-onprem" style="margin-top:16px">
+      <div class="legend-section ls-onprem">
         <div class="legend-section-label">Private Model Infra · On-prem</div>
         <div class="legend-row">
           <span class="legend-block">Zeus — Primary Extractor</span>
@@ -650,7 +616,7 @@ h1{
         </div>
         <div class="glossary-row">
           <span class="glossary-term">asyncio.gather()</span>
-          <span class="glossary-def">Fires multiple AI calls at exactly the same time — Gemini and Claude both verify a page simultaneously instead of waiting for each other</span>
+          <span class="glossary-def">Fires multiple async calls at exactly the same time — all pages of a drawing are processed simultaneously instead of waiting for each other</span>
         </div>
         <div class="glossary-row">
           <span class="glossary-term">chord() fan-in</span>
@@ -658,7 +624,7 @@ h1{
         </div>
         <div class="glossary-row">
           <span class="glossary-term">Reconciler</span>
-          <span class="glossary-def">Merges the outputs from Zeus, Gemini and Claude into one final result — flags disagreements as items needing human review</span>
+          <span class="glossary-def">Merges the outputs from Zeus into one final result — flags low-confidence extractions as items needing human review</span>
         </div>
         <div class="glossary-row">
           <span class="glossary-term">Deterministic pricing</span>
@@ -792,7 +758,7 @@ function draw(){
         auth=E('b-auth'),blob=E('b-blob'),obs=E('b-obs'),
         api=E('b-api'),sb=E('b-sb'),wk=E('b-wk'),
         pg=E('b-pg'),redis=E('b-redis'),neo4j=E('b-neo4j'),
-        zeus=E('b-zeus'),gem=E('b-gemini'),cla=E('b-claude');
+        zeus=E('b-zeus');
   if(!est||!api)return;
 
   /* ── 1. Estimator → Front Door (vertical down, blue) ─────── */
@@ -845,19 +811,7 @@ function draw(){
   // pill to the LEFT of the vertical segment — stays inside diagram boundary
   pill(svg, rX-52, (wk.cy+zeus.cy)/2, 'extract', 'purple');
 
-  /* ── 10. Workers → Gemini (elbow, cyan dashed) ─────────────── */
-  const gFromX=wk.l+wk.w*0.28, gMidX=(gFromX+gem.cx)/2;
-  path(svg,`M${gFromX},${wk.b+14} L${gMidX},${wk.b+14} L${gMidX},${gem.t-6}`,'cyan',true);
-  // pin pill just below the Knowledge Graph DB box, not at arrow midpoint
-  pill(svg, gMidX, neo4j.b+16, 'verify', 'cyan');
-
-  /* ── 11. Workers → Claude (elbow, cyan dashed) ──────────────── */
-  const cFromX=wk.l+wk.w*0.72, cMidX=(cFromX+cla.cx)/2;
-  path(svg,`M${cFromX},${wk.b+14} L${cMidX},${wk.b+14} L${cMidX},${cla.t-6}`,'cyan',true);
-  // pin pill just below the Knowledge Graph DB box, not at arrow midpoint
-  pill(svg, cMidX, neo4j.b+16, 'verify', 'cyan');
-
-  /* ── 12. API → Blob  (elbow left, cross-column, blue dashed) */
+  /* ── 10. API → Blob  (elbow left, cross-column, blue dashed) */
   const blobMidX = api.l-(api.l-blob.r)*0.5;
   path(svg,`M${api.l},${api.cy} L${blobMidX},${api.cy} L${blobMidX},${blob.cy} L${blob.r+6},${blob.cy}`,'blue',true);
   pill(svg, blobMidX, (api.cy+blob.cy)/2, 'store drawings', 'blue');
