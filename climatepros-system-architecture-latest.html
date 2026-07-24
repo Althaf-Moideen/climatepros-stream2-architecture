@@ -16,8 +16,18 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
 
-/* ── Page container ──────────────────────────────────────────── */
-.main{max-width:1220px;margin:0 auto;padding:40px 40px 80px;}
+/* ── Page containers ────────────────────────────────────────── */
+.main{max-width:1220px;margin:0 auto;}
+.main-top{padding:40px 40px 0;}
+.main-bottom{padding:20px 40px 80px;}
+
+/* ── Diagram band — breaks out to use full viewport width ────── */
+/* max-width:1460px; 16px side padding → inner 1428px on wide screens */
+/* On 1366px viewport: full width, inner 1334px → diagram (1320px) fits with 14px spare */
+.diagram-bleed{max-width:1460px;margin:0 auto;padding:0 16px 44px;}
+/* h2 auto-centers to match .main content width (1140px) on any screen */
+.diag-h2{max-width:1140px;margin:0 auto 16px;font-size:22px;font-weight:700;
+  color:var(--primary-dark);padding-bottom:9px;border-bottom:2px solid var(--primary-light);}
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;padding:34px 42px;border-radius:16px;margin-bottom:34px;}
@@ -31,7 +41,8 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 .sec-head h2{margin:0;padding:0;border:none;}
 
 /* ── Diagram wrap ────────────────────────────────────────────── */
-.diagram-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 12px 16px;}
+/* 3px side padding: diagram (1320) + 6px = 1326px, fits in .diagram-bleed inner (1334px) */
+.diagram-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 3px 16px;}
 
 /* ── Diagram internals ───────────────────────────────────────── */
 .diagram{position:relative;width:1320px;}
@@ -132,14 +143,16 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 <body>
 
 <!-- HERO -->
-<div class="main">
+<div class="main main-top">
 <div class="hero">
   <h1>ClimatePros Stream 2 &middot; System Architecture</h1>
   <div class="subtitle">What exists today &middot; what this project introduces &middot; how the new AI extraction and estimation tier plugs into the existing FieldJetX platform &middot; Azure</div>
 </div>
+</div>
 
-<section>
-<h2>System Diagram</h2>
+<!-- DIAGRAM — full-viewport-width band so 1320px diagram fits on ~1366px screens -->
+<div class="diagram-bleed">
+<h2 class="diag-h2">System Diagram</h2>
 <div class="diagram-wrap">
 <div class="diagram" id="diagram">
 <div class="cols">
@@ -271,8 +284,10 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 </svg>
 </div><!-- /diagram -->
 </div><!-- /diagram-wrap -->
-</section>
+</div><!-- /diagram-bleed -->
 
+<!-- INVENTORY + BENEFITS -->
+<div class="main main-bottom">
 <section id="inventory-section">
 <h2>What We Have vs What We Introduce</h2>
 <div class="inv">
@@ -444,7 +459,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 </div>
 </section>
 
-</div><!-- /main -->
+</div><!-- /main-bottom -->
 
 <script>
 const NS='http://www.w3.org/2000/svg';
@@ -526,19 +541,8 @@ function draw(){
   path(svg,`M${api.l},${api.b} L${obsMidX},${api.b} L${obsMidX},${obs.cy} L${obs.r+6},${obs.cy}`,'teal',true);
   pill(svg,obsMidX,(api.b+obs.cy)/2,'telemetry','teal');
 }
-function fitDiagram(){
-  const wrap=document.querySelector('.diagram-wrap');
-  const diag=document.getElementById('diagram');
-  if(!wrap||!diag)return;
-  const NATURAL_W=1320;
-  // available inner width = wrap width minus its horizontal padding (12px each side)
-  const available=wrap.getBoundingClientRect().width-24;
-  const scale=Math.min(1,available/NATURAL_W);
-  diag.style.zoom=scale;
-}
-function refresh(){fitDiagram();draw();}
-document.fonts.ready.then(()=>{setTimeout(refresh,350);});
-window.addEventListener('resize',()=>{setTimeout(refresh,150);});
+document.fonts.ready.then(()=>{setTimeout(draw,350);});
+window.addEventListener('resize',()=>{setTimeout(draw,150);});
 </script>
 </body>
 </html>
