@@ -168,6 +168,21 @@ h1{
 /* warn text */
 .warn{ color:#c0392b !important; font-weight:600 !important; }
 
+/* reusing badge */
+.existing{
+  display:inline-flex;
+  align-items:center;
+  background:#4a8fd4;
+  color:#fff;
+  font-size:7.5px;
+  font-weight:800;
+  letter-spacing:.1em;
+  padding:2px 6px;
+  border-radius:4px;
+  margin-left:4px;
+  flex-shrink:0;
+}
+
 /* italic note */
 .note{
   display:block;
@@ -425,7 +440,7 @@ h1{
 
       <div class="row2">
         <div class="box bx-orange" id="b-pg">
-          <div class="box-t">🗄️ Azure SQL Database <span class="new">NEW</span></div>
+          <div class="box-t">🗄️ Azure SQL Database <span class="existing">Reusing FJX DB</span></div>
           <div class="box-s">HA + PITR · SQLAlchemy 2.0 async<br/>bids · bid_items · audit_log · ai_calls</div>
         </div>
         <div class="box bx-orange" id="b-redis">
@@ -546,8 +561,8 @@ h1{
           <span class="br-desc">The workforce — scales up automatically, processes all pages in parallel, calls AI models, merges results and runs pricing</span>
         </div>
         <div class="br-row">
-          <span class="br-block">Azure SQL Database</span>
-          <span class="br-desc">The main database — stores bids, extracted items, pricing, audit trail and every AI call log · same SQL Server technology as FieldJetX</span>
+          <span class="br-block">Azure SQL Database · reusing FieldJetX DB</span>
+          <span class="br-desc">New tables (bids, bid_items, audit_log, ai_calls) added to the existing FieldJetX Azure SQL instance — no new database provisioned, same SQL Server the client already operates</span>
         </div>
         <div class="br-row">
           <span class="br-block">Azure Cache for Redis</span>
@@ -597,13 +612,13 @@ h1{
 
     <div class="benefit-card bc-new">
       <div class="benefit-card-label">New · Database</div>
-      <div class="benefit-card-name">Azure SQL Database</div>
+      <div class="benefit-card-name">Azure SQL Database · reusing FieldJetX DB</div>
       <ul>
-        <li>Same SQL Server engine as FieldJetX — one DB technology for the client to operate and support</li>
+        <li>Reusing the existing FieldJetX Azure SQL instance — no new database provisioned, no extra infrastructure cost</li>
+        <li>New tables (bids, bid_items, audit_log, ai_calls) added to the same SQL Server the client already operates</li>
         <li>Client DBA team already knows SQL Server; no extra skill or tooling needed</li>
-        <li>Data lives on Azure alongside the rest of the stack — no cross-cloud hops</li>
         <li>HA + PITR built in — system stays up if a server fails and can be restored to any point in time</li>
-        <li>Can share or sit alongside the same Azure SQL MI as FieldJetX when the POC moves to production</li>
+        <li>Single DB technology across FieldJetX and the new system — simpler to support and audit</li>
       </ul>
     </div>
 
