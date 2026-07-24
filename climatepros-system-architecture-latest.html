@@ -23,6 +23,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 
 /* Wide band — diagram only */
 .diagram-band{max-width:1460px;margin:0 auto;padding:0 40px 44px;}
+.diagram-band .sec-head{max-width:1220px;margin-left:auto;margin-right:auto;}
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;padding:34px 42px;border-radius:16px;margin-bottom:34px;}
@@ -63,9 +64,9 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 .row2{display:flex;gap:12px;margin-bottom:12px;} .row2 .box{flex:1;margin-bottom:0;}
 .inner{border:1.5px solid #4a8fd4;border-radius:12px;background:#d4e6f9;padding:14px 14px 16px;margin-bottom:12px;}
 .inner-title{font-size:9.5px;font-weight:700;color:#1b4a8a;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
-.exp{display:inline-flex;align-items:center;background:#7c3aed;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;opacity:.9;}
-.new{display:inline-flex;align-items:center;background:#d97c1a;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
-.existing{display:inline-flex;align-items:center;background:#4a8fd4;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
+.tag-exp{display:inline-flex;align-items:center;background:#7c3aed;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;opacity:.9;}
+.tag-new{display:inline-flex;align-items:center;background:#d97c1a;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
+.tag-ext{display:inline-flex;align-items:center;background:#4a8fd4;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
 .warn{color:#c0392b !important;font-weight:600 !important;}
 .note{display:block;font-size:9px;color:#999;font-style:italic;margin-top:10px;line-height:1.6;}
 
@@ -145,10 +146,8 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 </div>
 
 <!-- DIAGRAM SECTION — wider band so 1320px diagram fits cleanly -->
-<div class="main">
-  <div class="sec-head"><h2>System Diagram</h2></div>
-</div>
 <div class="diagram-band">
+<div class="sec-head" style="margin-bottom:16px;border-bottom:2px solid var(--primary-light);padding-bottom:9px;"><h2 style="font-size:22px;font-weight:700;color:var(--primary-dark);margin:0;padding:0;border:none;">System Diagram</h2></div>
 <div class="diagram-wrap">
 <div class="diagram" id="diagram">
 <div class="cols">
@@ -217,32 +216,32 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
     <div class="grp g-new" id="g-new">
       <div class="grp-title">New Infrastructure · This Project<span class="grp-sub">Azure · Container Apps</span></div>
       <div class="box bx-orange" id="b-api">
-        <div class="box-t">⚡ FastAPI + WebSocket API <span class="new">NEW</span></div>
+        <div class="box-t">⚡ FastAPI + WebSocket API <span class="tag-new">NEW</span></div>
         <div class="box-s">REST API · RBAC per route · Uvicorn · Swagger at /api/docs<br/>FJX session validation on every request<br/>
           <b>Job status (either):</b> WebSocket <code>/ws/jobs/{job_id}</code> for real-time push
           &nbsp;·&nbsp; HTTP polling <code>GET /api/jobs/{job_id}</code> as fallback
         </div>
       </div>
       <div class="box bx-orange" id="b-sb">
-        <div class="box-t">📨 Azure Service Bus <span class="new">NEW</span></div>
+        <div class="box-t">📨 Azure Service Bus <span class="tag-new">NEW</span></div>
         <div class="box-s">Async job queue · dead-letter on failure exhaustion<br/>max_delivery_count=3 · lock_timeout=5 min</div>
       </div>
       <div class="box bx-orange" id="b-wk">
-        <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="new">NEW</span></div>
+        <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="tag-new">NEW</span></div>
         <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — Gemini verifies in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
       </div>
       <div class="row2">
         <div class="box bx-orange" id="b-pg">
-          <div class="box-t">🗄️ Azure SQL Database <span class="existing">Reusing FJX DB</span></div>
+          <div class="box-t">🗄️ Azure SQL Database <span class="tag-ext">Reusing FJX DB</span></div>
           <div class="box-s">HA + PITR · SQLAlchemy 2.0 async<br/>bids · bid_items · audit_log · ai_calls</div>
         </div>
         <div class="box bx-orange" id="b-redis">
-          <div class="box-t">⚡ Azure Cache for Redis <span class="new">NEW</span></div>
+          <div class="box-t">⚡ Azure Cache for Redis <span class="tag-new">NEW</span></div>
           <div class="box-s">Job state · result cache<br/>Cache-hit → zero model cost</div>
         </div>
       </div>
       <div class="box bx-orange" id="b-neo4j">
-        <div class="box-t">🕸️ Knowledge Graph DB <span class="new">NEW</span></div>
+        <div class="box-t">🕸️ Knowledge Graph DB <span class="tag-new">NEW</span></div>
         <div class="box-s">Feedback learning · BidItem → Correction → Equipment nodes<br/>SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>Weekly promo: corrections → golden set → new prompt_version</div>
       </div>
     </div>
@@ -250,7 +249,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
     <div class="grp g-verifiers" id="g-verifiers">
       <div class="grp-title">Cloud AI Verifier<span class="grp-sub">cross-checks Zeus extraction · subject to change based on cost &amp; performance</span></div>
       <div class="box bx-cyan" id="b-gemini">
-        <div class="box-t">✨ Gemini 2.5 Flash <span class="exp">Experimental</span></div>
+        <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-exp">Experimental</span></div>
         <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
       </div>
       <span class="note">Not on-prem · called via cloud API to cross-verify on-prem Zeus extraction · can be replaced or skipped</span>
