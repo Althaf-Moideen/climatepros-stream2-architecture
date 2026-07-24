@@ -221,7 +221,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
       </div>
       <div class="box bx-orange" id="b-wk">
         <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="tag-new">NEW</span></div>
-        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — Gemini / Grok verify in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
+        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — active verifier (Gemini or Grok) runs in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
       </div>
       <div class="row2">
         <div class="box bx-orange" id="b-pg">
@@ -240,18 +240,18 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
     </div>
 
     <div class="grp g-verifiers" id="g-verifiers">
-      <div class="grp-title">Cloud AI Verifiers<span class="grp-sub">one or both active · cross-checks Zeus extraction · swappable by cost &amp; performance</span></div>
+      <div class="grp-title">Cloud AI Verifier<span class="grp-sub">one active at a time · selected by config · switchable without code changes</span></div>
       <div class="row2">
         <div class="box bx-cyan" id="b-gemini">
-          <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-exp">Experimental</span></div>
+          <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-exp">Option A</span></div>
           <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
         </div>
         <div class="box bx-cyan" id="b-grok">
-          <div class="box-t">⚡ Grok <span class="tag-exp">Experimental</span></div>
-          <div class="box-s">xAI cloud API<br/>Independent cross-check of Zeus output<br/>Alternative to Gemini · cost &amp; perf basis</div>
+          <div class="box-t">⚡ Grok <span class="tag-exp">Option B</span></div>
+          <div class="box-s">xAI cloud API<br/>Independent cross-check of Zeus output<br/>Switch from Gemini via config flag in Key Vault</div>
         </div>
       </div>
-      <span class="note">Not on-prem · called via cloud API · one or both may run per job · can be swapped or disabled individually</span>
+      <span class="note">Only one verifier runs per job · active model set via VERIFIER_MODEL config · swap anytime without deployment</span>
     </div>
 
     <div class="grp g-onprem" id="g-onprem">
@@ -352,12 +352,8 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
         <span class="pill azure">Azure</span>
       </li>
       <li>
-        <div class="inv-body"><b>Gemini 2.5 Flash</b> — cloud AI verifier option 1; cross-checks Zeus extraction independently via Google Vertex AI. Region-pinned, DPA-covered. Experimental — can run alone or alongside Grok.</div>
-        <span class="pill external">Vertex AI</span>
-      </li>
-      <li>
-        <div class="inv-body"><b>Grok</b> — cloud AI verifier option 2; independent cross-check via xAI cloud API. Alternative or complement to Gemini — chosen based on cost and performance. Experimental.</div>
-        <span class="pill external">xAI</span>
+        <div class="inv-body"><b>Gemini 2.5 Flash or Grok</b> — one cloud AI verifier active at a time, selected by config flag. Cross-checks Zeus extraction independently. Switch between Gemini (Google Vertex AI) and Grok (xAI) anytime without code changes or redeployment.</div>
+        <span class="pill external">Config-driven</span>
       </li>
       <li>
         <div class="inv-body"><b>Zeus — Primary Extractor</b> — ClimatePros' existing on-prem AI (Mac Studio "Tundra"); reused as-is. Reads drawings, outputs constrained JSON via Claude Sonnet 4.6, grounded in prior FJX bid history. Models never emit prices.</div>
@@ -375,7 +371,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 <div class="counts">
   <div class="count"><div class="n">5</div><div class="l">new Azure services<br/>FastAPI · Service Bus · KEDA · Redis · Knowledge Graph</div></div>
   <div class="count"><div class="n">1</div><div class="l">reused database<br/>Azure SQL — new tables in existing FieldJetX instance</div></div>
-  <div class="count"><div class="n">2</div><div class="l">cloud AI verifier options<br/>Gemini 2.5 Flash · Grok (one or both active)</div></div>
+  <div class="count"><div class="n">1</div><div class="l">cloud AI verifier (active)<br/>Gemini 2.5 Flash or Grok · config-switched</div></div>
   <div class="count"><div class="n">1</div><div class="l">on-prem private model<br/>Zeus · Claude Sonnet 4.6 · Mac Studio "Tundra"</div></div>
 </div>
 </section>
@@ -419,14 +415,14 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
   </div>
 
   <div class="chg cyan-l">
-    <div class="cap">Cloud AI Verifiers</div>
-    <h4>Gemini 2.5 Flash + Grok</h4>
+    <div class="cap">Cloud AI Verifier</div>
+    <h4>Gemini 2.5 Flash or Grok</h4>
     <ul>
-      <li>Two independent cross-checks on Zeus extraction — two models catching what one alone would miss</li>
-      <li>Both run in parallel via asyncio.gather() — accuracy gain with no added latency</li>
-      <li>Gemini via Google Vertex AI: region-pinned, DPA-covered, no prompt logging</li>
-      <li>Grok via xAI cloud API: independent alternative with different model architecture</li>
-      <li>Either verifier can be enabled, disabled, or swapped per job type based on live cost and accuracy data</li>
+      <li>One verifier active at a time — cross-checks Zeus extraction independently per job</li>
+      <li>Switch between Gemini and Grok via a single config flag in Key Vault — no redeployment needed</li>
+      <li>One API call per job keeps verification cost predictable and easy to track</li>
+      <li>A/B test models over time — real accuracy and cost data drives which one stays active</li>
+      <li>Gemini: Google Vertex AI, region-pinned, DPA-covered · Grok: xAI cloud API, different model architecture</li>
     </ul>
   </div>
 
