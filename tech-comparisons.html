@@ -285,6 +285,94 @@
     <div class="date">Discussed: 28 Jul 2026</div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  COMPARISON 5: Graph DB — Neo4j vs Memgraph            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Graph Database — Knowledge Graph for Bid Feedback</h2>
+    <div class="decision">Final Decision: Neo4j <span class="tag recommended">CHOSEN</span> vs Memgraph <span class="tag other">ALTERNATIVE</span></div>
+    <div class="reason">
+      Neo4j wins on long-term data growth safety, managed infrastructure, and 5-year total cost.
+      Memgraph is faster but RAM-bounded — risky as the feedback graph grows over years.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Factor</th>
+          <th>Neo4j</th>
+          <th>Memgraph</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Storage model</td>
+          <td class="win">Disk-based — grows unlimited</td>
+          <td class="lose">In-memory — bounded by RAM</td>
+        </tr>
+        <tr>
+          <td>Query speed</td>
+          <td class="neutral">~10–100ms</td>
+          <td class="win">~1–10ms — faster</td>
+        </tr>
+        <tr>
+          <td>Long-term data growth</td>
+          <td class="win">No concern — disk is cheap</td>
+          <td class="lose">RAM fills up — needs bigger VM every 1–2 years</td>
+        </tr>
+        <tr>
+          <td>Crash risk</td>
+          <td class="win">None</td>
+          <td class="lose">Yes — if RAM fills up, Memgraph goes down</td>
+        </tr>
+        <tr>
+          <td>Managed service</td>
+          <td class="win">Neo4j Aura — zero maintenance</td>
+          <td class="lose">Self-hosted — team manages it</td>
+        </tr>
+        <tr>
+          <td>LangChain / LLM integration</td>
+          <td class="win">Native connector, GraphRAG support</td>
+          <td class="neutral">Limited tooling</td>
+        </tr>
+        <tr>
+          <td>Open source</td>
+          <td class="neutral">Community edition only</td>
+          <td class="win">Fully open source</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 16px; padding: 12px 16px; background: #151824; border-radius: 6px; font-size: 0.82rem; color: #94a3b8; line-height: 1.9;">
+      <strong style="color: #cbd5e1;">5-Year Cost Breakdown</strong><br/>
+
+      <div style="display:flex; gap: 24px; margin-top: 10px;">
+        <div style="flex:1; background:#0d1f12; border:1px solid #166534; border-radius:6px; padding:12px;">
+          <div style="color:#34d399; font-weight:600; margin-bottom:6px;">Neo4j (Aura) ✓</div>
+          <span style="color:#94a3b8;">Year 1: Free tier — $0</span><br/>
+          <span style="color:#94a3b8;">Year 2–4: ~$780/year</span><br/>
+          <span style="color:#94a3b8;">Year 5: ~$2,400/year</span><br/>
+          <span style="color:#94a3b8;">DevOps: ~$0</span><br/>
+          <div style="margin-top:8px; color:#34d399; font-weight:600;">Total: ~$4,740</div>
+        </div>
+        <div style="flex:1; background:#1f0d0d; border:1px solid #7f1d1d; border-radius:6px; padding:12px;">
+          <div style="color:#f87171; font-weight:600; margin-bottom:6px;">Memgraph (Self-hosted)</div>
+          <span style="color:#94a3b8;">Year 1: ~$720/year (8GB VM)</span><br/>
+          <span style="color:#94a3b8;">Year 3: ~$1,680/year (16GB VM)</span><br/>
+          <span style="color:#94a3b8;">Year 5: ~$3,360/year (32GB VM)</span><br/>
+          <span style="color:#94a3b8;">DevOps: ~$15,000 (5hrs/mo × 5yrs)</span><br/>
+          <div style="margin-top:8px; color:#f87171; font-weight:600;">Total: ~$23,220</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; color:#fbbf24;">
+        &#9888; Memgraph is free software but costs ~5× more over 5 years when hosting + maintenance is factored in.
+      </div>
+    </div>
+
+    <div class="date">Discussed: 28 Jul 2026</div>
+  </div>
+
   <!-- Add future comparisons below as new .card blocks -->
 
 </body>
