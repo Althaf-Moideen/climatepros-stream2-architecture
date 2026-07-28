@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tech Comparisons — ClimatePros Stream 2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 40px 24px; }
+    h1 { font-size: 1.6rem; color: #7dd3fc; margin-bottom: 6px; }
+    .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 40px; }
+    .card { background: #1e2130; border: 1px solid #2d3348; border-radius: 10px; padding: 24px; margin-bottom: 32px; }
+    .card h2 { font-size: 1rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .card .decision { font-size: 1.1rem; color: #34d399; font-weight: 600; margin-bottom: 6px; }
+    .card .reason { font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px; line-height: 1.5; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 8px 12px; background: #151824; color: #64748b; font-weight: 500; border-bottom: 1px solid #2d3348; }
+    td { padding: 8px 12px; border-bottom: 1px solid #1a1f2e; vertical-align: top; }
+    td:first-child { color: #cbd5e1; font-weight: 500; width: 30%; }
+    .win { color: #34d399; }
+    .neutral { color: #94a3b8; }
+    .lose { color: #f87171; }
+    .tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .tag.recommended { background: #064e3b; color: #34d399; }
+    .tag.other { background: #1e293b; color: #64748b; }
+    .date { font-size: 0.75rem; color: #334155; margin-top: 14px; text-align: right; }
+  </style>
+</head>
+<body>
+
+  <h1>Tech Comparisons</h1>
+  <p class="subtitle">ClimatePros Stream 2 — decision reference for technology choices</p>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  COMPARISON 1: Knowledge Graph DB                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Knowledge Graph DB &mdash; Feedback Loop for Bid Extraction</h2>
+    <div class="decision">Recommended: Neo4j <span class="tag recommended">CHOSEN</span> vs Azure Cosmos DB Gremlin API <span class="tag other">ALTERNATIVE</span></div>
+    <div class="reason">
+      Storing estimator correction feedback as a graph to improve future AI bid-sheet extractions.
+      Neo4j wins on native LLM/LangChain integration, Cypher simplicity, and built-in graph analytics.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Factor</th>
+          <th>Neo4j</th>
+          <th>Cosmos DB Gremlin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Query language</td>
+          <td class="win">Cypher — intuitive, concise</td>
+          <td class="lose">Gremlin — verbose, harder to read</td>
+        </tr>
+        <tr>
+          <td>LLM / RAG integration</td>
+          <td class="win">Native LangChain Neo4j connector, GraphRAG support</td>
+          <td class="lose">No first-class LLM tooling</td>
+        </tr>
+        <tr>
+          <td>Pattern mining</td>
+          <td class="win">Graph Data Science library (built-in)</td>
+          <td class="neutral">Needs external tooling</td>
+        </tr>
+        <tr>
+          <td>Traversal performance</td>
+          <td class="win">Native graph storage (index-free adjacency)</td>
+          <td class="neutral">Graph layered over doc store — slower</td>
+        </tr>
+        <tr>
+          <td>POC ramp speed</td>
+          <td class="win">Aura free tier, up in minutes</td>
+          <td class="neutral">More Azure infra setup</td>
+        </tr>
+        <tr>
+          <td>Cost at POC scale</td>
+          <td class="win">Free tier covers 30–100 bids/week</td>
+          <td class="lose">Always paid</td>
+        </tr>
+        <tr>
+          <td>Azure ecosystem fit</td>
+          <td class="neutral">Works via API</td>
+          <td class="win">Native Azure managed service</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="date">Discussed: 28 Jul 2026</div>
+  </div>
+
+  <!-- Add future comparisons below as new .card blocks -->
+
+</body>
+</html>
