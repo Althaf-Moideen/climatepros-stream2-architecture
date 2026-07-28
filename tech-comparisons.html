@@ -398,6 +398,115 @@
     <div class="date">Discussed: 28 Jul 2026</div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  COMPARISON 6: Azure Cache for Redis — Cost             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Azure Cache for Redis — Cost &amp; Sizing</h2>
+    <div class="decision">Recommended: Standard C1 — 1GB &nbsp;<span class="tag recommended">CHOSEN</span></div>
+    <div class="reason">
+      Redis used for Celery task broker (6 pipeline queues) + WebSocket Pub/Sub.
+      Sized against real production quote volume pulled from Zeus reference data (last 30 days).
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Memory</th>
+          <th>Cost/month</th>
+          <th>SLA</th>
+          <th>Suitable</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Basic C0</td>
+          <td>250 MB</td>
+          <td>~$16</td>
+          <td class="lose">None</td>
+          <td class="lose">Dev only</td>
+        </tr>
+        <tr>
+          <td>Basic C1</td>
+          <td>1 GB</td>
+          <td>~$54</td>
+          <td class="lose">None</td>
+          <td class="neutral">POC only</td>
+        </tr>
+        <tr>
+          <td><strong>Standard C1</strong></td>
+          <td><strong>1 GB</strong></td>
+          <td><strong>~$108</strong></td>
+          <td class="win">99.9%</td>
+          <td class="win">Production ✓</td>
+        </tr>
+        <tr>
+          <td>Standard C2</td>
+          <td>6 GB</td>
+          <td>~$220</td>
+          <td class="win">99.9%</td>
+          <td class="neutral">If 500+ bids/week</td>
+        </tr>
+        <tr>
+          <td>Premium P1</td>
+          <td>6 GB</td>
+          <td>~$328</td>
+          <td class="win">99.95%</td>
+          <td class="neutral">Overkill for now</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 16px; padding: 12px 16px; background: #151824; border-radius: 6px; font-size: 0.82rem; color: #94a3b8; line-height: 1.9;">
+      <strong style="color: #cbd5e1;">Real Production Volume — Last 30 Days (Zeus Reference)</strong><br/>
+
+      <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:200px; background:#0d1117; border-radius:5px; padding:10px;">
+          <div style="color:#7dd3fc; font-weight:600; margin-bottom:4px;">Weekday Volume</div>
+          <span style="color:#94a3b8;">Typical range: 40–94 quotes/day</span><br/>
+          <span style="color:#94a3b8;">Average: ~55–60 quotes/day</span><br/>
+          <span style="color:#34d399;">Peak: 94 quotes (Jul 22, Tue)</span>
+        </div>
+        <div style="flex:1; min-width:200px; background:#0d1117; border-radius:5px; padding:10px;">
+          <div style="color:#7dd3fc; font-weight:600; margin-bottom:4px;">Weekend / Holiday</div>
+          <span style="color:#94a3b8;">Typical: 10–36 quotes/day</span><br/>
+          <span style="color:#94a3b8;">Jul 4th weekend: ~11–14/day</span><br/>
+          <span style="color:#94a3b8;">Jul 27 (Sun): 14 &nbsp;·&nbsp; Jul 26 (Sat): 19</span>
+        </div>
+        <div style="flex:1; min-width:200px; background:#0d1117; border-radius:5px; padding:10px;">
+          <div style="color:#7dd3fc; font-weight:600; margin-bottom:4px;">Monthly Total</div>
+          <span style="color:#34d399;">~1,000+ quotes in July</span><br/>
+          <span style="color:#94a3b8;">~300–340 quotes/week</span><br/>
+          <span style="color:#94a3b8;">~1,200–1,400 quotes/month</span>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <strong style="color:#cbd5e1;">Redis Memory Usage at This Volume</strong><br/>
+        <span style="color:#94a3b8;">&#x2022; Each Celery job in queue: ~2–5 KB</span><br/>
+        <span style="color:#94a3b8;">&#x2022; Peak day (94 jobs): ~470 KB in queue — well under 1 GB</span><br/>
+        <span style="color:#94a3b8;">&#x2022; WebSocket Pub/Sub messages: tiny, cleared immediately after delivery</span><br/>
+        <span style="color:#34d399;">&#x2022; Standard C1 (1 GB) comfortably handles current and 3–4× growth</span>
+      </div>
+
+      <div style="margin-top:14px;">
+        <strong style="color:#cbd5e1;">5-Year Cost Estimate</strong><br/>
+        <span style="color:#94a3b8;">Year 1–4 &nbsp;· Standard C1 · $108/month</span>
+        <span style="color:#34d399;"> → ~$1,296/year</span><br/>
+        <span style="color:#94a3b8;">Year 5+ &nbsp;&nbsp;· Standard C2 · $220/month (if volume exceeds 500/week)</span>
+        <span style="color:#34d399;"> → ~$2,640/year</span><br/>
+        <div style="margin-top:6px; color:#34d399; font-weight:600;">Total 5 years: ~$7,824</div>
+      </div>
+
+      <div style="margin-top:10px; color:#fbbf24;">
+        &#9888; Source: Zeus production database — last 30 days quote volume (Jul 2026)
+      </div>
+    </div>
+
+    <div class="date">Discussed: 28 Jul 2026</div>
+  </div>
+
   <!-- Add future comparisons below as new .card blocks -->
 
 </body>
