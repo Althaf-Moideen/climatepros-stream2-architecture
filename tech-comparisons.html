@@ -92,6 +92,77 @@
     <div class="date">Discussed: 28 Jul 2026</div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  COMPARISON 2: Real-time Communication                  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Real-time Communication — Bid Extraction &amp; Notifications</h2>
+    <div class="decision">Recommended: WebSocket <span class="tag recommended">CHOSEN</span> vs API Polling <span class="tag other">ALTERNATIVE</span></div>
+    <div class="reason">
+      Production system needs real-time extraction streaming, multi-role notifications (estimator → PMO reviewer → FieldGenix), and LLM field-by-field output.
+      WebSocket covers all of this. API Polling does not.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Factor</th>
+          <th>WebSocket</th>
+          <th>API Polling</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>LLM streaming output</td>
+          <td class="win">Native — fields populate live</td>
+          <td class="lose">Not possible</td>
+        </tr>
+        <tr>
+          <td>Multi-role notifications</td>
+          <td class="win">Server pushes to each role instantly</td>
+          <td class="lose">Delayed by poll interval</td>
+        </tr>
+        <tr>
+          <td>FieldGenix push on approval</td>
+          <td class="win">Real-time trigger</td>
+          <td class="neutral">Delayed</td>
+        </tr>
+        <tr>
+          <td>Server load at scale</td>
+          <td class="win">Event-driven — pushes only when needed</td>
+          <td class="lose">Repeated requests even when idle</td>
+        </tr>
+        <tr>
+          <td>Implementation complexity</td>
+          <td class="neutral">Medium — needs reconnect + heartbeat</td>
+          <td class="win">Simple</td>
+        </tr>
+        <tr>
+          <td>Corporate firewall risk</td>
+          <td class="neutral">Use wss:// on port 443 — mitigated</td>
+          <td class="win">No risk</td>
+        </tr>
+        <tr>
+          <td>Horizontal scaling</td>
+          <td class="neutral">Needs Redis Pub/Sub — solved</td>
+          <td class="win">Stateless, scales easily</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 16px; padding: 12px 16px; background: #151824; border-radius: 6px; font-size: 0.82rem; color: #94a3b8; line-height: 1.7;">
+      <strong style="color: #cbd5e1;">Known issues &amp; fixes</strong><br/>
+      <span style="color: #f87171;">&#x2022; Corporate firewall</span> — use <code style="color:#7dd3fc">wss://</code> on port 443<br/>
+      <span style="color: #f87171;">&#x2022; Idle timeout drops</span> — 30s client heartbeat ping<br/>
+      <span style="color: #f87171;">&#x2022; Reconnect on drop</span> — exponential backoff on client<br/>
+      <span style="color: #f87171;">&#x2022; Auth on reconnect</span> — pass JWT token on WS handshake<br/>
+      <span style="color: #f87171;">&#x2022; Multi-instance routing</span> — Redis Pub/Sub as message broker<br/>
+      <span style="color: #f87171;">&#x2022; Azure tier limits</span> — Standard tier or Azure App Gateway
+    </div>
+
+    <div class="date">Discussed: 28 Jul 2026</div>
+  </div>
+
   <!-- Add future comparisons below as new .card blocks -->
 
 </body>
