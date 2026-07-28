@@ -370,6 +370,31 @@
       </div>
     </div>
 
+    <div style="margin-top: 16px; padding: 12px 16px; background: #151824; border-radius: 6px; font-size: 0.82rem; color: #94a3b8; line-height: 1.9;">
+      <strong style="color: #cbd5e1;">Hosting on Existing Stack — Azure Container Apps</strong><br/>
+      <br/>
+      <strong style="color: #94a3b8;">Existing stack runs on:</strong><br/>
+      <span style="color: #7dd3fc;">Azure Container Apps → FastAPI · KEDA Workers · Service Bus · Redis</span><br/><br/>
+
+      <strong style="color: #f87171;">Memgraph — Cannot safely use existing stack</strong><br/>
+      <span style="color: #94a3b8;">&#x2022; Azure Container Apps is stateless — containers restart, scale, replace automatically</span><br/>
+      <span style="color: #94a3b8;">&#x2022; Memgraph lives in RAM — if container restarts, ALL graph data is lost</span><br/>
+      <span style="color: #94a3b8;">&#x2022; Needs a dedicated Azure VM outside the existing stack — extra cost + extra management</span><br/><br/>
+
+      <strong style="color: #34d399;">Neo4j — Plugs in cleanly with zero extra hosting</strong><br/>
+      <span style="color: #94a3b8;">&#x2022; Neo4j Aura is a managed cloud service — no VM, no container, no infra needed</span><br/>
+      <span style="color: #94a3b8;">&#x2022; Container Apps connect to it via API — same as Redis and Azure SQL</span><br/>
+      <span style="color: #94a3b8;">&#x2022; Zero additional infrastructure added to the existing stack</span><br/><br/>
+
+      <div style="background:#0d1117; border-radius:5px; padding:10px; font-size:0.8rem; color:#94a3b8;">
+        <span style="color:#34d399;">✓</span> FastAPI &nbsp;·&nbsp;
+        <span style="color:#34d399;">✓</span> Celery Workers &nbsp;·&nbsp;
+        <span style="color:#34d399;">✓</span> Redis &nbsp;·&nbsp;
+        <span style="color:#34d399;">✓</span> Neo4j (Aura API — no hosting) &nbsp;·&nbsp;
+        <span style="color:#f87171;">✗</span> Memgraph (needs separate VM)
+      </div>
+    </div>
+
     <div class="date">Discussed: 28 Jul 2026</div>
   </div>
 
