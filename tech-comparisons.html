@@ -163,6 +163,57 @@
     <div class="date">Discussed: 28 Jul 2026</div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  COMPARISON 3: Redis Cache Provider                     -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Redis Cache Provider — WebSocket Pub/Sub Broker</h2>
+    <div class="decision">Recommended: Azure Cache for Redis <span class="tag recommended">CHOSEN</span> vs AWS ElastiCache Redis <span class="tag other">ALTERNATIVE</span></div>
+    <div class="reason">
+      Used as the Pub/Sub message broker behind WebSocket for horizontal scaling.
+      Azure Cache for Redis fits natively into the existing Azure stack — no cross-cloud complexity.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Factor</th>
+          <th>Azure Cache for Redis</th>
+          <th>AWS ElastiCache</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ecosystem fit</td>
+          <td class="win">Native — same portal, VNet, IAM as the rest of the app</td>
+          <td class="lose">Cross-cloud — separate account, VPC, IAM</td>
+        </tr>
+        <tr>
+          <td>Latency</td>
+          <td class="win">Sub-millisecond within Azure region</td>
+          <td class="lose">Adds cross-cloud network hop if app is on Azure</td>
+        </tr>
+        <tr>
+          <td>Management overhead</td>
+          <td class="win">Zero — single vendor for full stack</td>
+          <td class="lose">Split support across Azure + AWS</td>
+        </tr>
+        <tr>
+          <td>Cost</td>
+          <td class="win">Predictable within Azure billing</td>
+          <td class="lose">Cross-cloud egress fees add up</td>
+        </tr>
+        <tr>
+          <td>Enterprise compliance</td>
+          <td class="win">SOC 2, ISO 27001, HIPAA — single boundary</td>
+          <td class="neutral">Same certs, but separate compliance boundary</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="date">Discussed: 28 Jul 2026</div>
+  </div>
+
   <!-- Add future comparisons below as new .card blocks -->
 
 </body>
