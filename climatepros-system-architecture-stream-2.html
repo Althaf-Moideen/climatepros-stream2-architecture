@@ -221,7 +221,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
       </div>
       <div class="box bx-orange" id="b-wk">
         <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="tag-new">NEW</span></div>
-        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — active verifier (Gemini or Grok) runs in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
+        <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — active verifier (Gemini 2.5 Flash) runs in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
       </div>
       <div class="row2">
         <div class="box bx-orange" id="b-pg">
@@ -240,18 +240,18 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
     </div>
 
     <div class="grp g-verifiers" id="g-verifiers">
-      <div class="grp-title">Cloud AI Verifier<span class="grp-sub">one active at a time · selected by config · switchable without code changes</span></div>
+      <div class="grp-title">Cloud AI Verifier<span class="grp-sub">best pricing · ~$0.029/bid</span></div>
       <div class="row2">
         <div class="box bx-cyan" id="b-gemini">
           <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-exp">Option A</span></div>
           <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
         </div>
         <div class="box bx-cyan" id="b-grok">
-          <div class="box-t">⚡ Grok <span class="tag-exp">Option B</span></div>
-          <div class="box-s">xAI cloud API<br/>Independent cross-check of Zeus output<br/>Switch from Gemini via config flag in Key Vault</div>
+          <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-ext">Sole Verifier</span></div>
+          <div class="box-s">xAI cloud API<br/>Independent cross-check of Zeus output<br/>Sole verifier — best pricing for our use case</div>
         </div>
       </div>
-      <span class="note">Only one verifier runs per job · active model set via VERIFIER_MODEL config · swap anytime without deployment</span>
+      <span class="note">Gemini 2.5 Flash is the sole verifier · best pricing for our use case · ~$0.029/bid</span>
     </div>
 
     <div class="grp g-onprem" id="g-onprem">
@@ -352,7 +352,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
         <span class="pill azure">Azure</span>
       </li>
       <li>
-        <div class="inv-body"><b>Gemini 2.5 Flash or Grok</b> — one cloud AI verifier active at a time, selected by config flag. Cross-checks Zeus extraction independently. Switch between Gemini (Google Vertex AI) and Grok (xAI) anytime without code changes or redeployment.</div>
+        <div class="inv-body"><b>Gemini 2.5 Flash</b> — one cloud AI verifier active at a time, selected by config flag. Cross-checks Zeus extraction independently. Switch between Gemini (Google Vertex AI) and Grok (xAI) anytime without code changes or redeployment.</div>
         <span class="pill external">Config-driven</span>
       </li>
       <li>
@@ -371,7 +371,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 <div class="counts">
   <div class="count"><div class="n">5</div><div class="l">new Azure services<br/>FastAPI · Service Bus · KEDA · Redis · Knowledge Graph</div></div>
   <div class="count"><div class="n">1</div><div class="l">reused database<br/>Azure SQL — new tables in existing FieldJetX instance</div></div>
-  <div class="count"><div class="n">1</div><div class="l">cloud AI verifier (active)<br/>Gemini 2.5 Flash or Grok · config-switched</div></div>
+  <div class="count"><div class="n">1</div><div class="l">cloud AI verifier (active)<br/>Gemini 2.5 Flash · config-switched</div></div>
   <div class="count"><div class="n">1</div><div class="l">on-prem private model<br/>Zeus · Claude Sonnet 4.6 · Mac Studio "Tundra"</div></div>
 </div>
 </section>
@@ -416,7 +416,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 
   <div class="chg cyan-l">
     <div class="cap">Cloud AI Verifier</div>
-    <h4>Gemini 2.5 Flash or Grok</h4>
+    <h4>Gemini 2.5 Flash</h4>
     <ul>
       <li>One verifier active at a time — cross-checks Zeus extraction independently per job</li>
       <li>Switch between Gemini and Grok via a single config flag in Key Vault — no redeployment needed</li>
