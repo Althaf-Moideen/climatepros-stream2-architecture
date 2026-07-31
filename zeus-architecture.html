@@ -543,6 +543,39 @@
         }
         .hero p { color: #fff; }
 
+        /* ── Architecture Diagram (mirrored from system-architecture page) ── */
+        .diagram-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 12px 16px;}
+        .diagram{position:relative;width:1070px;}
+        .cols{display:flex;gap:50px;align-items:stretch;}
+        .col-l{width:440px;flex-shrink:0;display:flex;flex-direction:column;gap:20px;}
+        .col-r{width:580px;flex-shrink:0;display:flex;flex-direction:column;gap:20px;}
+        .grp{border-radius:16px;padding:22px 22px 26px;position:relative;}
+        .grp-title{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:16px;}
+        .grp-sub{font-weight:400;font-size:9px;letter-spacing:.05em;opacity:.6;margin-left:6px;}
+        .g-clients{border:2px dashed #4a8fd4;background:#eef5ff;} .g-clients .grp-title{color:#2a5fa8;}
+        .g-existing{border:2px solid #4a8fd4;background:#e5effc;flex:1;} .g-existing .grp-title{color:#1b4a8a;}
+        .g-obs{border:2px dashed #29aaa0;background:#edfaf8;} .g-obs .grp-title{color:#1a7a72;}
+        .g-new{border:2px dashed #d97c1a;background:#fff7ee;flex:1;} .g-new .grp-title{color:#b05e0d;}
+        .g-onprem{border:2px dashed #8050d0;background:#f5f0ff;} .g-onprem .grp-title{color:#5e2dab;}
+        .g-verifiers{border:2px dashed #0891b2;background:#ecfeff;} .g-verifiers .grp-title{color:#0e7490;}
+        .diag-box{background:#fff;border-radius:10px;padding:13px 15px;margin-bottom:12px;}
+        .diag-box:last-child{margin-bottom:0;}
+        .box-t{font-size:12px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;}
+        .box-s{font-size:10px;color:#555;line-height:1.6;}
+        .box-s b{color:#c76000;font-weight:600;}
+        .bx-blue{border:1.5px solid #4a8fd4;} .bx-orange{border:1.5px solid #d97c1a;}
+        .bx-purple{border:1.5px solid #8050d0;} .bx-teal{border:1.5px solid #29aaa0;}
+        .bx-cyan{border:1.5px solid #0891b2;} .bx-gray{border:1.5px solid #c5ccd8;background:#f9fafc;}
+        .row2d{display:flex;gap:12px;margin-bottom:12px;} .row2d .diag-box{flex:1;margin-bottom:0;}
+        .inner-grp{border:1.5px solid #4a8fd4;border-radius:12px;background:#d4e6f9;padding:14px 14px 16px;margin-bottom:12px;}
+        .inner-title{font-size:9.5px;font-weight:700;color:#1b4a8a;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
+        .tag-exp{display:inline-flex;align-items:center;background:#7c3aed;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;opacity:.9;}
+        .tag-new{display:inline-flex;align-items:center;background:#d97c1a;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
+        .tag-ext{display:inline-flex;align-items:center;background:#4a8fd4;color:#fff;font-size:7.5px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border-radius:4px;margin-left:4px;flex-shrink:0;}
+        .diag-warn{color:#c0392b !important;font-weight:600 !important;}
+        .diag-note{display:block;font-size:9px;color:#999;font-style:italic;margin-top:10px;line-height:1.6;}
+        .arrow-svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;}
+
         /* Step 1 data-flow diagram */
         .df { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; overflow-x: auto; }
         .df-title { text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 18px; }
@@ -657,50 +690,143 @@
 <section id="architecture">
   <h2>4. Architecture Diagram</h2>
   <p>A modular monolith deployed as an <strong>API service</strong> and a <strong>worker service</strong> on Azure Container Apps, coordinated through Azure Service Bus. Requests enter through Front Door + WAF; heavy analyze jobs autoscale on queue depth (KEDA).</p>
-  <div class="arch">
-  <div class="arch-layer layer-user">
-    <div class="arch-title">User Layer &mdash; roles</div>
-    <div class="arch-row"><div class="arch-box ">👤 Estimator<small>creates &amp; submits bids</small></div> <div class="arch-box ">🔎 Reviewer<small>checks takeoff &amp; estimate</small></div> <div class="arch-box ">🧑‍💼 Manager<small>approves / signs off</small></div> <div class="arch-box ">⚙️ Admin<small>users, roles &amp; rate cards</small></div></div>
-  </div>
-  <div class="arch-arrow">&#8595;</div>
-  <div class="arch-layer layer-present">
-    <div class="arch-title">Presentation &mdash; Angular SPA</div>
-    <div class="arch-row"><div class="arch-box ">📈 Dashboard<small>KPIs &amp; bid overview</small></div> <div class="arch-box ">🧾 Bid Stepper<small>upload → review → deliver</small></div> <div class="arch-box ">✅ Review/Approval<small>check &amp; sign-off screens</small></div> <div class="arch-box ">👥 Clients<small>customer records &amp; history</small></div> <div class="arch-box ">💲 Pricing Admin<small>manage rate cards &amp; sheets</small></div></div>
-  </div>
-  <div class="arch-arrow">&#8597; &nbsp;<span style="font-size:12px">HTTPS · FJX Session Token validation</span></div>
-  <div class="arch-layer layer-api">
-    <div class="arch-title">Edge &amp; API</div>
-    <div class="arch-row"><div class="arch-box ">🚪 Front Door<small>+ WAF</small></div> <div class="arch-box ">🛡️ App Gateway<small>TLS · routing · rate-limit</small></div> <div class="arch-box ">🔐 FJX Auth<small>Session Tokens</small></div></div>
-    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">⚡ API Service — FastAPI / Uvicorn<small>REST + WebSocket · RBAC</small></div></div>
-  </div>
-  <div class="arch-arrow">&#8595;</div>
-  <div class="arch-layer layer-logic">
-    <div class="arch-title">Domain Services (Azure Container Apps)</div>
-    <div class="arch-row"><div class="arch-box ">📥 Intake<small>convert · render · text/vision</small></div> <div class="arch-box ">🤖 Analyze<small>Zeus extract + verify ensemble</small></div> <div class="arch-box ">🔀 Reconcile<small>deterministic merge</small></div> <div class="arch-box ">💵 Estimate<small>rate card + FieldJetX history (Zeus)</small></div></div>
-    <div class="arch-row" style="margin-top:10px"><div class="arch-box ">💲 Pricing<small>material · labor · equipment rates</small></div> <div class="arch-box ">✅ Review/Approval<small>sign-off state machine</small></div> <div class="arch-box ">📤 Export<small>Excel + summary PDF</small></div> <div class="arch-box ">👥 Clients<small>records, history &amp; reuse</small></div></div>
-  </div>
-  <div class="arch-arrow">&#8595;</div>
-  <div class="arch-layer layer-worker">
-    <div class="arch-title">Async Processing</div>
-    <div class="arch-row"><div class="arch-box ">🚌 Service Bus<small>async job queue</small></div> <div class="arch-box ">📈 KEDA autoscale + Celery workers<small>scale workers to queue depth</small></div></div>
-  </div>
-  <div class="arch-arrow">&#8595;</div>
-  <div class="arch-split">
-    <div class="arch-layer layer-integration">
-      <div class="arch-title">Integration — Zeus on-prem (Mac Studio "Tundra") · cloud verifier (managed · DPA · zero-retention)</div>
-      <div class="arch-row"><div class="arch-box ">🏛️ Zeus (On-Prem)<small>Mac Studio "Tundra" · Claude Sonnet 4.6 · FieldJetX-linked · data stays on-prem</small></div> <div class="arch-box ">✨ Gemini 2.5 Flash<small>verifier · Option A · Google Vertex AI</small></div> <div class="arch-box ">⚡ Grok<small>verifier · Option B · xAI cloud API</small></div> <div class="arch-box dashed">📤 FieldJetX API<small>Excel push · prior-bid context + rates → Zeus</small></div></div>
+  <div class="diagram-wrap">
+  <div class="diagram" id="diagram">
+  <div class="cols">
+
+    <div class="col-l">
+      <div class="grp g-clients" id="g-clients">
+        <div class="grp-title">Clients</div>
+        <div class="row2d">
+          <div class="diag-box bx-blue" id="b-est">
+            <div class="box-t">🖥️ FieldJetX Web App</div>
+            <div class="box-s">Estimator — bid upload, review &amp; finalise</div>
+          </div>
+          <div class="diag-box bx-blue" id="b-mgr">
+            <div class="box-t">👤 Manager / Admin</div>
+            <div class="box-s">Feedback &amp; rate-card config</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grp g-existing" id="g-existing">
+        <div class="grp-title">Existing · FieldJetX Platform<span class="grp-sub">Azure · unchanged · reused</span></div>
+        <div class="inner-grp" id="inner-edge">
+          <div class="inner-title">Edge &amp; Auth Layer</div>
+          <div class="row2d">
+            <div class="diag-box bx-gray" id="b-fd">
+              <div class="box-t">🛡️ Front Door + WAF</div>
+              <div class="box-s">FJX existing · TLS via FJX cert<br/>no separate provisioning</div>
+            </div>
+            <div class="diag-box bx-gray" id="b-ag">
+              <div class="box-t">🔀 App Gateway</div>
+              <div class="box-s">FJX existing · routes to<br/>ClimatePros containers</div>
+            </div>
+          </div>
+          <div class="diag-box bx-gray" id="b-auth">
+            <div class="box-t">🔑 FJX Auth · Session Tokens</div>
+            <div class="box-s">GUID session tokens · loginsessionid validated per request<br/>UserFeatureXref feature-gate · SecJobRoles (ADM / MGR / USR / LOA)</div>
+          </div>
+        </div>
+        <div class="row2d">
+          <div class="diag-box bx-gray" id="b-blob">
+            <div class="box-t">📁 Blob Storage</div>
+            <div class="box-s">FJX existing · geo-redundant<br/>drawings · quotes · images</div>
+          </div>
+          <div class="diag-box bx-gray" id="b-vnet">
+            <div class="box-t">🔒 VNet + Private Endpoints</div>
+            <div class="box-s">FJX existing<br/>data off public internet</div>
+          </div>
+        </div>
+        <div class="diag-box bx-gray" id="b-kv">
+          <div class="box-t">🗝️ Key Vault</div>
+          <div class="box-s">API keys · FJX integration token · no secrets in config or images · managed keys</div>
+        </div>
+      </div>
+
+      <div class="grp g-obs" id="g-obs">
+        <div class="grp-title">Observability &amp; Tracing</div>
+        <div class="diag-box bx-teal" id="b-obs">
+          <div class="box-t">📊 Monitor + App Insights</div>
+          <div class="box-s">Logs · traces · metrics · correlation IDs<br/>ai_calls: per-model tokens, latency, cost · SLO burn &amp; dead-letter alerts</div>
+        </div>
+        <span class="diag-note">all services emit telemetry · prompt_version stamped on every bid + ai_calls record</span>
+      </div>
     </div>
-    <div class="arch-layer layer-data">
-      <div class="arch-title">Data (Azure)</div>
-      <div class="arch-row"><div class="arch-box ">🗄️ Azure SQL Database<small>Reusing FJX DB</small></div> <div class="arch-box ">📦 Blob Storage<small>drawings/quotes</small></div> <div class="arch-box ">🔥 Cache for Redis<small>fast results cache · WebSocket pub/sub</small></div> <div class="arch-box ">🕸️ Knowledge Graph<small>corrections → SIMILAR_TO edges → few-shot grounding</small></div></div>
+
+    <div class="col-r">
+      <div class="grp g-new" id="g-new">
+        <div class="grp-title">New Infrastructure · This Project<span class="grp-sub">Azure · Container Apps</span></div>
+        <div class="diag-box bx-orange" id="b-api">
+          <div class="box-t">⚡ FastAPI + WebSocket API <span class="tag-new">NEW</span></div>
+          <div class="box-s">REST API · RBAC per route · Uvicorn · Swagger at /api/docs<br/>FJX session validation on every request<br/>
+            <b>Job status (either):</b> WebSocket <code>/ws/jobs/{job_id}</code> for real-time push
+            &nbsp;·&nbsp; HTTP polling <code>GET /api/jobs/{job_id}</code> as fallback
+          </div>
+        </div>
+        <div class="diag-box bx-orange" id="b-sb">
+          <div class="box-t">📨 Azure Service Bus <span class="tag-new">NEW</span></div>
+          <div class="box-s">Async job queue · dead-letter on failure exhaustion<br/>max_delivery_count=3 · lock_timeout=5 min</div>
+        </div>
+        <div class="diag-box bx-orange" id="b-wk">
+          <div class="box-t">⚙️ KEDA Workers · Celery 5.6 <span class="tag-new">NEW</span></div>
+          <div class="box-s">Scale 0–N on queue depth · <b>group() fan-out per page</b><br/>asyncio.gather() — active verifier (Gemini 2.5 Flash) runs in parallel<br/>chord() fan-in → Reconciler → Deterministic pricing engine</div>
+        </div>
+        <div class="row2d">
+          <div class="diag-box bx-orange" id="b-pg">
+            <div class="box-t">🗄️ Azure SQL Database <span class="tag-ext">Reusing FJX DB</span></div>
+            <div class="box-s">HA + PITR · SQLAlchemy 2.0 async<br/>bids · bid_items · audit_log · ai_calls</div>
+          </div>
+          <div class="diag-box bx-orange" id="b-redis">
+            <div class="box-t">⚡ Azure Cache for Redis <span class="tag-new">NEW</span></div>
+            <div class="box-s">Job state · result cache<br/>Cache-hit → zero model cost</div>
+          </div>
+        </div>
+        <div class="diag-box bx-orange" id="b-neo4j">
+          <div class="box-t">🕸️ Knowledge Graph DB <span class="tag-new">NEW</span></div>
+          <div class="box-s">Feedback learning · BidItem → Correction → Equipment nodes<br/>SIMILAR_TO edges · dynamic few-shot grounding for Zeus<br/>Weekly promo: corrections → golden set → new prompt_version</div>
+        </div>
+      </div>
+
+      <div class="grp g-verifiers" id="g-verifiers">
+        <div class="grp-title">Cloud AI Verifier<span class="grp-sub">best pricing · ~$0.029/bid</span></div>
+        <div class="row2d">
+          <div class="diag-box bx-cyan" id="b-gemini">
+            <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-exp">Option A</span></div>
+            <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
+          </div>
+          <div class="diag-box bx-cyan" id="b-grok">
+            <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-ext">Sole Verifier</span></div>
+            <div class="box-s">xAI cloud API<br/>Independent cross-check of Zeus output<br/>Sole verifier — best pricing for our use case</div>
+          </div>
+        </div>
+        <span class="diag-note">Gemini 2.5 Flash is the sole verifier · best pricing for our use case · ~$0.029/bid</span>
+      </div>
+
+      <div class="grp g-onprem" id="g-onprem">
+        <div class="grp-title">Private Model Infra · ClimatePros Client<span class="grp-sub">on-prem · Mac Studio "Tundra"</span></div>
+        <div class="diag-box bx-purple" id="b-zeus">
+          <div class="box-t">🤖 Zeus — Primary Extractor <span class="tag-ext">On-Prem</span></div>
+          <div class="box-s">ClimatePros' existing on-prem AI · Claude Sonnet 4.6 · FieldJetX-linked<br/>Grounded in prior FJX bids + Knowledge Graph SIMILAR_TO edges · constrained JSON schema output<br/><span class="diag-warn">💡 Drawing content never leaves client premises</span></div>
+        </div>
+        <span class="diag-note">Models never emit prices · all pricing = pure deterministic code · drawings in delimited data channel only</span>
+      </div>
     </div>
-  </div>
-  <div class="arch-arrow">&#8595;</div>
-  <div class="arch-layer layer-logic">
-    <div class="arch-title">Platform &amp; Foundation</div>
-    <div class="arch-row"><div class="arch-box ">🔑 Key Vault<small>secure store for API keys &amp; passwords</small></div> <div class="arch-box ">📊 Monitor + App Insights<small>logs, cost &amp; performance tracking + alerts</small></div> <div class="arch-box ">🗃️ Container Registry<small>versioned app images to deploy</small></div> <div class="arch-box ">🕸️ VNet + Private Endpoints<small>data kept off the public internet</small></div></div>
-  </div>
-</div>
+
+  </div><!-- /cols -->
+
+  <svg class="arrow-svg" id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ah-blue"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#4a8fd4"/></marker>
+      <marker id="ah-orange" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#d97c1a"/></marker>
+      <marker id="ah-purple" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#8050d0"/></marker>
+      <marker id="ah-teal"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#29aaa0"/></marker>
+      <marker id="ah-cyan"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#0891b2"/></marker>
+      <marker id="ah-gray"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#888"/></marker>
+    </defs>
+  </svg>
+  </div><!-- /diagram -->
+  </div><!-- /diagram-wrap -->
   <h3>Request Flow</h3>
   <ol style="padding-left:24px">
     <li>User accesses via <strong>FieldJetX Web App</strong>; FJX session token (loginsessionid + SecJobRoles) is validated on every API request.</li>
@@ -1050,4 +1176,91 @@
 </div>
 
 </div>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const COLS={blue:'#4a8fd4',orange:'#d97c1a',purple:'#8050d0',teal:'#29aaa0',cyan:'#0891b2',gray:'#888'};
+const FS=8.5;
+function rc(id){
+  const el=document.getElementById(id);
+  if(!el)return null;
+  const d=document.getElementById('diagram').getBoundingClientRect();
+  const r=el.getBoundingClientRect();
+  return{t:r.top-d.top,b:r.bottom-d.top,l:r.left-d.left,r:r.right-d.left,
+    cx:r.left-d.left+r.width/2,cy:r.top-d.top+r.height/2,w:r.width,h:r.height};
+}
+function pill(svg,cx,cy,txt,col){
+  const c=COLS[col]||col,tw=txt.length*FS*0.56,ph=9,pv=4,bw=tw+ph*2,bh=FS+pv*2;
+  const g=document.createElementNS(NS,'g');
+  const rct=document.createElementNS(NS,'rect');
+  rct.setAttribute('x',cx-bw/2);rct.setAttribute('y',cy-bh/2);rct.setAttribute('width',bw);rct.setAttribute('height',bh);
+  rct.setAttribute('rx',bh/2);rct.setAttribute('fill','#fff');rct.setAttribute('stroke',c);rct.setAttribute('stroke-width','1.1');
+  g.appendChild(rct);
+  const t=document.createElementNS(NS,'text');
+  t.setAttribute('x',cx);t.setAttribute('y',cy+FS*0.36);t.setAttribute('text-anchor','middle');
+  t.setAttribute('fill',c);t.setAttribute('font-size',FS);t.setAttribute('font-weight','700');
+  t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');t.textContent=txt;
+  g.appendChild(t);svg.appendChild(g);
+}
+function drawPath(svg,d,col,dash){
+  const c=COLS[col]||col,p=document.createElementNS(NS,'path');
+  p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke',c);p.setAttribute('stroke-width','1.7');
+  p.setAttribute('marker-end','url(#ah-'+col+')');if(dash)p.setAttribute('stroke-dasharray','5,3');
+  svg.appendChild(p);return p;
+}
+function draw(){
+  const svg=document.getElementById('arrow-svg');
+  if(!svg)return;
+  while(svg.children.length>1)svg.removeChild(svg.lastChild);
+  const diag=document.getElementById('diagram');
+  svg.setAttribute('height',diag.getBoundingClientRect().height);
+  svg.setAttribute('width',diag.getBoundingClientRect().width);
+  const E=id=>rc(id);
+  const est=E('b-est'),mgr=E('b-mgr'),fd=E('b-fd'),ag=E('b-ag'),
+        auth=E('b-auth'),blob=E('b-blob'),obs=E('b-obs'),
+        api=E('b-api'),sb=E('b-sb'),wk=E('b-wk'),
+        pg=E('b-pg'),redis=E('b-redis'),neo4j=E('b-neo4j'),
+        zeus=E('b-zeus'),gem=E('b-gemini'),grok=E('b-grok');
+  if(!est||!api)return;
+  drawPath(svg,'M'+est.cx+','+est.b+' L'+est.cx+','+(fd.t-6),'blue');
+  pill(svg,est.cx+46,(est.b+fd.t)/2,'requests','blue');
+  drawPath(svg,'M'+mgr.cx+','+mgr.b+' L'+mgr.cx+','+(ag.t-6),'blue');
+  pill(svg,mgr.cx+46,(mgr.b+ag.t)/2,'requests','blue');
+  const authMidX=auth.r+(api.l-auth.r)*0.5;
+  drawPath(svg,'M'+auth.r+','+auth.cy+' L'+authMidX+','+auth.cy+' L'+authMidX+','+api.cy+' L'+(api.l-6)+','+api.cy,'blue');
+  pill(svg,authMidX,(auth.cy+api.cy)/2,'validated session','blue');
+  drawPath(svg,'M'+api.cx+','+api.b+' L'+api.cx+','+(sb.t-6),'orange');
+  pill(svg,api.cx+55,(api.b+sb.t)/2,'publish job','orange');
+  drawPath(svg,'M'+sb.cx+','+sb.b+' L'+sb.cx+','+(wk.t-6),'orange');
+  pill(svg,sb.cx+70,(sb.b+wk.t)/2,'consume · scale 0–N','orange');
+  const pgFromX=wk.l+wk.w*0.28,pgMidX=(pgFromX+pg.cx)/2;
+  drawPath(svg,'M'+pgFromX+','+wk.b+' L'+pgMidX+','+wk.b+' L'+pgMidX+','+(pg.t-6),'orange');
+  pill(svg,pgMidX-52,(wk.b+pg.t)/2,'reads / writes','orange');
+  const rdFromX=wk.l+wk.w*0.72,rdMidX=(rdFromX+redis.cx)/2;
+  drawPath(svg,'M'+rdFromX+','+wk.b+' L'+rdMidX+','+wk.b+' L'+rdMidX+','+(redis.t-6),'orange');
+  pill(svg,rdMidX+48,(wk.b+redis.t)/2,'job state','orange');
+  const neoX=wk.cx;
+  drawPath(svg,'M'+neoX+','+redis.b+' L'+neoX+','+(neo4j.t-6),'orange');
+  pill(svg,neoX+70,(redis.b+neo4j.t)/2,'query · upsert','orange');
+  const rX=wk.r+16;
+  drawPath(svg,'M'+wk.r+','+wk.cy+' L'+rX+','+wk.cy+' L'+rX+','+zeus.cy+' L'+(zeus.r+6)+','+zeus.cy,'purple');
+  pill(svg,rX-52,(wk.cy+zeus.cy)/2,'extract','purple');
+  if(gem){
+    const gFromX=wk.l+wk.w*0.22,gMidX=(gFromX+gem.cx)/2;
+    drawPath(svg,'M'+gFromX+','+(wk.b+10)+' L'+gMidX+','+(wk.b+10)+' L'+gMidX+','+(gem.t-6),'cyan',true);
+    pill(svg,gMidX,neo4j.b+14,'verify','cyan');
+  }
+  if(grok){
+    const grFromX=wk.l+wk.w*0.55,grMidX=(grFromX+grok.cx)/2;
+    drawPath(svg,'M'+grFromX+','+(wk.b+22)+' L'+grMidX+','+(wk.b+22)+' L'+grMidX+','+(grok.t-6),'cyan',true);
+  }
+  const blobMidX=api.l-(api.l-blob.r)*0.5;
+  drawPath(svg,'M'+api.l+','+api.cy+' L'+blobMidX+','+api.cy+' L'+blobMidX+','+blob.cy+' L'+(blob.r+6)+','+blob.cy,'blue',true);
+  pill(svg,blobMidX,(api.cy+blob.cy)/2,'store drawings','blue');
+  const obsMidX=api.l-(api.l-obs.r)*0.5-18;
+  drawPath(svg,'M'+api.l+','+api.b+' L'+obsMidX+','+api.b+' L'+obsMidX+','+obs.cy+' L'+(obs.r+6)+','+obs.cy,'teal',true);
+  pill(svg,obsMidX,(api.b+obs.cy)/2,'telemetry','teal');
+}
+document.fonts.ready.then(function(){setTimeout(draw,350);});
+window.addEventListener('resize',function(){setTimeout(draw,150);});
+</script>
 </body></html>
