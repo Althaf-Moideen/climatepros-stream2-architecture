@@ -243,12 +243,8 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
       <div class="grp-title">Cloud AI Verifier<span class="grp-sub">best pricing · ~$0.029/bid</span></div>
       <div class="row2">
         <div class="box bx-cyan" id="b-gemini">
-          <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-exp">Option A</span></div>
-          <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Verifies Zeus output independently</div>
-        </div>
-        <div class="box bx-cyan" id="b-grok">
           <div class="box-t">✨ Gemini 2.5 Flash <span class="tag-ext">Sole Verifier</span></div>
-          <div class="box-s">xAI cloud API<br/>Independent cross-check of Zeus output<br/>Sole verifier — best pricing for our use case</div>
+          <div class="box-s">Google Vertex AI · cloud API<br/>region-pinned · DPA · no prompt logging<br/>Independent cross-check of Zeus output</div>
         </div>
       </div>
       <span class="note">Gemini 2.5 Flash is the sole verifier · best pricing for our use case · ~$0.029/bid</span>
@@ -352,8 +348,8 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
         <span class="pill azure">Azure</span>
       </li>
       <li>
-        <div class="inv-body"><b>Gemini 2.5 Flash</b> — one cloud AI verifier active at a time, selected by config flag. Cross-checks Zeus extraction independently. Switch between Gemini (Google Vertex AI) and Grok (xAI) anytime without code changes or redeployment.</div>
-        <span class="pill external">Config-driven</span>
+        <div class="inv-body"><b>Gemini 2.5 Flash</b> — sole cloud AI verifier. Cross-checks Zeus extraction independently via Google Vertex AI, region-pinned and DPA-covered.</div>
+        <span class="pill external">Google Vertex AI</span>
       </li>
       <li>
         <div class="inv-body"><b>Zeus — Primary Extractor</b> — ClimatePros' existing on-prem AI (Mac Studio "Tundra"); reused as-is. Reads drawings, outputs constrained JSON via Claude Sonnet 4.6, grounded in prior FJX bid history. Models never emit prices.</div>
@@ -371,7 +367,7 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
 <div class="counts">
   <div class="count"><div class="n">5</div><div class="l">new Azure services<br/>FastAPI · Service Bus · KEDA · Redis · Knowledge Graph</div></div>
   <div class="count"><div class="n">1</div><div class="l">reused database<br/>Azure SQL — new tables in existing FieldJetX instance</div></div>
-  <div class="count"><div class="n">1</div><div class="l">cloud AI verifier (active)<br/>Gemini 2.5 Flash · config-switched</div></div>
+  <div class="count"><div class="n">1</div><div class="l">cloud AI verifier<br/>Gemini 2.5 Flash · Google Vertex AI</div></div>
   <div class="count"><div class="n">1</div><div class="l">on-prem private model<br/>Zeus · Claude Sonnet 4.6 · Mac Studio "Tundra"</div></div>
 </div>
 </section>
@@ -418,11 +414,9 @@ h2{font-size:22px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;p
     <div class="cap">Cloud AI Verifier</div>
     <h4>Gemini 2.5 Flash</h4>
     <ul>
-      <li>One verifier active at a time — cross-checks Zeus extraction independently per job</li>
-      <li>Switch between Gemini and Grok via a single config flag in Key Vault — no redeployment needed</li>
+      <li>Sole verifier — cross-checks Zeus extraction independently per job</li>
+      <li>Google Vertex AI: region-pinned, DPA-covered, no prompt logging</li>
       <li>One API call per job keeps verification cost predictable and easy to track</li>
-      <li>A/B test models over time — real accuracy and cost data drives which one stays active</li>
-      <li>Gemini: Google Vertex AI, region-pinned, DPA-covered · Grok: xAI cloud API, different model architecture</li>
     </ul>
   </div>
 
@@ -496,7 +490,7 @@ function draw(){
         auth=E('b-auth'),blob=E('b-blob'),obs=E('b-obs'),
         api=E('b-api'),sb=E('b-sb'),wk=E('b-wk'),
         pg=E('b-pg'),redis=E('b-redis'),neo4j=E('b-neo4j'),
-        zeus=E('b-zeus'),gem=E('b-gemini'),grok=E('b-grok');
+        zeus=E('b-zeus'),gem=E('b-gemini');
   if(!est||!api)return;
   path(svg,`M${est.cx},${est.b} L${est.cx},${fd.t-6}`,'blue');
   pill(svg,est.cx+46,(est.b+fd.t)/2,'requests','blue');
@@ -525,10 +519,6 @@ function draw(){
     const gFromX=wk.l+wk.w*0.22,gMidX=(gFromX+gem.cx)/2;
     path(svg,`M${gFromX},${wk.b+10} L${gMidX},${wk.b+10} L${gMidX},${gem.t-6}`,'cyan',true);
     pill(svg,gMidX,neo4j.b+14,'verify','cyan');
-  }
-  if(grok){
-    const grFromX=wk.l+wk.w*0.55,grMidX=(grFromX+grok.cx)/2;
-    path(svg,`M${grFromX},${wk.b+22} L${grMidX},${wk.b+22} L${grMidX},${grok.t-6}`,'cyan',true);
   }
   const blobMidX=api.l-(api.l-blob.r)*0.5;
   path(svg,`M${api.l},${api.cy} L${blobMidX},${api.cy} L${blobMidX},${blob.cy} L${blob.r+6},${blob.cy}`,'blue',true);
