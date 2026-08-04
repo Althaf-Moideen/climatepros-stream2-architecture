@@ -100,31 +100,27 @@
   .state-arrow { color: #6B7280; font-size: 10pt; }
 
   /* ── Architecture diagram iframe ── */
-  /* Page 10 special layout: diagram fills content area */
-  .page-diagram {
-    padding: 14mm 14mm 14mm;
-  }
   .diagram-frame-wrapper {
-    /* 178mm wide × 222mm tall = full usable area after header+heading+footer */
-    width: 182mm;
-    height: 222mm;
+    width: 178mm;
+    height: 198mm;
     border: 1px solid #E2E8F0;
     border-radius: 4px;
     overflow: hidden;
-    margin-top: 2mm;
+    margin-top: 3mm;
     position: relative;
     background: #fff;
   }
   .diagram-frame-wrapper iframe {
     position: absolute;
-    top: 0;
+    /* Offset upward to skip the blue HTML page header + "System Diagram" label (~200 CSS px) */
+    top: -96px;   /* 200px × 0.478 scale = 96px visual skip */
     left: 0;
-    /* Render at 1440px viewport width — matches the HTML's layout */
+    /* Render at 1440px viewport — matches the diagram HTML layout */
     width: 1440px;
-    height: 2400px;
+    height: 2600px;
     border: none;
-    /* Scale to fit 182mm (688px) wide: 688/1440 = 0.478 */
-    transform: scale(0.478);
+    /* Scale to fit 178mm (~673px): 673/1440 = 0.467 */
+    transform: scale(0.467);
     transform-origin: top left;
     pointer-events: none;
   }
@@ -459,11 +455,14 @@
 <!-- ════════════════════════════════════════════
      PAGE 10 — §02 SYSTEM ARCHITECTURE DIAGRAM
 ════════════════════════════════════════════ -->
-<div class="page page-diagram">
+<div class="page">
   <div class="page-header">
     <div class="conf">Confidential — ClimatePros / techjays</div>
-    <div class="doc-title">Stream 2 Architecture · v1.0 &nbsp;·&nbsp; 02 System Architecture Diagram</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
   </div>
+
+  <div class="section-num">02</div>
+  <h1 class="section-title">System Architecture Diagram</h1>
 
   <div class="diagram-frame-wrapper">
     <iframe
