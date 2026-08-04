@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClimatePros — Stream 2 Architecture (Zeus)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 9.5pt; color: #0D1A3E; background: #f0f0f0; }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #fff;
+    margin: 0 auto 16px;
+    padding: 16mm 16mm 14mm;
+    position: relative;
+    page-break-after: always;
+    overflow: hidden;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; }
+  }
+
+  /* ── Cover ── */
+  .cover { background: #0D1A3E; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 20mm 18mm; }
+  .cover .logo-mark { font-size: 13pt; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+  .cover .logo-mark span { color: #E87722; }
+  .cover .cover-badge { background: #1A56A0; color: #fff; font-size: 7pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; display: inline-block; margin-bottom: 12mm; }
+  .cover h1 { font-size: 30pt; font-weight: 700; line-height: 1.15; color: #fff; margin-bottom: 4mm; }
+  .cover h1 span { color: #4DA8DA; }
+  .cover .cover-sub { font-size: 13pt; font-weight: 300; color: #8BB8D4; margin-bottom: 10mm; }
+  .cover .cover-meta { font-size: 8.5pt; color: #8BB8D4; line-height: 1.7; }
+  .cover .cover-bottom { border-top: 1px solid rgba(255,255,255,0.15); padding-top: 6mm; display: flex; justify-content: space-between; align-items: flex-end; }
+  .cover .cover-bottom .techjays { font-size: 11pt; font-weight: 700; color: #fff; }
+  .cover .cover-bottom .techjays span { color: #E87722; }
+  .cover .cover-bottom .version { font-size: 8pt; color: #8BB8D4; }
+
+  /* ── Page Header / Footer ── */
+  .page-header { border-bottom: 1px solid #E2E8F0; padding-bottom: 3mm; margin-bottom: 7mm; display: flex; justify-content: space-between; align-items: center; }
+  .page-header .conf { font-size: 7pt; font-weight: 600; color: #E87722; letter-spacing: 0.1em; text-transform: uppercase; }
+  .page-header .doc-title { font-size: 7pt; color: #6B7280; }
+  .page-footer { position: absolute; bottom: 10mm; left: 16mm; right: 16mm; border-top: 1px solid #E2E8F0; padding-top: 3mm; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer .logo-mark { font-size: 8.5pt; font-weight: 700; color: #0D1A3E; }
+  .page-footer .logo-mark span { color: #E87722; }
+  .page-footer .pg { font-size: 7.5pt; color: #6B7280; }
+
+  /* ── Section headings ── */
+  .section-num { font-size: 28pt; font-weight: 700; color: #E2E8F0; line-height: 1; margin-bottom: -6mm; }
+  h1.section-title { font-size: 16pt; font-weight: 700; color: #1A56A0; margin-bottom: 5mm; }
+  h2.sub-heading { font-size: 10.5pt; font-weight: 700; color: #1A56A0; margin-top: 5mm; margin-bottom: 2.5mm; }
+  h3.sub-sub { font-size: 9.5pt; font-weight: 600; color: #0D1A3E; margin-top: 3.5mm; margin-bottom: 1.5mm; }
+
+  /* ── Body text ── */
+  p { line-height: 1.55; margin-bottom: 3mm; font-size: 9.5pt; color: #0D1A3E; }
+  ul { margin-left: 5mm; margin-bottom: 3mm; }
+  ul li { line-height: 1.55; margin-bottom: 1.2mm; font-size: 9.5pt; }
+  ol { margin-left: 5mm; margin-bottom: 3mm; }
+  ol li { line-height: 1.55; margin-bottom: 1.5mm; font-size: 9.5pt; }
+  strong { font-weight: 600; }
+
+  /* ── Badges ── */
+  .badge-new { background: #E87722; color: #fff; font-size: 6.5pt; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; }
+  .badge-reuse { background: #059669; color: #fff; font-size: 6.5pt; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; }
+  .badge-onprem { background: #7C3AED; color: #fff; font-size: 6.5pt; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; }
+  .badge-cloud { background: #0EA5E9; color: #fff; font-size: 6.5pt; font-weight: 700; padding: 1px 5px; border-radius: 3px; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin-bottom: 4mm; }
+  table th { background: #1A56A0; color: #fff; font-weight: 600; padding: 4px 7px; text-align: left; font-size: 8pt; }
+  table td { padding: 4px 7px; border-bottom: 1px solid #E2E8F0; vertical-align: top; line-height: 1.45; }
+  table tr:nth-child(even) td { background: #F8FAFC; }
+  table tr:last-child td { border-bottom: none; }
+  .col-item { font-weight: 600; white-space: nowrap; }
+
+  /* ── Code ── */
+  pre { background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 4px; padding: 3.5mm 4mm; font-family: 'Courier New', monospace; font-size: 7.5pt; line-height: 1.5; overflow-x: auto; margin-bottom: 3mm; white-space: pre-wrap; }
+  code { font-family: 'Courier New', monospace; font-size: 8pt; background: #F1F5F9; padding: 1px 4px; border-radius: 2px; }
+
+  /* ── Callout boxes ── */
+  .callout { border-left: 3px solid #1A56A0; background: #EFF6FF; padding: 3mm 4mm; border-radius: 0 4px 4px 0; margin-bottom: 3.5mm; font-size: 9pt; }
+  .callout-principle { border-color: #E87722; background: #FFF7ED; }
+  .callout-warning { border-color: #DC2626; background: #FEF2F2; }
+
+  /* ── TOC ── */
+  .toc-entry { display: flex; align-items: baseline; gap: 2mm; margin-bottom: 1.5mm; font-size: 9.5pt; }
+  .toc-entry .toc-num { font-weight: 600; color: #1A56A0; min-width: 8mm; }
+  .toc-entry .toc-title { flex: 1; }
+  .toc-entry .toc-dots { flex: 1; border-bottom: 1px dotted #CBD5E1; min-width: 10mm; margin: 0 2mm 1mm; }
+  .toc-entry .toc-pg { color: #6B7280; font-size: 9pt; }
+  .toc-sub { margin-left: 8mm; }
+  .toc-sub .toc-num { color: #6B7280; font-weight: 400; }
+
+  /* ── State machine ── */
+  .state-flow { display: flex; align-items: center; gap: 2mm; flex-wrap: wrap; margin: 3mm 0; font-size: 8.5pt; }
+  .state-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 4px; padding: 2px 6px; font-weight: 600; color: #1A56A0; }
+  .state-arrow { color: #6B7280; font-size: 10pt; }
+
+  /* ── Architecture diagram iframe ── */
+  .diagram-frame-wrapper {
+    width: 100%;
+    height: 185mm;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 4mm;
+  }
+  .diagram-frame-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    transform: scale(0.62);
+    transform-origin: top left;
+    width: calc(100% / 0.62);
+    height: calc(100% / 0.62);
+  }
+
+  /* ── Approval page ── */
+  .approval-box { border: 1px solid #E2E8F0; border-radius: 6px; padding: 8mm; margin-bottom: 6mm; }
+  .approval-box h3 { font-size: 10pt; font-weight: 600; color: #1A56A0; margin-bottom: 5mm; }
+  .sig-line { border-bottom: 1px solid #0D1A3E; margin: 8mm 0 2mm; }
+  .sig-label { font-size: 8pt; color: #6B7280; }
+
+  /* ── Version meta bar ── */
+  .meta-bar { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 2.5mm 4mm; font-size: 8pt; color: #4B5563; margin-bottom: 5mm; display: flex; gap: 6mm; flex-wrap: wrap; }
+  .meta-bar span { font-weight: 600; color: #0D1A3E; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     PAGE 1 — COVER
+════════════════════════════════════════════ -->
+<div class="page cover">
+  <div>
+    <div class="logo-mark"><span>//</span> techjays</div>
+  </div>
+  <div>
+    <div class="cover-badge">Confidential · Draft for Client Review</div>
+    <h1>ClimatePros<br><span>Stream 2</span><br>Architecture</h1>
+    <div class="cover-sub">Zeus · Technical Design Reference</div>
+    <div class="cover-meta">
+      Version 1.0 &nbsp;·&nbsp; August 2026 &nbsp;·&nbsp; Prepared by techjays<br>
+      Two-model AI: Anthropic Claude Sonnet 4.6 (cloud extraction) + Zeus (on-prem spec analysis)
+    </div>
+  </div>
+  <div class="cover-bottom">
+    <div class="techjays"><span>//</span> techjays</div>
+    <div class="version">ClimatePros — Stream 2 Architecture (Zeus) · v1.0 · August 2026</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 2 — APPROVAL
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">00</div>
+  <h1 class="section-title">Approval</h1>
+
+  <p>This document requires sign-off from both ClimatePros and techjays before it is considered approved for build.</p>
+
+  <div class="approval-box">
+    <h3>Approved for ClimatePros</h3>
+    <div class="sig-line"></div>
+    <div class="sig-label">Signature &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date</div>
+  </div>
+
+  <div class="approval-box">
+    <h3>Approved for techjays</h3>
+    <div class="sig-line"></div>
+    <div class="sig-label">Signature &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date</div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">2 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 3 — DOCUMENT CONTROL + HOW TO READ
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="meta-bar">
+    Version 1.0 — Draft for client review &nbsp;·&nbsp; Confidential — ClimatePros / techjays
+  </div>
+
+  <p>Companion to the Stream 2 Scope Document — the scope defines <em>what</em> is built; this document defines <em>how</em>.</p>
+
+  <h2 class="sub-heading">Document control</h2>
+  <table>
+    <tr><th>Item</th><th>Detail</th></tr>
+    <tr><td class="col-item">Document</td><td>Stream 2 — Zeus Architecture</td></tr>
+    <tr><td class="col-item">Version</td><td>1.0 — Draft for client review</td></tr>
+    <tr><td class="col-item">Prepared by</td><td>techjays</td></tr>
+    <tr><td class="col-item">Classification</td><td>Confidential — ClimatePros / techjays</td></tr>
+    <tr><td class="col-item">Date</td><td>August 2026</td></tr>
+    <tr><td class="col-item">Supersedes</td><td>Initial architecture notes and POC documentation. This document is the authoritative design reference for the Stream 2 AI bid-estimation platform.</td></tr>
+  </table>
+
+  <h2 class="sub-heading">How to read this document</h2>
+  <ul>
+    <li>Sections are numbered 01–13; cross-references appear as §N.</li>
+    <li><strong>Zeus principle:</strong> &nbsp;Zeus (Claude Sonnet 4.6, on-premises Mac Studio "Tundra") performs spec analysis on Anthropic-extracted drawing data. Spec data is processed on-prem only; drawing images are processed by Anthropic Claude Sonnet 4.6 via Anthropic API (cloud, no prompt logging). Drawing content never leaves the client's premises in raw form — only structured data crosses the boundary.</li>
+    <li><strong>Models never emit prices</strong> — LLMs do quantities; deterministic code does dollars. Every price is computed by pure, auditable code against a pinned rate-card version.</li>
+    <li><strong>Azure-native infrastructure</strong> — all new services run on Azure (Container Apps, Service Bus, Redis, Knowledge Graph). The existing FieldJetX SQL Server instance is reused; no new database is provisioned.</li>
+    <li>Open items requiring ClimatePros confirmation are collected in the Appendix.</li>
+  </ul>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">3 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 4 — TABLE OF CONTENTS (part 1)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h1 class="section-title">Contents</h1>
+
+  <div class="toc-entry"><div class="toc-num">01</div><div class="toc-title">Stream 2 Overview</div><div class="toc-dots"></div><div class="toc-pg">6</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Design principle</div><div class="toc-dots"></div><div class="toc-pg">6</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Key capabilities</div><div class="toc-dots"></div><div class="toc-pg">6</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Goals &amp; success criteria</div><div class="toc-dots"></div><div class="toc-pg">7</div></div>
+
+  <div class="toc-entry"><div class="toc-num">02</div><div class="toc-title">High-Level Architecture</div><div class="toc-dots"></div><div class="toc-pg">8</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Component inventory</div><div class="toc-dots"></div><div class="toc-pg">8</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Data flow overview</div><div class="toc-dots"></div><div class="toc-pg">9</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">System Architecture Diagram</div><div class="toc-dots"></div><div class="toc-pg">10</div></div>
+
+  <div class="toc-entry"><div class="toc-num">03</div><div class="toc-title">Technology Stack</div><div class="toc-dots"></div><div class="toc-pg">11</div></div>
+
+  <div class="toc-entry"><div class="toc-num">04</div><div class="toc-title">Infrastructure</div><div class="toc-dots"></div><div class="toc-pg">13</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Existing — reused as-is</div><div class="toc-dots"></div><div class="toc-pg">13</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">New — introduced by this project</div><div class="toc-dots"></div><div class="toc-pg">13</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Environments</div><div class="toc-dots"></div><div class="toc-pg">13</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Compute sizing</div><div class="toc-dots"></div><div class="toc-pg">14</div></div>
+
+  <div class="toc-entry"><div class="toc-num">05</div><div class="toc-title">Application Workflow</div><div class="toc-dots"></div><div class="toc-pg">15</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Step 1 — Upload &amp; Normalise</div><div class="toc-dots"></div><div class="toc-pg">15</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Step 2 — Analyze (Anthropic extract + Zeus analyse)</div><div class="toc-dots"></div><div class="toc-pg">15</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Step 3 — Estimate</div><div class="toc-dots"></div><div class="toc-pg">15</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Step 4 — Review &amp; Approval</div><div class="toc-dots"></div><div class="toc-pg">16</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Step 5 — Deliver</div><div class="toc-dots"></div><div class="toc-pg">16</div></div>
+
+  <div class="toc-entry"><div class="toc-num">06</div><div class="toc-title">Core Services</div><div class="toc-dots"></div><div class="toc-pg">17</div></div>
+  <div class="toc-entry"><div class="toc-num">07</div><div class="toc-title">Data Model &amp; Schema</div><div class="toc-dots"></div><div class="toc-pg">20</div></div>
+  <div class="toc-entry"><div class="toc-num">08</div><div class="toc-title">API Contracts</div><div class="toc-dots"></div><div class="toc-pg">22</div></div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">4 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 5 — TABLE OF CONTENTS (part 2)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h1 class="section-title">Contents <span style="font-size:11pt;color:#6B7280;font-weight:400;">(continued)</span></h1>
+
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Endpoints reference</div><div class="toc-dots"></div><div class="toc-pg">22</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Core request / response schemas</div><div class="toc-dots"></div><div class="toc-pg">22</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">FieldJetX integration contract</div><div class="toc-dots"></div><div class="toc-pg">23</div></div>
+
+  <div class="toc-entry"><div class="toc-num">09</div><div class="toc-title">Applied-AI Engineering &amp; Governance</div><div class="toc-dots"></div><div class="toc-pg">24</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Observability &amp; audit trail</div><div class="toc-dots"></div><div class="toc-pg">24</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Evaluation — golden set + CI gate</div><div class="toc-dots"></div><div class="toc-pg">24</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Feedback loop &amp; Knowledge Graph</div><div class="toc-dots"></div><div class="toc-pg">24</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Prompt versioning &amp; rollout</div><div class="toc-dots"></div><div class="toc-pg">24</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Prompt-injection defence</div><div class="toc-dots"></div><div class="toc-pg">24</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Compliance &amp; data governance</div><div class="toc-dots"></div><div class="toc-pg">25</div></div>
+
+  <div class="toc-entry"><div class="toc-num">10</div><div class="toc-title">Security &amp; Access Control</div><div class="toc-dots"></div><div class="toc-pg">26</div></div>
+  <div class="toc-entry"><div class="toc-num">11</div><div class="toc-title">CI/CD &amp; Release Management</div><div class="toc-dots"></div><div class="toc-pg">27</div></div>
+  <div class="toc-entry"><div class="toc-num">12</div><div class="toc-title">Observability &amp; SLOs</div><div class="toc-dots"></div><div class="toc-pg">28</div></div>
+  <div class="toc-entry"><div class="toc-num">13</div><div class="toc-title">Cost Projection</div><div class="toc-dots"></div><div class="toc-pg">29</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Volume assumptions</div><div class="toc-dots"></div><div class="toc-pg">29</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Per-bid token math</div><div class="toc-dots"></div><div class="toc-pg">29</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Azure infrastructure</div><div class="toc-dots"></div><div class="toc-pg">29</div></div>
+  <div class="toc-entry toc-sub"><div class="toc-num">—</div><div class="toc-title">Roll-up</div><div class="toc-dots"></div><div class="toc-pg">29</div></div>
+  <div class="toc-entry"><div class="toc-num">A</div><div class="toc-title">Appendix — Open Items</div><div class="toc-dots"></div><div class="toc-pg">30</div></div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">5 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 6 — §01 STREAM 2 OVERVIEW
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">01</div>
+  <h1 class="section-title">Stream 2 Overview</h1>
+
+  <p>ClimatePros is an AI-assisted estimating platform for commercial refrigeration bids. Estimators upload engineering drawing packages; the platform extracts a structured takeoff with a history-grounded AI pass, prices it deterministically, routes it through a review-and-approval workflow, and delivers the FieldJetX Excel (the only file sent to FieldJetX) plus an in-app summary PDF. It runs on Microsoft Azure, with Zeus operating on the client's on-premises Mac Studio ("Tundra") for spec analysis — so structured bid data never leaves the client's premises.</p>
+
+  <div class="callout callout-principle">
+    <strong>Design principle — Two-model AI extraction:</strong> Anthropic Claude Sonnet 4.6 extracts structured takeoff from engineering drawings (cloud, Anthropic API, no prompt logging). Zeus (Claude Sonnet 4.6, on-premises Mac Studio "Tundra") analyses specs and grounds extraction in the client's real FieldJetX bid history. Models never emit prices — every dollar is deterministic code.
+  </div>
+
+  <div class="callout">
+    <strong>Zeus design principle:</strong> Zeus is ClimatePros' own AI, running Claude Sonnet 4.6 on-premises on the client's Mac Studio "Tundra", wired to FieldJetX — so it analyses specs grounded in real prior bids (equipment names, N/E/R/X statuses, rates), raising accuracy on exactly the domain-specific fields a generic model guesses at. A Knowledge Graph tracks estimator corrections (BidItem → Correction → Equipment nodes, SIMILAR_TO edges) and promotes them to the golden set weekly, continuously improving extraction without retraining.
+  </div>
+
+  <h2 class="sub-heading">Key capabilities</h2>
+  <table>
+    <tr><th>Capability</th><th>Description</th></tr>
+    <tr><td class="col-item">Multi-format intake</td><td>PDF · DOC · CAD · scans · photos — all normalised to consistent per-page images</td></tr>
+    <tr><td class="col-item">AI takeoff</td><td>Anthropic Claude Sonnet 4.6 extracts drawings (cloud) → Zeus analyses specs (on-prem) → deterministic reconciler merges results</td></tr>
+    <tr><td class="col-item">Deterministic estimate</td><td>Rate card + FieldJetX history via Zeus; honest + draft totals, fully re-runnable</td></tr>
+    <tr><td class="col-item">Review &amp; approval</td><td>Estimator → manager sign-off state machine; approver ≠ estimator; full audit trail</td></tr>
+    <tr><td class="col-item">FieldJetX delivery</td><td>Excel pushed to FieldJetX (only file that leaves the system); in-app summary PDF generated</td></tr>
+    <tr><td class="col-item">Knowledge Graph learning</td><td>Correction tracking with weekly golden-set promotion — continuous improvement without retraining</td></tr>
+    <tr><td class="col-item">Multi-tenant</td><td>Client registry, bid history, search, analytics, KPI dashboard</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">6 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 7 — §01 GOALS & SUCCESS CRITERIA
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Goals &amp; success criteria</h2>
+  <table>
+    <tr><th>Dimension</th><th>Target</th><th>Measured by</th></tr>
+    <tr><td class="col-item">Circuit / equipment extraction recall</td><td>≥ 95% vs. golden set</td><td>Reconciled items vs. verified expected</td></tr>
+    <tr><td class="col-item">Pipe / duct size match (sized items)</td><td>≥ 90%</td><td>Size match on the golden set</td></tr>
+    <tr><td class="col-item">Status classification (N/E/R/X)</td><td>≥ 95%</td><td>Per-item status vs. expected</td></tr>
+    <tr><td class="col-item">Analyze latency</td><td>P95 &lt; 5 min</td><td>Job-duration histogram (App Insights)</td></tr>
+    <tr><td class="col-item">Estimator time per bid</td><td>60–75% reduction</td><td>Baseline study vs. platform timing</td></tr>
+    <tr><td class="col-item">API availability</td><td>99.9% monthly</td><td>Azure Monitor uptime</td></tr>
+    <tr><td class="col-item">Auditability</td><td>100% of priced items traceable</td><td>item → prompt_version + raw outputs + approver</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">7 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 8 — §02 HIGH-LEVEL ARCHITECTURE: COMPONENT INVENTORY
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">02</div>
+  <h1 class="section-title">High-Level Architecture</h1>
+
+  <h2 class="sub-heading">Component inventory</h2>
+  <table>
+    <tr><th>Component</th><th>Type</th><th>Role</th></tr>
+    <tr><td class="col-item">FieldJetX Web App</td><td>Existing · unchanged</td><td>Estimator — bid upload, review &amp; finalise</td></tr>
+    <tr><td class="col-item">Manager / Admin</td><td>UI · Existing · unchanged</td><td>Bid feedback &amp; rate-card configuration</td></tr>
+    <tr><td class="col-item">Front Door + WAF</td><td>Existing · unchanged</td><td>TLS termination, threat blocking, FJX cert</td></tr>
+    <tr><td class="col-item">App Gateway</td><td>Existing · unchanged</td><td>Routes to ClimatePros containers</td></tr>
+    <tr><td class="col-item">FJX Auth · Session Tokens</td><td>Existing · unchanged</td><td>GUID loginsessionid validated per request; SecJobRoles (ADM/MGR/USR/LOA)</td></tr>
+    <tr><td class="col-item">Blob Storage</td><td>Existing · unchanged</td><td>Geo-redundant store for drawings, quotes, images</td></tr>
+    <tr><td class="col-item">VNet + Private Endpoints</td><td>Existing · unchanged</td><td>Data services off public internet</td></tr>
+    <tr><td class="col-item">Key Vault</td><td>Existing · unchanged</td><td>API keys, FJX token; nothing hardcoded in config or images</td></tr>
+    <tr><td class="col-item">Monitor + App Insights</td><td>Existing · unchanged</td><td>Logs, traces, metrics, correlation IDs; per-model token/latency/cost tracking</td></tr>
+    <tr><td class="col-item">FastAPI + WebSocket API</td><td><span class="badge-new">NEW</span></td><td>REST API, RBAC per route, Uvicorn; Swagger at /api/docs; WebSocket for real-time job status</td></tr>
+    <tr><td class="col-item">Azure Service Bus</td><td><span class="badge-new">NEW</span></td><td>Async job queue; max_delivery_count=3, lock_timeout=5 min; dead-letter on exhaustion</td></tr>
+    <tr><td class="col-item">KEDA Workers · Celery 5.6</td><td><span class="badge-new">NEW</span></td><td>Scale 0–N on queue depth; group() fan-out per page; asyncio.gather() — Anthropic Sonnet extracts drawings · Zeus analyses specs; chord() fan-in → Reconciler</td></tr>
+    <tr><td class="col-item">Azure SQL Database</td><td><span class="badge-reuse">Reusing FJX DB</span></td><td>HA + PITR; SQLAlchemy 2.0 async; bids, bid_items, audit_log, ai_calls tables</td></tr>
+    <tr><td class="col-item">Azure Cache for Redis</td><td><span class="badge-new">NEW</span></td><td>Job state, result cache (hash-based — zero model cost on repeat layouts)</td></tr>
+    <tr><td class="col-item">Knowledge Graph DB</td><td><span class="badge-new">NEW</span></td><td>BidItem → Correction → Equipment nodes; SIMILAR_TO edges; weekly golden-set promotion</td></tr>
+    <tr><td class="col-item">Anthropic Claude Sonnet 4.6</td><td><span class="badge-cloud">CLOUD · Anthropic API</span></td><td>Drawing extractor; cloud, no prompt logging; extracts structured takeoff from engineering drawings; passes structured data to Zeus; ~$0.23/bid</td></tr>
+    <tr><td class="col-item">Zeus (Claude Sonnet 4.6)</td><td><span class="badge-onprem">ON-PREM · Mac Studio</span></td><td>Spec analyzer; FieldJetX-linked; performs spec analysis on Anthropic-extracted data; spec data never leaves client premises; constrained JSON output</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">8 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 9 — §02 DATA FLOW OVERVIEW
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Data flow overview</h2>
+  <p>Estimators submit drawings through FieldJetX Web App → FastAPI validates the FJX session token and RBAC, then enqueues an analyze job on Azure Service Bus → KEDA workers consume the queue, fanning out one Celery task per page → each page task calls <strong>Anthropic Claude Sonnet 4.6</strong> (cloud, drawing extraction) via asyncio.gather(), which extracts structured takeoff data and passes it to <strong>Zeus</strong> (on-prem, spec analysis) → a Celery chord() fans all page results back in to the Reconciler → deterministic pricing engine prices the reconciled items → WebSocket / HTTP polling returns real-time status to the estimator → corrections feed the Knowledge Graph for continuous improvement → on approval, Excel is pushed to FieldJetX (the only outbound file).</p>
+
+  <h2 class="sub-heading">Five key design rules</h2>
+  <ol>
+    <li><strong>Drawing images go to Anthropic API</strong> (cloud, no prompt logging) — only reconciled structured data reaches Zeus on-prem; raw drawings never traverse the on-prem boundary outward.</li>
+    <li><strong>Spec data stays on-prem (Zeus)</strong> — all spec analysis and FieldJetX bid grounding runs on the client's Mac Studio "Tundra"; structured bid data never leaves the client's premises.</li>
+    <li><strong>Models never emit prices</strong> — every dollar is deterministic code; no model call touches a price field.</li>
+    <li><strong>One cloud AI active: Anthropic Claude Sonnet 4.6</strong> via Anthropic API — region-pinned, DPA-covered, no prompt logging.</li>
+    <li><strong>prompt_version stamped on every bid and ai_calls record</strong> — full traceability chain; dead-letter queue captures all failed jobs — nothing is silently lost.</li>
+  </ol>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">9 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 10 — §02 SYSTEM ARCHITECTURE DIAGRAM
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">System Architecture Diagram</h2>
+
+  <div class="diagram-frame-wrapper">
+    <iframe
+      src="./climatepros-system-architecture-stream-2.html"
+      scrolling="no"
+      title="ClimatePros Stream 2 — System Architecture Diagram"
+    ></iframe>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">10 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 11 — §03 TECHNOLOGY STACK (part 1)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">03</div>
+  <h1 class="section-title">Technology Stack</h1>
+
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Role &amp; Rationale</th></tr>
+    <tr><td class="col-item">API</td><td>FastAPI</td><td>0.115</td><td>Async-first REST + WebSocket; handles concurrent uploads and real-time job progress without blocking</td></tr>
+    <tr><td class="col-item">Workers</td><td>Celery</td><td>5.6</td><td>group() fans out one task per page; asyncio.gather() runs Anthropic extractor + Zeus spec analyzer concurrently per page; chord() fans in to Reconciler</td></tr>
+    <tr><td class="col-item">Database</td><td>Azure SQL (FJX)</td><td>Reusing FJX DB</td><td>No new DB provisioned; new tables added to existing FieldJetX SQL Server instance. SQLAlchemy 2.0 async, HA + PITR</td></tr>
+    <tr><td class="col-item">Queue</td><td>Azure Service Bus</td><td>Managed</td><td>Async job dispatch; dead-letter after max_delivery_count=3; KEDA autoscales workers on queue depth</td></tr>
+    <tr><td class="col-item">Cache</td><td>Azure Cache for Redis</td><td>Managed</td><td>Drawing-hash-based result caching (zero AI cost on repeat layouts); Celery chord backend; FastAPI WebSocket pub/sub</td></tr>
+    <tr><td class="col-item">AI — Drawing Extraction</td><td>Anthropic Claude Sonnet 4.6</td><td>Cloud (Anthropic API)</td><td>Cloud drawing extractor; no prompt logging; region-pinned; DPA-covered; extracts structured takeoff from engineering drawings; passes structured data to Zeus; ~$0.23/bid ($3/$15 per 1M tokens)</td></tr>
+    <tr><td class="col-item">AI — Spec Analysis</td><td>Zeus (Claude Sonnet 4.6)</td><td>On-Prem</td><td>Client's own AI on Mac Studio "Tundra"; grounded in real prior FieldJetX bids + Knowledge Graph; performs spec analysis on Anthropic-extracted data; constrained JSON output; spec data never leaves premises</td></tr>
+    <tr><td class="col-item">Graph DB</td><td>Knowledge Graph DB</td><td>Graph DB</td><td>BidItem → Correction → Equipment nodes + SIMILAR_TO edges; dynamic few-shot grounding for Zeus; weekly golden-set promotion</td></tr>
+    <tr><td class="col-item">Frontend</td><td>Angular</td><td>19.2 · MSAL</td><td>Standalone, signals, Entra ID sign-in; fits ClimatePros' Microsoft ecosystem</td></tr>
+    <tr><td class="col-item">Styling</td><td>Tailwind CSS</td><td>3.4</td><td>Utility-first; consistent, responsive UI</td></tr>
+    <tr><td class="col-item">PDF render</td><td>PyMuPDF</td><td>AGPL-3.0</td><td>Fastest Python PDF renderer; extracts native text from digital PDFs without OCR</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">11 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 12 — §03 TECHNOLOGY STACK (part 2)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Role &amp; Rationale</th></tr>
+    <tr><td class="col-item">OCR (optional)</td><td>Azure AI Document Intelligence</td><td>Managed</td><td>Word-level bounding boxes for source-highlighting in UI</td></tr>
+    <tr><td class="col-item">DOC conversion</td><td>LibreOffice Headless</td><td>—</td><td>Server-side Word → PDF; no Office licence needed</td></tr>
+    <tr><td class="col-item">CAD conversion</td><td>ODA/CAD exporter</td><td>—</td><td>DWG/DXF → PDF normalisation</td></tr>
+    <tr><td class="col-item">Excel export</td><td>openpyxl</td><td>3.1</td><td>Pure-Python Excel generation; no Office/COM dependency</td></tr>
+    <tr><td class="col-item">IaC</td><td>Bicep / Terraform</td><td>—</td><td>All three environments provisioned as code; secrets never in state files</td></tr>
+  </table>
+
+  <div class="callout callout-warning">
+    <strong>License note:</strong> PyMuPDF is AGPL-3.0 — a commercial licence or permissive alternative (pypdf / pdfplumber) must be confirmed before release (see OI-05). Model SDK versions are pinned in lockfile.
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">12 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 13 — §04 INFRASTRUCTURE
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">04</div>
+  <h1 class="section-title">Infrastructure</h1>
+
+  <h2 class="sub-heading">Existing — reused as-is</h2>
+  <ul>
+    <li>FieldJetX Web App and Mobile App (Flutter) — client-facing, unchanged</li>
+    <li>Azure App Service hosting the .NET Legacy and Microservices APIs — gains new routes for AI calls</li>
+    <li>Azure SQL Server on FieldJetX — system of record; new tables added (bids, bid_items, audit_log, ai_calls, item_edits), existing data untouched</li>
+    <li>Blob Storage, VNet, Key Vault, Front Door + WAF, App Gateway, Monitor + App Insights</li>
+  </ul>
+
+  <h2 class="sub-heading">New — introduced by this project</h2>
+  <ul>
+    <li>FastAPI on Azure Container Apps — API + WebSocket service; KEDA-managed autoscale</li>
+    <li>Azure Service Bus — async analyze job queue with dead-letter</li>
+    <li>KEDA Workers (Celery) — scale 0–N on queue depth; fan-out/fan-in for per-page extraction</li>
+    <li>Azure Cache for Redis — job state, result caching, WebSocket pub/sub coordination</li>
+    <li>Knowledge Graph DB — correction tracking + weekly golden-set promotion</li>
+    <li>Anthropic Claude Sonnet 4.6 (Anthropic API, cloud) — sole drawing extractor; region-pinned, DPA-covered, no prompt logging</li>
+    <li>Mac Studio "Tundra" (on-prem, client-operated) — Zeus (Claude Sonnet 4.6) spec analyzer; FieldJetX-linked; spec data stays on-premises</li>
+  </ul>
+
+  <h2 class="sub-heading">Environments</h2>
+  <table>
+    <tr><th>Environment</th><th>Purpose</th><th>What differs from Prod</th></tr>
+    <tr><td class="col-item">Dev</td><td>Integration and feature work</td><td>Lowest replica caps; de-identified / synthetic dataset derived from SQL (never raw production data); Anthropic Sonnet-only models (no on-prem link); all data de-identified before load</td></tr>
+    <tr><td class="col-item">Staging</td><td>Pre-prod validation and evals; mirrors Prod topology</td><td>Smaller replica ranges; restricted SQL replica; full model stack (Anthropic + Zeus) for eval fidelity</td></tr>
+    <tr><td class="col-item">Prod</td><td>Live — all branches, all estimators</td><td>—</td></tr>
+  </table>
+  <p>Each environment is fully isolated — separate queues, databases, indexes and keys; lower environments never point at live prod data. The Dev dataset is de-identified or synthesised before load.</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">13 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 14 — §04 COMPUTE SIZING
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Compute sizing</h2>
+  <table>
+    <tr><th>Component</th><th>Instance size</th><th>Scaling</th><th>Notes</th></tr>
+    <tr><td class="col-item">FastAPI (Container Apps)</td><td>0.5 vCPU / 1 GB</td><td>2–N on gateway queue wait</td><td>Min 2 replicas always-on; no cold start; tolerates instance loss</td></tr>
+    <tr><td class="col-item">KEDA Workers (Container Apps)</td><td>0.5 vCPU / 1 GB</td><td>0–N on Service Bus queue depth</td><td>Scale-to-zero when idle</td></tr>
+    <tr><td class="col-item">Azure Cache for Redis</td><td>Managed tier</td><td>Fixed; sized to queue depth</td><td>Persistence on; no-eviction policy</td></tr>
+    <tr><td class="col-item">Azure SQL (FJX)</td><td>Existing tier</td><td>Existing HA + PITR</td><td>New tables only; no tier change required initially</td></tr>
+    <tr><td class="col-item">Knowledge Graph DB</td><td>Managed</td><td>Grows with correction corpus</td><td>Sizing confirmed after pilot data (see OI-06)</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">14 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 15 — §05 APPLICATION WORKFLOW
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">05</div>
+  <h1 class="section-title">Application Workflow</h1>
+
+  <h3 class="sub-sub">1 · Upload &amp; Normalise — deterministic, no AI</h3>
+  <p>Detect format → convert everything to PDF (DOC via LibreOffice, CAD via exporter, images wrapped) → render each page (200 DPI, auto-bumped to 300 DPI for dense schedule / E-size sheets) → obtain text by the most accurate route: native text extraction for born-digital PDFs (exact + free); scans, photos and image-only pages carry no text layer, so they are marked <code>needs_vision</code> and read directly by Anthropic Claude Sonnet 4.6 vision in Step 2 → quality gate flags blank/blurry/garbled pages instead of passing them silently. Uniform per-page images land in Blob + Azure SQL so all models see consistent inputs for every document type.</p>
+
+  <h3 class="sub-sub">2 · Analyze — Anthropic extract + Zeus analyse</h3>
+  <p><strong>Anthropic Claude Sonnet 4.6</strong> (cloud, Anthropic API, no prompt logging) receives page images and extracts the takeoff into a constrained JSON schema (validated + auto-retried), with every item linked back to its source page. Passes structured data (no raw drawings) to <strong>Zeus</strong>. Zeus (on-prem, Mac Studio "Tundra") performs spec analysis on the Anthropic-extracted data, guided by a domain prompt + dynamic few-shot examples from the Knowledge Graph and grounded in the client's prior FieldJetX bids (real equipment names, statuses, quantities). Workers fan out via Celery <code>group()</code> (one task per page); each page task calls Anthropic extractor and Zeus spec analyzer in parallel via <code>asyncio.gather()</code>. A Celery <code>chord()</code> fans all page results back in to the Reconciler. No prices here.</p>
+
+  <h3 class="sub-sub">3 · Estimate — pure deterministic code</h3>
+  <p>Deterministic engine maps each item to a rate line (no rate → unpriced flag, never $0), prices by status (N/E/R/X) in <code>Decimal</code>, and pins the rate-card version → honest + draft totals, fully re-runnable. Rate lines and formula inputs are drawn from the client's FieldJetX bid history via Zeus. No model call in this step.</p>
+
+  <h3 class="sub-sub">4 · Review &amp; Approval — human sign-off</h3>
+  <p>Estimator submits; reviewer/manager approves or rejects with sign-off; audit-logged state machine. Open RFIs or unpriced items block final sign-off but not drafting. Approver ≠ estimator (separation of duty enforced).</p>
+
+  <h3 class="sub-sub">5 · Deliver — Excel + PDF</h3>
+  <p>Excel pushed to FieldJetX via direct API call (the only file that leaves the system); in-app summary PDF generated for viewing / download. FieldJetX must expose a REST ingest endpoint — API key stored in Key Vault (see OI-01).</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">15 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 16 — §05 BID STATE MACHINE
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Bid state machine</h2>
+  <table>
+    <tr><th>From state</th><th>Trigger</th><th>To state</th><th>Notes</th></tr>
+    <tr><td><code>created</code></td><td>Upload completes</td><td><code>upload</code></td><td>Pages normalised</td></tr>
+    <tr><td><code>upload</code></td><td>Analyze dispatched</td><td><code>analyzing</code></td><td>Job enqueued</td></tr>
+    <tr><td><code>analyzing</code></td><td>All pages complete</td><td><code>estimated</code></td><td>Reconciled + priced</td></tr>
+    <tr><td><code>estimated</code></td><td>Estimator submits</td><td><code>in_review</code></td><td>Locked for review</td></tr>
+    <tr><td><code>in_review</code></td><td>Manager approves</td><td><code>approved</code></td><td>Ready to deliver</td></tr>
+    <tr><td><code>in_review</code></td><td>Manager rejects</td><td><code>draft</code></td><td>Estimator revises</td></tr>
+    <tr><td><code>approved</code></td><td>Export completes</td><td><code>finalised</code></td><td>Excel pushed to FJX</td></tr>
+  </table>
+
+  <div class="state-flow">
+    <div class="state-box">created</div><div class="state-arrow">→</div>
+    <div class="state-box">upload</div><div class="state-arrow">→</div>
+    <div class="state-box">analyzing</div><div class="state-arrow">→</div>
+    <div class="state-box">estimated</div><div class="state-arrow">→</div>
+    <div class="state-box">in_review</div><div class="state-arrow">→</div>
+    <div class="state-box">approved</div><div class="state-arrow">→</div>
+    <div class="state-box">finalised</div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">16 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 17 — §06 CORE SERVICES (part 1)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">06</div>
+  <h1 class="section-title">Core Services</h1>
+
+  <h3 class="sub-sub">1 · Intake — get the drawings ready</h3>
+  <p>Takes any file — PDF, Word, CAD, scan or photo — and turns it into clean, consistent pages. Word and CAD are first converted to PDF; each page is rendered as an image (200–300 DPI). It then gets the text the most accurate way: native text straight from normal (vector) PDFs, or Anthropic Claude Sonnet 4.6 vision for scans and photos (more accurate than OCR on messy drawings). Blurry or blank pages are flagged (<code>needs_review</code>) instead of guessed. No AI decisions here — just preparation.</p>
+
+  <h3 class="sub-sub">2 · Analyze — Anthropic extracts (cloud), Zeus analyses (on-prem)</h3>
+  <p><strong>Anthropic Claude Sonnet 4.6</strong> — running via Anthropic API (cloud, no prompt logging) — receives page images and extracts the takeoff (equipment, sizes, quantities and each item's status N/E/R/X) as structured data (JSON), with every item linked back to the page it came from. Drawing images are processed by Anthropic; only structured data is passed onward.</p>
+  <p><strong>Zeus</strong> — the client's own AI, running Claude Sonnet 4.6 on the client's on-premises Mac Studio ("Tundra"), connected to FieldJetX — performs spec analysis on the Anthropic-extracted structured data. Before analysing, Zeus queries the Knowledge Graph for SIMILAR_TO correction edges as dynamic few-shot examples, plus prior bid details from FieldJetX as grounding context. Spec data stays fully on-prem throughout. Workers fan out via Celery <code>group()</code>; each page task calls Anthropic extractor and Zeus spec analyzer via <code>asyncio.gather()</code>; a Celery <code>chord()</code> fans results back in to the Reconciler.</p>
+
+  <div class="callout">
+    <strong>Zeus grounding:</strong> Zeus queries the FieldJetX database to retrieve historical bid records for the same client (prior equipment lists, statuses, sizes, rate references) and queries the Knowledge Graph for correction-derived SIMILAR_TO edges as dynamic few-shot examples. Spec data stays fully on-prem throughout.
+  </div>
+
+  <h3 class="sub-sub">3 · Reconcile — merge into one list</h3>
+  <p>Merges Anthropic's and Zeus's results into one clean list of <code>bid_items</code>. Matches the same item across both, then merges field by field: agreement raises confidence, a confident value fills a blank, and any disagreement or missed item becomes an RFI. Fully deterministic — the same input always gives the same result, and every decision is logged.</p>
+  <p>Built to scale: pages run in parallel on KEDA workers; drawing-hash-based Redis caching returns results at zero AI cost for repeat layouts (national chains with standard store templates).</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">17 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 18 — §06 CORE SERVICES (part 2)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h3 class="sub-sub">4 · Estimate — work out the cost</h3>
+  <p>Prices the job with plain code — no AI touches the dollars. Each item is matched to a rate card line — rates and formula parameters are populated from the client's FieldJetX bid history via Zeus. An item with no rate is flagged <code>unpriced</code>, never counted as $0. Produces two totals — an <em>honest total</em> (confirmed items) and a <em>draft total</em> (includes uncertain/RFI items) — using <code>Decimal</code> money (no rounding drift). The rate version is pinned to the bid, so a re-run always gives the same figure.</p>
+
+  <h3 class="sub-sub">5 · Review &amp; Approval — people sign off</h3>
+  <p>The bid moves through clear states: <code>draft → in_review → approved → finalised</code>. The estimator submits; a reviewer or manager approves — the approver cannot be the estimator. Open RFIs or unpriced items block final sign-off but not drafting. Every step is kept in an immutable audit trail.</p>
+
+  <h3 class="sub-sub">6 · Deliver — send the result</h3>
+  <p>Once approved, the platform makes a direct API call to FieldJetX to push the generated Excel file — the only file that leaves the system. A summary PDF of the findings and bid details is also generated in-app for viewing or download.</p>
+  <p><strong>FieldJetX API requirement:</strong> FieldJetX must expose a REST ingest endpoint that accepts the Excel via <code>multipart/form-data</code>. The API key is provisioned by FieldJetX and stored in Azure Key Vault. This endpoint must be in place and verified before the Deliver step can go live (see OI-01).</p>
+
+  <h3 class="sub-sub">7 · Knowledge Graph — continuous accuracy improvement</h3>
+  <p>Tracks every estimator correction as a graph: BidItem → Correction → Equipment nodes with SIMILAR_TO edges linking corrected items to canonical equipment records. Zeus queries these edges at spec-analysis time for dynamic few-shot examples that are far more relevant than static prompt examples. On a weekly promotion cycle, validated corrections are folded into the golden set, generating a new <code>prompt_version</code>. This creates a continuous accuracy-improvement loop without any model retraining — the more estimators correct, the better Zeus analyses.</p>
+  <p><strong>Feedback loop:</strong> Estimator edits → <code>item_edits</code> table → Knowledge Graph nodes → weekly promotion review → golden-set update → new <code>prompt_version</code> stamped on all future bids. Every correction becomes compounding signal.</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">18 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 19 — §07 DATA MODEL (part 1)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">07</div>
+  <h1 class="section-title">Data Model &amp; Schema</h1>
+
+  <p>Azure SQL Database (reusing the existing FieldJetX SQL Server instance — no new DB provisioned) via SQLAlchemy 2.0 async. Multi-tenant by <code>customer_id</code>; AI-populated fields use <code>Text</code>.</p>
+
+  <h2 class="sub-heading">Table inventory</h2>
+  <table>
+    <tr><th>Table</th><th>Purpose &amp; key fields</th></tr>
+    <tr><td class="col-item">customers</td><td>id (PK), name, rules (JSON), contacts</td></tr>
+    <tr><td class="col-item">bids</td><td>id (PK), customer_id (FK), domain, current_stage, review_state, assignee, approver, estimate (JSON), honest_total, draft_total, rate_card_version, prompt_version, timestamps</td></tr>
+    <tr><td class="col-item">bid_pages</td><td>bid_id (FK), source_format, file_key, image_key, dpi, text, text_source (native/vision/ocr), norm_quality (clean/needs_vision/low_quality/failed)</td></tr>
+    <tr><td class="col-item">bid_items</td><td>case_id, type, status (N/E/R/X), size, length, qty, source_sheets (JSON), confidence</td></tr>
+    <tr><td class="col-item">bid_condensers</td><td>unit_id, unit_type, systems_served, status, model, capacity</td></tr>
+    <tr><td class="col-item">rate_cards / rate_sheets</td><td>Rate card (material/labour) + referenced equipment rate sheets; versioned</td></tr>
+    <tr><td class="col-item">users / roles</td><td>FJX-linked users + role assignments</td></tr>
+    <tr><td class="col-item">audit_log</td><td>Immutable bid history; actor, action, before/after payload</td></tr>
+    <tr><td class="col-item">ai_calls</td><td>Per-model-call telemetry: bid_id, model, prompt_version, tokens, latency, cost — covers both Anthropic extractor and Zeus spec analyzer</td></tr>
+    <tr><td class="col-item">item_edits</td><td>Estimator-edit feedback signal feeding the Knowledge Graph</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">19 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 20 — §07 DATA MODEL (part 2)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Key column types — bids &amp; bid_items</h2>
+  <table>
+    <tr><th>Table.column</th><th>Type</th><th>Null?</th><th>Notes</th></tr>
+    <tr><td class="col-item">bids.id</td><td>uuid</td><td>no</td><td>PK, gen_random_uuid()</td></tr>
+    <tr><td class="col-item">bids.customer_id</td><td>uuid</td><td>no</td><td>FK → customers.id · tenant key</td></tr>
+    <tr><td class="col-item">bids.domain</td><td>text (enum)</td><td>no</td><td>refrigeration | HVAC (CK)</td></tr>
+    <tr><td class="col-item">bids.current_stage</td><td>text (enum)</td><td>no</td><td>upload … deliver</td></tr>
+    <tr><td class="col-item">bids.review_state</td><td>text (enum)</td><td>no</td><td>draft | in_review | approved | finalised | rejected</td></tr>
+    <tr><td class="col-item">bids.honest_total / draft_total</td><td>numeric(14,2)</td><td>yes</td><td>Decimal money; null pre-estimate</td></tr>
+    <tr><td class="col-item">bids.rate_card_version</td><td>text</td><td>yes</td><td>pinned at estimate time</td></tr>
+    <tr><td class="col-item">bids.prompt_version</td><td>text</td><td>yes</td><td>content-hash of prompt set; stamped on every bid</td></tr>
+    <tr><td class="col-item">bid_items.type</td><td>text (enum)</td><td>no</td><td>condenser | pipe | duct | fitting | control | …</td></tr>
+    <tr><td class="col-item">bid_items.status</td><td>char(1) (enum)</td><td>no</td><td>N | E | R | X (CHECK) — New/Existing/Relocated/Remove</td></tr>
+    <tr><td class="col-item">bid_items.confidence</td><td>numeric(3,2)</td><td>yes</td><td>0.00–1.00; set by reconciler</td></tr>
+    <tr><td class="col-item">audit_log.created_at</td><td>timestamptz</td><td>no</td><td>append-only; default now()</td></tr>
+  </table>
+
+  <p style="font-size:8.5pt;color:#4B5563;margin-top:2mm;"><strong>Indexes:</strong> bids(customer_id, current_stage, review_state, created_at) + bid_id on children · <strong>Migrations:</strong> Alembic (pre-deploy) · <strong>PII/retention:</strong> client drawings encrypted at rest; purged a configurable period after finalisation (default 90 days) with cascade to Blob · <strong>Tenant isolation</strong> by customer_id.</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">20 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 21 — §08 API CONTRACTS (part 1)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">08</div>
+  <h1 class="section-title">API Contracts</h1>
+
+  <p>REST + JSON. All endpoints require a valid FJX session token (<code>loginsessionid</code>) validated on every request; RBAC per route via SecJobRoles (ADM / MGR / USR / LOA). FastAPI auto-generates the contract: Swagger UI at <code>/api/docs</code>, ReDoc at <code>/api/redoc</code>, machine-readable <code>/api/openapi.json</code> published as a CI build artifact.</p>
+
+  <h2 class="sub-heading">Endpoints reference</h2>
+  <table>
+    <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+    <tr><td>POST</td><td><code>/api/bids/upload</code></td><td>Multi-format package → pages; returns bid_id + page_status breakdown (201)</td></tr>
+    <tr><td>POST</td><td><code>/api/bids/{id}/analyze</code></td><td>Dispatch Anthropic extractor + Zeus spec analyzer; returns job_id + WS + poll URLs (202)</td></tr>
+    <tr><td>GET</td><td><code>/api/bids/{id}/takeoff</code></td><td>Returns project · items · condensers · rfis after analyze completes</td></tr>
+    <tr><td>PATCH</td><td><code>/api/bids/{id}/items/{item_id}</code></td><td>Edit an extracted item; feeds item_edits → Knowledge Graph</td></tr>
+    <tr><td>POST</td><td><code>/api/bids/{id}/estimate</code></td><td>Deterministic pricing; returns honest_total + draft_total</td></tr>
+    <tr><td>POST</td><td><code>/api/bids/{id}/review</code></td><td>Submit / approve / reject bid</td></tr>
+    <tr><td>POST</td><td><code>/api/bids/{id}/quote</code></td><td>Push Excel to FieldJetX; render summary PDF</td></tr>
+    <tr><td>GET</td><td><code>/api/jobs/{job_id}</code></td><td>Poll analyze job status (fallback to WebSocket <code>/ws/jobs/{job_id}</code>)</td></tr>
+    <tr><td>GET</td><td><code>/api/customers[/{id}][/bids]</code></td><td>Client management</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">21 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 22 — §08 API CONTRACTS (part 2)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Core request / response schemas</h2>
+<pre>// POST /api/bids/upload  (multipart/form-data: customer_id, domain, files[])  → 201
+{ "bid_id": "uuid", "pages": 15,
+  "page_status": { "clean": 13, "needs_vision": 2, "low_quality": 0 } }
+
+// POST /api/bids/{id}/analyze  → 202
+{ "job_id": "uuid", "status": "queued",
+  "ws": "/ws/jobs/{job_id}", "poll": "/api/jobs/{job_id}" }
+
+// WS push / GET /api/jobs/{job_id}
+{ "job_id": "uuid", "bid_id": "uuid",
+  "status": "queued|running|succeeded|failed",
+  "progress": 0.6, "stage": "extract → analyse → reconcile",
+  "result": { "takeoff_url": "/api/bids/{id}/takeoff",
+               "item_count": 120, "rfi_count": 4 },
+  "error": null }
+
+// GET /api/bids/{id}/takeoff  → 200
+{ "project": { "name": "…", "domain": "refrigeration" },
+  "items": [ /* bid_item — schema below */ ],
+  "condensers": [ … ],
+  "rfis": [ { "item_ref": "…", "reason": "anthropic/zeus disagree on qty" } ] }
+
+// POST /api/bids/{id}/estimate  → 200
+{ "honest_total": "124300.00", "draft_total": "131750.00",
+  "currency": "USD", "rate_card_version": "2026.02", "unpriced": 3 }
+
+// bid_item sub-schema (no price fields — models never emit dollars)
+{ "case_id": "C-12", "type": "condenser|pipe|duct|…", "status": "N|E|R|X",
+  "size": "2 in", "length": 40, "qty": 3, "unit": "ea|ft",
+  "source_sheets": ["M-201"],
+  "confidence": 0.92,
+  "provenance": { "anthropic_extractor": true,
+                  "zeus_analyser": "agree|flag|added",
+                  "zeus_model": "claude-sonnet-4-6" } }</pre>
+
+  <h2 class="sub-heading">FieldJetX integration contract</h2>
+  <table>
+    <tr><th>Aspect</th><th>Contract</th></tr>
+    <tr><td class="col-item">Transport</td><td>HTTPS POST to FieldJetX ingest endpoint (base URL per environment, from Key Vault)</td></tr>
+    <tr><td class="col-item">Auth</td><td>API key / OAuth client-credentials (FieldJetX-issued); secret in Key Vault only</td></tr>
+    <tr><td class="col-item">Payload</td><td><code>multipart/form-data</code>: generated .xlsx + JSON metadata { bid_id, customer_id, rate_card_version, honest_total }</td></tr>
+    <tr><td class="col-item">Idempotency</td><td><code>Idempotency-Key: {bid_id}:{quote_revision}</code> — safe to retry without duplicate quotes</td></tr>
+    <tr><td class="col-item">Retry</td><td>Exponential backoff (3 attempts) on 5xx / timeout; on exhaustion job dead-letters; bid stays <code>approved</code> with alert</td></tr>
+    <tr><td class="col-item">Response</td><td>200 → <code>{ external_ref }</code> stored on bid for traceability; 4xx surfaced to user, no auto-retry</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">22 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 23 — §09 APPLIED-AI (part 1)
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">09</div>
+  <h1 class="section-title">Applied-AI Engineering &amp; Governance</h1>
+
+  <h2 class="sub-heading">Observability &amp; audit trail</h2>
+  <p>Every model call — Anthropic Claude Sonnet 4.6 (extractor) and Zeus (spec analyzer) — logs <code>bid_id</code>, <code>model+version</code>, <code>prompt_version</code>, tokens, latency, and cost to <code>ai_calls</code> + App Insights. Raw outputs are stored per run, forming the full traceability chain: bid → <code>prompt_version</code> + raw Anthropic extraction output + raw Zeus spec-analysis output → reconciled items → estimate → approver.</p>
+
+  <h2 class="sub-heading">Evaluation — golden set + CI gate</h2>
+  <p>A versioned golden set (refrigeration + HVAC split) scores recall, status accuracy, and size-match. Evals run in CI and gate every prompt or model change. The reconciler threshold (default 0.6) is tuned against this set.</p>
+  <p><strong>Hard gate thresholds (CI pass/fail):</strong> extraction recall ≥ 95% · size-match ≥ 90% · status (N/E/R/X) accuracy ≥ 95% · no metric regresses more than 2 percentage points below the current production baseline for that <code>prompt_version</code>. A change that breaks any threshold is blocked from promotion.</p>
+
+  <h2 class="sub-heading">Feedback loop &amp; Knowledge Graph</h2>
+  <p>Estimator corrections are captured in <code>item_edits</code> and written as BidItem → Correction → Equipment nodes with SIMILAR_TO edges. Zeus queries these edges at spec-analysis time as dynamic few-shot grounding. On a weekly promotion cycle, validated corrections are folded into the golden set, generating a new <code>prompt_version</code> — continuously improving analysis accuracy without model retraining.</p>
+
+  <h2 class="sub-heading">Prompt versioning &amp; rollout</h2>
+  <p>Prompts (system + few-shot) live in the repo as versioned templates; a content hash produces the <code>prompt_version</code> stamped on every <code>bids</code> row and <code>ai_calls</code> record. Changes ship behind a feature flag, must clear the eval gate before promotion, and can be rolled back instantly by flipping the flag — no redeployment required.</p>
+
+  <h2 class="sub-heading">Prompt-injection &amp; adversarial-input defence</h2>
+  <p>Native-text PDFs can carry adversarial instructions into the extraction prompt, so document text is treated as untrusted data, never instructions:</p>
+  <ol>
+    <li>Drawing content is passed in a clearly delimited data channel with system-prompt role-framing.</li>
+    <li>Structured-output enforcement — the model must return the constrained <code>bid_item</code> schema, validated + auto-retried; free-form injected directives cannot alter control flow.</li>
+    <li>The deterministic reconciler applies quantity/size bounds &amp; sanity checks; anything implausible becomes an RFI.</li>
+    <li>Models never emit prices — no injection can move a dollar figure.</li>
+    <li>The FieldJetX bid history Zeus retrieves is treated as untrusted data too — supplied in the same delimited data channel, never as instructions.</li>
+  </ol>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">23 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 24 — §09 COMPLIANCE
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <h2 class="sub-heading">Compliance &amp; data governance</h2>
+  <p><strong>Anthropic Claude Sonnet 4.6</strong> runs via Anthropic API (region-pinned to a supported EU/US region, no prompt logging, not used for training under the Anthropic API Data Processing Addendum). Drawing images are processed by Anthropic in the cloud; no raw drawings are stored beyond the processing window.</p>
+  <p><strong>Zeus</strong> runs fully on-premises on the client's Mac Studio "Tundra" — spec data never leaves the client's premises. Only structured drawing data (no raw images) is passed from Anthropic extractor to Zeus spec analyzer. The FieldJetX bid history Zeus retrieves never leaves the trusted on-prem boundary.</p>
+  <p>Prompt/response content is redacted before external log sinks. <strong>GDPR/CCPA:</strong> client drawings processed under legitimate-interest/contract basis, retention-limited per §7, right-to-erasure honoured by the purge cascade. Models never emit prices.</p>
+
+  <div class="callout">
+    <strong>Data boundary summary:</strong> Drawing images → Anthropic API (cloud, no logging, DPA-covered) → structured data only → Zeus (on-prem, Mac Studio "Tundra") → spec analysis output → Reconciler (cloud) → deterministic pricing. No raw drawings leave the extraction step.
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">24 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 25 — §10 SECURITY & ACCESS CONTROL
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">10</div>
+  <h1 class="section-title">Security &amp; Access Control</h1>
+
+  <table>
+    <tr><th>Control</th><th>Implementation</th><th>Notes</th></tr>
+    <tr><td class="col-item">Authentication</td><td>FJX session tokens (GUID loginsessionid); validated on every API request</td><td>UserFeatureXref feature-gate; no anonymous endpoints</td></tr>
+    <tr><td class="col-item">Authorisation (RBAC)</td><td>SecJobRoles: ADM / MGR / USR / LOA; enforced per route in FastAPI</td><td>Estimator, reviewer, manager, admin roles</td></tr>
+    <tr><td class="col-item">Separation of duty</td><td>Approver ≠ estimator enforced at review endpoint</td><td>Audit-logged; blocks same-person approval</td></tr>
+    <tr><td class="col-item">Secrets management</td><td>All secrets in Azure Key Vault; never in config files or container images</td><td>Includes Anthropic API key and FieldJetX credentials</td></tr>
+    <tr><td class="col-item">Network isolation</td><td>VNet + Private Endpoints; data services not publicly reachable</td><td>No direct public access to SQL, Redis, or Service Bus</td></tr>
+    <tr><td class="col-item">On-prem isolation</td><td>Zeus on Mac Studio "Tundra" (client-operated, client-controlled)</td><td>Spec data never traverses public internet; mTLS on Azure → on-prem link</td></tr>
+    <tr><td class="col-item">Data-in-transit</td><td>TLS on all hops (Front Door, App Gateway, Anthropic API, Zeus API)</td><td>Mutual TLS on Azure → on-prem link (OI-03)</td></tr>
+    <tr><td class="col-item">Data-at-rest</td><td>Azure-managed encryption on SQL, Blob, Redis, Key Vault</td><td>Client drawings purged after configurable retention period (default 90 days)</td></tr>
+    <tr><td class="col-item">Input sanitisation</td><td>Drawing content in delimited data channel; structured-output enforcement</td><td>Injection cannot alter control flow or emit prices</td></tr>
+    <tr><td class="col-item">Audit trail</td><td>Immutable audit_log table; every bid state transition logged</td><td>Append-only; actor, action, before/after payload</td></tr>
+    <tr><td class="col-item">Anthropic API</td><td>Region-pinned, no prompt logging; Anthropic API DPA; structured output only</td><td>No raw drawing storage beyond processing window</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">25 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 26 — §11 CI/CD & RELEASE MANAGEMENT
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">11</div>
+  <h1 class="section-title">CI/CD &amp; Release Management</h1>
+
+  <h2 class="sub-heading">Pipeline stages</h2>
+  <table>
+    <tr><th>Stage</th><th>Action</th><th>Gate</th></tr>
+    <tr><td class="col-item">Lint</td><td>Ruff (Python), ESLint (Angular)</td><td>Fail on any error</td></tr>
+    <tr><td class="col-item">Unit tests</td><td>pytest + Angular Karma</td><td>100% pass</td></tr>
+    <tr><td class="col-item">Extraction evals</td><td>Golden-set eval against pinned Anthropic Claude Sonnet 4.6 + Zeus spec analyzer prompt versions</td><td>recall ≥ 95% · size-match ≥ 90% · status ≥ 95% · no regression &gt; 2pp</td></tr>
+    <tr><td class="col-item">Build → ACR</td><td>Docker image built + pushed to Azure Container Registry</td><td>Image scan (no critical CVEs)</td></tr>
+    <tr><td class="col-item">Staging (auto)</td><td>Terraform apply + Alembic migration + health checks</td><td>All health probes green</td></tr>
+    <tr><td class="col-item">Prod (gated)</td><td>Manual approval → Container Apps traffic shift</td><td>Staged rollout; instant rollback by shifting traffic to prior revision</td></tr>
+  </table>
+
+  <p><strong>Safe rollout:</strong> Blue/green via Container Apps revisions — instant rollback by shifting traffic to prior revision + Alembic downgrade. Prompt changes ship behind feature flags and must clear the eval gate before promotion.</p>
+  <p><strong>Migrations:</strong> Alembic pre-deploy (forward-only; backward migration for rollback). <strong>Secrets:</strong> never in Terraform state — referenced from Key Vault by name.</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">26 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 27 — §12 OBSERVABILITY & SLOs
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">12</div>
+  <h1 class="section-title">Observability &amp; SLOs</h1>
+
+  <h2 class="sub-heading">Telemetry stack</h2>
+  <table>
+    <tr><th>What</th><th>How</th><th>Where</th></tr>
+    <tr><td class="col-item">Distributed traces</td><td>OpenTelemetry auto-instrumentation on FastAPI + Celery workers</td><td>Azure App Insights</td></tr>
+    <tr><td class="col-item">Logs</td><td>Structured JSON; correlation IDs on every request</td><td>Azure Monitor Logs</td></tr>
+    <tr><td class="col-item">Per-model-call telemetry</td><td>ai_calls table: model, prompt_version, tokens, latency, cost — covers Anthropic extractor and Zeus spec analyzer</td><td>App Insights + Azure SQL</td></tr>
+    <tr><td class="col-item">Cost tracking</td><td>Per-model token usage × published rates → cost dashboard</td><td>App Insights workbook</td></tr>
+    <tr><td class="col-item">SLO burn alerts</td><td>Alert rules on error budget burn rate</td><td>Azure Monitor</td></tr>
+    <tr><td class="col-item">Dead-letter alerts</td><td>Alert when Service Bus DLQ depth &gt; 0</td><td>Azure Monitor → PagerDuty / email</td></tr>
+  </table>
+
+  <h2 class="sub-heading">SLO targets</h2>
+  <table>
+    <tr><th>SLO</th><th>Target</th><th>Measured by</th></tr>
+    <tr><td class="col-item">API availability</td><td>99.9% monthly</td><td>Azure Monitor uptime check</td></tr>
+    <tr><td class="col-item">Analyze P95 latency</td><td>&lt; 5 minutes</td><td>Job-duration histogram in App Insights</td></tr>
+    <tr><td class="col-item">Upload P99 latency</td><td>&lt; 30 seconds</td><td>Request duration histogram</td></tr>
+    <tr><td class="col-item">Extraction error rate</td><td>&lt; 1% of jobs</td><td>ai_calls failure count / total</td></tr>
+  </table>
+
+  <p><strong>Reliability patterns:</strong> KEDA workers restart on failure; Service Bus max_delivery_count=3 before dead-letter; Redis cache-hit eliminates model cost on repeat drawings; FastAPI min 2 replicas (no cold start).</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">27 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 28-29 — §13 COST PROJECTION
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">13</div>
+  <h1 class="section-title">Cost Projection</h1>
+
+  <p>Two components: model cost (Anthropic Claude Sonnet 4.6 drawing extraction + Zeus spec analysis per bid) and Azure infrastructure. Modelled bottom-up from explicit volume assumptions. Unit rates are published list rates at time of writing and are re-validated against current pricing before commitment. The Zeus spec-analysis pass runs on ClimatePros' own hardware, so its inference cost (marked *) is client-borne and shown for transparency but excluded from the Techjays-billed roll-up.</p>
+
+  <h2 class="sub-heading">Volume assumptions</h2>
+  <table>
+    <tr><th>Assumption</th><th>Low</th><th>Expected</th><th>High</th></tr>
+    <tr><td class="col-item">Bids / month</td><td>80</td><td>200</td><td>500</td></tr>
+    <tr><td class="col-item">Avg pages / bid package</td><td>8</td><td>15</td><td>30</td></tr>
+    <tr><td class="col-item">Avg extracted line-items / bid</td><td>60</td><td>120</td><td>250</td></tr>
+  </table>
+
+  <h2 class="sub-heading">Per-bid token math <span style="font-size:8pt;font-weight:400;color:#6B7280;">(Expected: 15 pages, 120 items)</span></h2>
+  <table>
+    <tr><th>Model / stage</th><th>Input tokens</th><th>Output tokens</th><th>Unit rate ($/1M)</th><th>$/bid</th></tr>
+    <tr><td class="col-item">Anthropic Claude Sonnet 4.6 — drawing extraction (Techjays-billed)</td><td>≈ 35,000<br><span style="font-size:7.5pt;color:#6B7280;">15 page-images ≈ 1.3k tok/pg + ~4k prompt/few-shot; JSON out ≈ 60 tok/item</span></td><td>≈ 8,000</td><td>$3 in / $15 out</td><td><strong>≈ $0.23</strong></td></tr>
+    <tr><td class="col-item">Zeus (Claude Sonnet 4.6) — spec analysis <em>*client-borne</em></td><td>≈ 20,000<br><span style="font-size:7.5pt;color:#6B7280;">structured data from Anthropic + FieldJetX context; spec output in constrained JSON</span></td><td>≈ 6,000</td><td>$3 in / $15 out</td><td><strong>≈ $0.15 *</strong></td></tr>
+    <tr><td class="col-item">Azure AI Document Intelligence — optional OCR (source-highlight only)</td><td colspan="3">≈ 15 pages @ $1.50 / 1k pages (read layer)</td><td><strong>≈ $0.02</strong></td></tr>
+    <tr style="background:#EFF6FF;"><td class="col-item"><strong>Model cost / bid — Techjays-billed</strong><br><span style="font-size:7.5pt;font-weight:400;">(excludes * client-borne Zeus ≈ $0.15)</span></td><td colspan="3"></td><td><strong>≈ $0.25</strong></td></tr>
+  </table>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">28 / 30</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <p><strong>Key cost lever: caching.</strong> Repeat drawings (national chains — Walmart, Kroger, Target standard store layouts) return at zero model cost via Redis drawing-hash cache. The Zeus spec-analysis pass (≈ $0.15/bid) is client-borne on ClimatePros' own Mac Studio hardware.</p>
+
+  <h2 class="sub-heading">Azure infrastructure ($/month)</h2>
+  <table>
+    <tr><th>Component</th><th>Low</th><th>Expected</th><th>High</th></tr>
+    <tr><td class="col-item">Container Apps (API + workers, autoscale)</td><td>$180</td><td>$350</td><td>$700</td></tr>
+    <tr><td class="col-item">Azure SQL (HA + PITR — existing instance, new tables)</td><td>$0 incremental</td><td>$50–100</td><td>$200</td></tr>
+    <tr><td class="col-item">Blob Storage (geo-redundant)</td><td>$30</td><td>$60</td><td>$120</td></tr>
+    <tr><td class="col-item">Service Bus + Redis Cache</td><td>$40</td><td>$80</td><td>$160</td></tr>
+    <tr><td class="col-item">Front Door + WAF / App Gateway (existing)</td><td>$0 incremental</td><td>$20</td><td>$60</td></tr>
+    <tr><td class="col-item">Key Vault · Monitor · App Insights</td><td>$50</td><td>$100</td><td>$200</td></tr>
+    <tr><td class="col-item">Knowledge Graph DB</td><td>$30</td><td>$60</td><td>$120</td></tr>
+    <tr style="background:#EFF6FF;"><td class="col-item"><strong>Infra subtotal / month</strong></td><td><strong>≈ $330</strong></td><td><strong>≈ $670</strong></td><td><strong>≈ $1,560</strong></td></tr>
+  </table>
+
+  <h2 class="sub-heading">Roll-up</h2>
+  <table>
+    <tr><th>Scenario</th><th>Model $/bid</th><th>Bids/mo</th><th>Model $/mo</th><th>Infra $/mo</th><th>Total $/mo</th><th>Effective $/bid</th></tr>
+    <tr><td class="col-item">Low</td><td>$0.25</td><td>80</td><td>$20</td><td>$330</td><td>≈ $350</td><td>$4.38</td></tr>
+    <tr><td class="col-item">Expected</td><td>$0.25</td><td>200</td><td>$50</td><td>$670</td><td>≈ $720</td><td>$3.60</td></tr>
+    <tr><td class="col-item">High</td><td>$0.25</td><td>500</td><td>$125</td><td>$1,560</td><td>≈ $1,685</td><td>$3.37</td></tr>
+  </table>
+
+  <p style="font-size:8.5pt;"><strong>Levers (in priority order):</strong> ① cache extraction for unchanged re-submissions (zero model cost for repeat drawings) · ② right-size worker autoscale floors · ③ downscale extractor input images / tile only dense schedule regions · ④ reserved-capacity / savings-plan discounts on steady infra. Infrastructure dominates at low volume (fixed HA baseline); Anthropic Claude Sonnet 4.6 is the only cloud model active at ≈$0.23/bid extraction cost.</p>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">29 / 30</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE 30 — APPENDIX — OPEN ITEMS
+════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="conf">Confidential — ClimatePros / techjays</div>
+    <div class="doc-title">Stream 2 Architecture · v1.0</div>
+  </div>
+
+  <div class="section-num">A</div>
+  <h1 class="section-title">Appendix — Open Items</h1>
+
+  <p>Items below require confirmation from ClimatePros before the corresponding component can be finalised. Each is referenced inline in the relevant section.</p>
+
+  <table>
+    <tr><th>#</th><th>Item</th><th>Owner</th><th>Impact if unresolved</th></tr>
+    <tr>
+      <td class="col-item">OI-01</td>
+      <td>FieldJetX ingest REST API endpoint — spec, base URL, and credentials</td>
+      <td>FieldJetX / ClimatePros</td>
+      <td>Deliver step (§6) cannot go live; Excel push is manual fallback</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-02</td>
+      <td>Zeus API contract — documented endpoint, auth scheme, and round-trip latency measurement on Mac Studio "Tundra"</td>
+      <td>ClimatePros</td>
+      <td>On-prem connectivity design (§4) and P95 latency target (§12)</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-03</td>
+      <td>Azure → on-prem connectivity mechanism for Zeus calls (VPN / ExpressRoute / authenticated private endpoint)</td>
+      <td>ClimatePros infra</td>
+      <td>Network topology finalisation (§4)</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-04</td>
+      <td>Anthropic API DPA region confirmation for drawing extraction data processing</td>
+      <td>techjays / ClimatePros legal</td>
+      <td>Compliance section (§9); must be confirmed before Prod</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-05</td>
+      <td>PyMuPDF commercial licence decision (AGPL-3.0 vs. permissive alternative — pypdf / pdfplumber)</td>
+      <td>techjays</td>
+      <td>Release gate; blocks production deployment</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-06</td>
+      <td>Knowledge Graph DB product selection (Neo4j AuraDB, Azure Cosmos DB Gremlin, etc.)</td>
+      <td>techjays</td>
+      <td>§6 service implementation; sizing decision</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-07</td>
+      <td>Dev environment dataset decision — de-identified SQL snapshot vs. synthetic data generation</td>
+      <td>ClimatePros</td>
+      <td>Dev environment setup (§4)</td>
+    </tr>
+    <tr>
+      <td class="col-item">OI-08</td>
+      <td>Golden set size and composition — confirm number of drawing packages and domains (refrigeration / HVAC split)</td>
+      <td>ClimatePros + techjays</td>
+      <td>Eval gate thresholds (§9) baseline measurement</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:8mm;padding-top:4mm;border-top:1px solid #E2E8F0;font-size:8pt;color:#6B7280;text-align:center;">
+    ClimatePros — Stream 2 Architecture (Zeus) · Prepared by techjays · v1.0 · August 2026
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-mark"><span>//</span> techjays</div>
+    <div class="pg">30 / 30</div>
+  </div>
+</div>
+
+</body>
+</html>
