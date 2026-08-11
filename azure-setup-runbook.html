@@ -103,8 +103,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
   </div>
   <nav>
     <div class="ngl">Overview</div>
-    <a class="ni active" href="#architecture"><span class="nic">🗺️</span> Architecture Diagram</a>
-    <a class="ni" href="#legend"><span class="nic">📖</span> Service Legend</a>
+    <a class="ni active" href="#legend"><span class="nic">📖</span> Service Legend</a>
     <a class="ni" href="#auth"><span class="nic">🔐</span> Auth Flow</a>
     <a class="ni" href="#overview"><span class="nic">📋</span> README / Overview</a>
     <div class="ngl">Runbook</div>
@@ -134,7 +133,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 
 <div id="main">
   <div id="topbar">
-    <div class="bc">ClimatePros &rsaquo; Stream 2 &rsaquo; <span id="cur">Architecture</span></div>
+    <div class="bc">ClimatePros &rsaquo; Stream 2 &rsaquo; <span id="cur">Service Legend</span></div>
     <div class="ebs">
       <span class="eb ed">dev</span>
       <span class="eb es">staging</span>
@@ -143,80 +142,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
     </div>
   </div>
   <div id="ct">
-
-    <section class="sec" id="architecture">
-      <div class="sh"><span class="sn sni">🗺️</span>
-        <div><div class="st">Architecture Diagram</div><div class="ss">Full topology — VNet, subnets, services, private endpoints, CI/CD</div></div>
-      </div>
-      <div class="dw"><div class="mermaid">%%{init:{"theme":"base","themeVariables":{"primaryColor":"#1e40af","primaryTextColor":"#fff","primaryBorderColor":"#1d4ed8","lineColor":"#64748b","secondaryColor":"#ede9fe","fontSize":"13px"},"flowchart":{"curve":"basis","padding":18}}}%%
-graph TB
-    Internet(["🌐 Internet / Users"])
-    CICD["⚙️ CI/CD Pipeline\nGitHub Actions · Azure DevOps\nService Principal auth"]
-    subgraph Azure["☁️  Microsoft Azure — eastus"]
-      subgraph VNet["🔒  Virtual Network: cp-ENV-vnet   10.x.0.0/16"]
-        subgraph Infra["   infra-subnet  10.x.0.0/23  ·  delegated → Microsoft.App/environments   "]
-          subgraph CAE["  Container Apps Environment: cp-ENV-cae  ·  External Load Balancer  "]
-            API["🚀  FastAPI · cp-ENV-api\n0.5 vCPU · 1 GiB RAM\nExternal HTTPS · 1–10 replicas\nSystem-Assigned MI"]
-            Worker["⚙️  Celery Worker · cp-ENV-worker\n1 vCPU · 2 GiB RAM\nNo ingress · KEDA scaling\nSystem-Assigned MI"]
-          end
-        end
-        subgraph DataSub["   data-subnet  10.x.2.0/24  ·  Private Endpoints   "]
-          direction LR
-          PE_R(["🔗 PE: Redis"])
-          PE_S(["🔗 PE: Service Bus"])
-          PE_B(["🔗 PE: Blob"])
-        end
-        subgraph PGSub["   postgres-subnet  10.x.3.0/28  ·  VNet-delegated   "]
-          PG[("🐘  PostgreSQL\ncp-ENV-postgres · v16\nVNet-integrated · AAD Auth")]
-        end
-        DNS["🔍  Private DNS Zones × 5   ·   📊  Log Analytics: cp-ENV-logs"]
-      end
-      Redis[(["🔴  Azure Managed Redis\ncp-ENV-redis · Port 10000 TLS\nNoEviction"])]
-      SB[/"📨  Azure Service Bus\ncp-ENV-sb · task-queue\nLock 30s · MaxDelivery 10"/]
-      Blob[("🗄️  Blob Storage\ndocuments · exports\nLRS/ZRS · Shared Key off")]
-      ACR["📦  Container Registry\ncpXXXXacr · Standard\nShared all envs · acrPull via MI"]
-    end
-    Neo4j[("🔵  Neo4j Aura — managed SaaS\ncp-ENV-graph · v5 · eastus\nBolt over TLS · 7687")]
-    Internet -->|"HTTPS :443"| API
-    API -->|"MI: SB Data Owner"| PE_S
-    API -->|"MI: Blob Contributor"| PE_B
-    API -->|"AAD token auth"| PG
-    Worker -->|"secretref TLS 10000"| PE_R
-    Worker -->|"MI: SB Data Receiver"| PE_S
-    Worker -->|"MI: Blob Contributor"| PE_B
-    Worker -->|"AAD token auth"| PG
-    API -->|"secretref · TLS 7687"| Neo4j
-    Worker -->|"secretref · TLS 7687"| Neo4j
-    PE_R -.-|"Private Link"| Redis
-    PE_S -.-|"Private Link"| SB
-    PE_B -.-|"Private Link"| Blob
-    API -->|"acrPull · MI"| ACR
-    Worker -->|"acrPull · MI"| ACR
-    CICD -->|"docker push · SP"| ACR
-    CICD -->|"containerapp update"| API & Worker
-    classDef internet fill:#ecfdf5,stroke:#059669,color:#064e3b
-    classDef cicd fill:#fff7ed,stroke:#ea580c,color:#7c2d12
-    classDef capp fill:#faf5ff,stroke:#7c3aed,color:#3b0764
-    classDef pe fill:#eff6ff,stroke:#2563eb,color:#1e3a8a
-    classDef pg fill:#eef2ff,stroke:#4338ca,color:#1e1b4b
-    classDef redis fill:#fff1f2,stroke:#be123c,color:#881337
-    classDef sb fill:#fffbeb,stroke:#d97706,color:#78350f
-    classDef blob fill:#f0f9ff,stroke:#0284c7,color:#0c4a6e
-    classDef acr fill:#fdf4ff,stroke:#a21caf,color:#4a044e
-    classDef dns fill:#f0fdf4,stroke:#16a34a,color:#14532d
-    classDef neo4j fill:#eff6ff,stroke:#2563eb,color:#0c4a6e
-    class Internet internet
-    class CICD cicd
-    class API,Worker capp
-    class PE_R,PE_S,PE_B pe
-    class PG pg
-    class Redis redis
-    class SB sb
-    class Blob blob
-    class ACR acr
-    class DNS dns
-    class Neo4j neo4j</div></div>
-    </section>
 
     <section class="sec" id="legend">
       <div class="sh"><span class="sn sni">📖</span>
@@ -410,7 +335,7 @@ function cpCode(btn) {
 
 // ── SIDEBAR ACTIVE ────────────────────────────────────────────────────────
 var LABELS = {
-  'architecture':'Architecture Diagram','legend':'Service Legend','auth':'Auth Flow',
+  'legend':'Service Legend','auth':'Auth Flow',
   'overview':'README / Overview','s00':'00 · CLI Setup','s01':'01 · VNet + DNS',
   's02':'02 · PostgreSQL','s03':'03 · Redis','s04':'04 · Service Bus',
   's05':'05 · Blob Storage','s06':'06 · ACR','s07':'07 · Container Apps',
