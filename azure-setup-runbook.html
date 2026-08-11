@@ -176,7 +176,7 @@ graph TB
       Blob[("🗄️  Blob Storage\ndocuments · exports\nLRS/ZRS · Shared Key off")]
       ACR["📦  Container Registry\ncpXXXXacr · Standard\nShared all envs · acrPull via MI"]
     end
-    Neo4j[("🔵  Neo4j Aura — managed SaaS\ncp-ENV-graph · v5 · eastus\nneo4j+s TLS :7687")]
+    Neo4j[("🔵  Neo4j Aura — managed SaaS\ncp-ENV-graph · v5 · eastus\nBolt over TLS · 7687")]
     Internet -->|"HTTPS :443"| API
     API -->|"MI: SB Data Owner"| PE_S
     API -->|"MI: Blob Contributor"| PE_B
@@ -185,8 +185,8 @@ graph TB
     Worker -->|"MI: SB Data Receiver"| PE_S
     Worker -->|"MI: Blob Contributor"| PE_B
     Worker -->|"AAD token auth"| PG
-    API -->|"secretref · neo4j+s TLS 7687"| Neo4j
-    Worker -->|"secretref · neo4j+s TLS 7687"| Neo4j
+    API -->|"secretref · TLS 7687"| Neo4j
+    Worker -->|"secretref · TLS 7687"| Neo4j
     PE_R -.-|"Private Link"| Redis
     PE_S -.-|"Private Link"| SB
     PE_B -.-|"Private Link"| Blob
